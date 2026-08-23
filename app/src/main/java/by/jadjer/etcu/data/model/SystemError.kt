@@ -1,4 +1,4 @@
-package by.jadjer.etcu.data.ble
+package by.jadjer.etcu.data.model
 
 enum class SystemError(val bitMask: Long, val description: String) {
     GUARD_LOCK(1L shl 0, "Блокировка защиты (Guard Lock)"),
@@ -39,54 +39,3 @@ enum class SystemError(val bitMask: Long, val description: String) {
         }
     }
 }
-
-enum class SystemState(val value: Int) {
-    OFF(0),
-    NORMAL(1),
-    CALIBRATION(2),
-    UPDATE(3),
-    UNKNOWN(-1); // Защита на случай некорректных данных
-
-    companion object {
-        fun fromByte(byte: Byte): SystemState {
-            val intVal = byte.toInt() and 0xFF
-            return entries.find { it.value == intVal } ?: UNKNOWN
-        }
-    }
-}
-
-data class ServoTelemetryState(
-    val isConnected: Boolean = false,
-    val isMoved: Boolean = false,
-    val load: Int = 0,
-    val speed: Int = 0,
-    val current: Int = 0,
-    val voltage: Int = 0,
-    val position: Int = 0,
-    val temperature: Int = 0
-)
-
-data class EcuTelemetryState(
-    val isConnected: Boolean = false,
-    val rpm: Int = 0,
-    val speed: Int = 0,
-    val tps: Int = 0,
-    val started: Boolean = false,
-    val clutchEnabled: Boolean = false
-)
-
-data class SystemTelemetryState(
-    val servo: ServoTelemetryState = ServoTelemetryState(),
-    val ecu: EcuTelemetryState = EcuTelemetryState(),
-    val acceleratorPosition: Int = 0,
-    val acceleratorOffset: Int = 0,
-    val throttlePosition: Int = 0,
-    val targetSpeed: Int = 0,
-    val guardActive: Boolean = false,
-    val brakeEnabled: Boolean = false,
-    val clutchEnabled: Boolean = false,
-    val systemState: SystemState = SystemState.UNKNOWN,
-    val activeErrors: List<SystemError> = emptyList()
-)
-
-

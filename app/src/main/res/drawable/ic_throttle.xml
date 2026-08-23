@@ -1,0 +1,40 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Background Circle -->
+    <path
+        android:pathData="M54,54m-40,0a40,40 0,1 1,80 0a40,40 0,1 1,-80 0"
+        android:strokeWidth="4"
+        android:strokeColor="#6200EE" />
+
+    <group
+        android:name="butterfly_group"
+        android:pivotX="54"
+        android:pivotY="54">
+        <!-- Butterfly Valve (Horizontal by default, will rotate) -->
+        <path
+            android:name="butterfly_path"
+            android:pathData="M24,54 L84,54"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"
+            android:strokeColor="#6200EE" />
+    </group>
+
+    <!-- Center Shaft -->
+    <path
+        android:pathData="M54,34 L54,74"
+        android:strokeWidth="2"
+        android:strokeColor="#BB86FC" />
+
+    <!-- Pivot Points -->
+    <path
+        android:fillColor="#6200EE"
+        android:pathData="M54,34m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0" />
+    <path
+        android:fillColor="#6200EE"
+        android:pathData="M54,74m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0" />
+
+</vector>
