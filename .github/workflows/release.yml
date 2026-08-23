@@ -8,8 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,24 +22,36 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build with Gradle
+      - name: Build Unsigned APK
         run: ./gradlew assembleRelease
 
       - name: Sign APK
-        uses: r0adkll/sign-android-release@v1
-        id: sign_app
-        with:
-          releaseDirectory: app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.KEYSTORE }}
-          alias: ${{ secrets.KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
-          buildToolsVersion: 34.0.0
+        run: |
+          # 1. Декодируем Keystore из секрета в файл
+          echo "${{ secrets.KEYSTORE }}" | base64 -d > release.keystore
+          
+          # 2. Находим путь к инструментам сборки (динамически выбираем последнюю версию)
+          BUILD_TOOLS_VERSION=$(ls $ANDROID_HOME/build-tools | sort -V | tail -n 1)
+          BUILD_TOOLS_PATH=$ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION
+          
+          # 3. Выравниваем APK (Zipalign)
+          # Gradle по умолчанию создает файл с именем app-release-unsigned.apk или app-release.apk
+          # Мы найдем его в папке сборки
+          UNSIGNED_APK=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
+          
+          $BUILD_TOOLS_PATH/zipalign -v 4 "$UNSIGNED_APK" app-release-aligned.apk
+          
+          # 4. Подписываем APK
+          $BUILD_TOOLS_PATH/apksigner sign --ks release.keystore \
+            --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
+            --ks-pass pass:"${{ secrets.KEYSTORE_PASSWORD }}" \
+            --key-pass pass:"${{ secrets.KEY_PASSWORD }}" \
+            --out app-release-signed.apk app-release-aligned.apk
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ steps.sign_app.outputs.signedReleaseFile }}
+          files: app-release-signed.apk
           name: Release ${{ github.ref_name }}
           draft: false
           prerelease: false
