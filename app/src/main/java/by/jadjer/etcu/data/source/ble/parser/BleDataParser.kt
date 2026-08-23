@@ -21,52 +21,30 @@ class BleDataParser {
     }
 
     fun parseTelemetry(bytes: ByteArray): SystemTelemetry {
-        if (bytes.size < 35) return SystemTelemetry()
+        // Based on the provided C++ hierarchy, the total size is 37 bytes.
+        if (bytes.size < 37) return SystemTelemetry()
 
         val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
 
-        // 1. ServoTelemetry
-        val servoConnected = buffer.get().toInt() != 0
-        val servoMoved = buffer.get().toInt() != 0
-        val servoLoad = buffer.short.toInt() and 0xFFFF
-        val servoSpeed = buffer.short.toInt() and 0xFFFF
-        val servoCurrent = buffer.short.toInt() and 0xFFFF
-        val servoVoltage = buffer.get().toInt() and 0xFF
-        val servoPosition = buffer.short.toInt() and 0xFFFF
-        val servoTemperature = buffer.short.toInt() and 0xFFFF
+        // 1. ServoTelemetry (12 bytes)
+        val servo = parseServoTelemetry(buffer)
 
-        val servo = ServoTelemetry(
-            isConnected = servoConnected, isMoved = servoMoved, load = servoLoad,
-            speed = servoSpeed, current = servoCurrent, voltage = servoVoltage,
-            position = servoPosition, temperature = servoTemperature
-        )
+        // 2. ECUTelemetry (9 bytes)
+        val ecu = parseEcuTelemetry(buffer)
 
-        // 2. ECUTelemetry
-        val ecuConnected = buffer.get().toInt() != 0
-        val ecuRpm = buffer.short.toInt() and 0xFFFF
-        val ecuSpeed = buffer.short.toInt() and 0xFFFF
-        val ecuTps = buffer.short.toInt() and 0xFFFF
-        val ecuStarted = buffer.get().toInt() != 0
-        val ecuClutch = buffer.get().toInt() != 0
+        // 3. SystemTelemetry Remaining fields
+        val accelPos = buffer.short.toInt() and 0xFFFF    // Position (uint16_t)
+        val accelOffset = buffer.short.toInt() and 0xFFFF // Position (uint16_t)
+        val throttlePos = buffer.short.toInt() and 0xFFFF // Position (uint16_t)
+        val targetSpeed = buffer.short.toInt() and 0xFFFF // Speed (uint16_t)
 
-        val ecu = EcuTelemetry(
-            isConnected = ecuConnected, rpm = ecuRpm, speed = ecuSpeed,
-            tps = ecuTps, started = ecuStarted, clutchEnabled = ecuClutch
-        )
+        val guardActive = buffer.get().toInt() != 0       // bool
+        val brakeEnabled = buffer.get().toInt() != 0      // bool
+        val sysClutchEnabled = buffer.get().toInt() != 0  // bool
 
-        // 3. SystemTelemetry
-        val accelPos = buffer.short.toInt() and 0xFFFF
-        val accelOffset = buffer.short.toInt() and 0xFFFF
-        val throttlePos = buffer.short.toInt() and 0xFFFF
-        val targetSpeed = buffer.short.toInt() and 0xFFFF
+        val systemState = SystemState.fromByte(buffer.get()) // SystemState (uint8_t)
 
-        val guardActive = buffer.get().toInt() != 0
-        val brakeEnabled = buffer.get().toInt() != 0
-        val sysClutchEnabled = buffer.get().toInt() != 0
-
-        val systemState = SystemState.fromByte(buffer.get())
-
-        val rawErrorsMask = buffer.int.toLong() and 0xFFFFFFFFL
+        val rawErrorsMask = buffer.int.toLong() and 0xFFFFFFFFL // SystemError (uint32_t)
         val activeErrorsList = SystemError.parseErrors(rawErrorsMask)
 
         return SystemTelemetry(
@@ -81,6 +59,46 @@ class BleDataParser {
             clutchEnabled = sysClutchEnabled,
             systemState = systemState,
             activeErrors = activeErrorsList
+        )
+    }
+
+    private fun parseServoTelemetry(buffer: ByteBuffer): ServoTelemetry {
+        val isConnected = buffer.get().toInt() != 0   // bool
+        val isMoved = buffer.get().toInt() != 0       // bool
+        val load = buffer.short.toInt() and 0xFFFF     // uint16_t
+        val speed = buffer.short.toInt() and 0xFFFF    // uint16_t
+        val current = buffer.short.toInt() and 0xFFFF  // uint16_t
+        val voltage = buffer.get().toInt() and 0xFF    // uint8_t
+        val position = buffer.get().toInt() and 0xFF   // uint8_t
+        val temperature = buffer.short.toInt() and 0xFFFF // uint16_t
+
+        return ServoTelemetry(
+            isConnected = isConnected,
+            isMoved = isMoved,
+            load = load,
+            speed = speed,
+            current = current,
+            voltage = voltage,
+            position = position,
+            temperature = temperature
+        )
+    }
+
+    private fun parseEcuTelemetry(buffer: ByteBuffer): EcuTelemetry {
+        val isConnected = buffer.get().toInt() != 0   // bool
+        val rpm = buffer.short.toInt() and 0xFFFF      // uint16_t
+        val speed = buffer.short.toInt() and 0xFFFF    // uint16_t
+        val tps = buffer.short.toInt() and 0xFFFF      // uint16_t
+        val started = buffer.get().toInt() != 0        // bool
+        val clutchEnabled = buffer.get().toInt() != 0  // bool
+
+        return EcuTelemetry(
+            isConnected = isConnected,
+            rpm = rpm,
+            speed = speed,
+            tps = tps,
+            started = started,
+            clutchEnabled = clutchEnabled
         )
     }
 
