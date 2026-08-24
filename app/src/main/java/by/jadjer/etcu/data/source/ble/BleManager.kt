@@ -99,11 +99,12 @@ class BleManager(
         val packageSize = otaChunk.data.size
         val buffer = ByteBuffer.allocate(packageSize + 10).order(ByteOrder.LITTLE_ENDIAN)
         
-        buffer.put(otaChunk.data)
-        buffer.putShort(packageSize.toShort())
-        buffer.putShort(otaChunk.chunkNumber.toShort())
-        buffer.putShort(otaChunk.totalChunks.toShort())
+        // New structure order: firmware_size (4), chunk_total (2), chunk_number (2), chunk_size (2), then chunk data
         buffer.putInt(otaChunk.firmwareSize.toInt())
+        buffer.putShort(otaChunk.totalChunks.toShort())
+        buffer.putShort(otaChunk.chunkNumber.toShort())
+        buffer.putShort(packageSize.toShort())
+        buffer.put(otaChunk.data)
 
         bluetoothGatt?.writeCharacteristic(characteristic, buffer.array(), BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
     }
