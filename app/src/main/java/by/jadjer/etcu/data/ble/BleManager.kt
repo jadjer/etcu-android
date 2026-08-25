@@ -1,12 +1,10 @@
-package by.jadjer.etcu.data.source.ble
+package by.jadjer.etcu.data.ble
 
 import android.annotation.SuppressLint
 import android.bluetooth.*
 import android.content.Context
 import by.jadjer.etcu.data.model.*
-import by.jadjer.etcu.data.source.ble.parser.BleDataParser
-import by.jadjer.etcu.data.source.ble.scanner.BleScanner
-import by.jadjer.etcu.data.source.local.BlePreferenceManager
+import by.jadjer.etcu.data.local.BlePreferenceManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.nio.ByteBuffer
@@ -41,6 +39,9 @@ class BleManager(
     private val _otaFeedback = MutableStateFlow<Int?>(null)
     val otaFeedback: StateFlow<Int?> = _otaFeedback
 
+    private val _savedMac = MutableStateFlow<String?>(preferenceManager.getLastMac())
+    val savedMac: StateFlow<String?> = _savedMac
+
     private val gattCallback = BleConnectionHandler(
         dataParser = dataParser,
         onConnectionStateChange = { state, connected ->
@@ -57,7 +58,9 @@ class BleManager(
     private fun handleServicesDiscovered(gatt: BluetoothGatt) {
         _connectionState.value = "Службы найдены. Проверка характеристик..."
         if (subscribeToCharacteristics(gatt)) {
-            preferenceManager.saveLastMac(gatt.device.address)
+            val mac = gatt.device.address
+            preferenceManager.saveLastMac(mac)
+            _savedMac.value = mac
             _isConnected.value = true
             gatt.requestMtu(BleConstants.DEFAULT_MTU)
         } else {
@@ -138,5 +141,6 @@ class BleManager(
 
     fun clearLastMac() {
         preferenceManager.clearLastMac()
+        _savedMac.value = null
     }
 }

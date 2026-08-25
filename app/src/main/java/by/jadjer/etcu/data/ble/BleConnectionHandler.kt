@@ -1,10 +1,11 @@
-package by.jadjer.etcu.data.source.ble
+package by.jadjer.etcu.data.ble
 
 import android.annotation.SuppressLint
-import android.bluetooth.*
-import by.jadjer.etcu.data.source.ble.parser.BleDataParser
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCallback
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
+import android.bluetooth.BluetoothProfile
 
 @SuppressLint("MissingPermission")
 class BleConnectionHandler(

@@ -1,6 +1,11 @@
-package by.jadjer.etcu.data.source.ble.parser
+package by.jadjer.etcu.data.ble
 
-import by.jadjer.etcu.data.model.*
+import by.jadjer.etcu.data.model.EcuTelemetry
+import by.jadjer.etcu.data.model.ServoTelemetry
+import by.jadjer.etcu.data.model.SystemError
+import by.jadjer.etcu.data.model.SystemInfo
+import by.jadjer.etcu.data.model.SystemState
+import by.jadjer.etcu.data.model.SystemTelemetry
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -21,21 +26,20 @@ class BleDataParser {
     }
 
     fun parseTelemetry(bytes: ByteArray): SystemTelemetry {
-        // SystemTelemetry size = 38 bytes (1+1+1 + 13 + 9 + 2+2+2+2 + 1 + 4)
-        if (bytes.size < 38) return SystemTelemetry()
+        // SystemTelemetry size = 37 bytes (1+1 + 9 + 13 + 2+2+2+2 + 1 + 4)
+        if (bytes.size < 37) return SystemTelemetry()
 
         val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
 
         // 1. System-level flags (bools)
-        val guardActive = buffer.get().toInt() != 0
-        val brakeEnabled = buffer.get().toInt() != 0
-        val sysClutchEnabled = buffer.get().toInt() != 0
+        val isGuardActive = buffer.get().toInt() != 0
+        val isBrakeEnabled = buffer.get().toInt() != 0
 
-        // 2. ServoTelemetry (13 bytes)
-        val servo = parseServoTelemetry(buffer)
-
-        // 3. ECUTelemetry (9 bytes)
+        // 2. ECUTelemetry (9 bytes)
         val ecu = parseEcuTelemetry(buffer)
+
+        // 3. ServoTelemetry (13 bytes)
+        val servo = parseServoTelemetry(buffer)
 
         // 4. SystemTelemetry Remaining fields
         val accelPos = buffer.short.toInt() and 0xFFFF
@@ -48,15 +52,14 @@ class BleDataParser {
         val activeErrorsList = SystemError.parseErrors(rawErrorsMask)
 
         return SystemTelemetry(
-            servo = servo,
+            isGuardActive = isGuardActive,
+            isBrakeEnabled = isBrakeEnabled,
             ecu = ecu,
+            servo = servo,
             acceleratorPosition = accelPos,
             acceleratorOffset = accelOffset,
             throttlePosition = throttlePos,
             targetSpeed = targetSpeed,
-            guardActive = guardActive,
-            brakeEnabled = brakeEnabled,
-            clutchEnabled = sysClutchEnabled,
             systemState = systemState,
             activeErrors = activeErrorsList
         )
@@ -94,11 +97,11 @@ class BleDataParser {
 
         return EcuTelemetry(
             isConnected = isConnected,
+            isStarted = isStarted,
+            isClutchEnabled = isClutchEnabled,
             rpm = rpm,
             speed = speed,
             tps = tps,
-            started = isStarted,
-            clutchEnabled = isClutchEnabled
         )
     }
 

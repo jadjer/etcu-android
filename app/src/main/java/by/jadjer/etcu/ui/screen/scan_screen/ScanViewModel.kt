@@ -7,19 +7,20 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import by.jadjer.etcu.ETCUApplication
 import by.jadjer.etcu.data.model.DiscoveredDevice
-import by.jadjer.etcu.data.repository.BleRepository
+import by.jadjer.etcu.domain.repository.BleRepository
+import by.jadjer.etcu.util.BleUtils
 import kotlinx.coroutines.flow.*
 
 class ScanViewModel(private val repository: BleRepository) : ViewModel() {
     
     val connectionState: StateFlow<String> = repository.connectionState
+    val isScanning: StateFlow<Boolean> = repository.isScanning
     
-    private val _pairedDevices = MutableStateFlow<List<DiscoveredDevice>>(emptyList())
-    val pairedDevices: StateFlow<List<DiscoveredDevice>> = _pairedDevices
-
     val discoveredDevices: StateFlow<List<DiscoveredDevice>> = repository.discoveredDevices
         .map { devices ->
-            devices.map { it.toDiscoveredDevice(isPaired = false) }
+            devices.map { (device, rssi) ->
+                device.toDiscoveredDevice(isPaired = false, rssi = rssi)
+            }
         }
         .stateIn(
             scope = viewModelScope,
@@ -27,19 +28,9 @@ class ScanViewModel(private val repository: BleRepository) : ViewModel() {
             initialValue = emptyList()
         )
 
-    init {
-        updatePairedDevices()
-    }
-
     fun startScanning() = repository.startScan()
 
     fun stopScanning() = repository.stopScan()
-
-    fun updatePairedDevices() {
-        _pairedDevices.value = repository.getPairedDevices().map { 
-            it.toDiscoveredDevice(isPaired = true)
-        }
-    }
 
     fun connect(device: DiscoveredDevice) {
         stopScanning()
@@ -51,11 +42,13 @@ class ScanViewModel(private val repository: BleRepository) : ViewModel() {
     }
 
     @SuppressLint("MissingPermission")
-    private fun BluetoothDevice.toDiscoveredDevice(isPaired: Boolean): DiscoveredDevice {
+    private fun BluetoothDevice.toDiscoveredDevice(isPaired: Boolean, rssi: Int = 0): DiscoveredDevice {
         return DiscoveredDevice(
+            isPaired = isPaired,
             name = name ?: "Unknown Device",
             macAddress = address,
-            isPaired = isPaired
+            rssi = rssi,
+            distance = BleUtils.calculateDistance(rssi)
         )
     }
 

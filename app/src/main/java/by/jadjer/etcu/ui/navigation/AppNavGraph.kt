@@ -8,7 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import by.jadjer.etcu.ETCUApplication
-import by.jadjer.etcu.data.source.ble.BleConstants
+import by.jadjer.etcu.data.ble.BleConstants
 import by.jadjer.etcu.ui.screen.MainScreen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState

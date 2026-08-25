@@ -15,7 +15,9 @@ import by.jadjer.etcu.ui.theme.ETCUTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
+
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
 
         setContent {

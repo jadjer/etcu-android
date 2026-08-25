@@ -1,4 +1,4 @@
-package by.jadjer.etcu.data.source.ble
+package by.jadjer.etcu.data.ble
 
 import java.util.UUID
 

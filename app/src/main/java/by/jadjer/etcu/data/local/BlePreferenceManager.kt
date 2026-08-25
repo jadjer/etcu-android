@@ -1,8 +1,8 @@
-package by.jadjer.etcu.data.source.local
+package by.jadjer.etcu.data.local
 
 import android.content.Context
 import androidx.core.content.edit
-import by.jadjer.etcu.data.source.ble.BleConstants
+import by.jadjer.etcu.data.ble.BleConstants
 
 class BlePreferenceManager(context: Context) {
     private val prefs = context.getSharedPreferences(BleConstants.PREFS_NAME, Context.MODE_PRIVATE)

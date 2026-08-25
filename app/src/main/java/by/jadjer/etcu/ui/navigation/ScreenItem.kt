@@ -13,7 +13,6 @@ sealed class ScreenItem(val title: String, val icon: ImageVector) {
     object Ecu : ScreenItem("ECU", Icons.Default.DirectionsCar)
     object Servo : ScreenItem("Servo", Icons.Default.SettingsInputComponent)
     object System : ScreenItem("System", Icons.Default.Dns)
-    object Errors : ScreenItem("Errors", Icons.Default.Warning)
     object Ota : ScreenItem("OTA", Icons.Default.SystemUpdate)
     object Settings : ScreenItem("Settings", Icons.Default.Settings)
 }

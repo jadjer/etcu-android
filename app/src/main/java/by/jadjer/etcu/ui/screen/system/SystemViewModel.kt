@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import by.jadjer.etcu.ETCUApplication
 import by.jadjer.etcu.data.model.SystemTelemetry
-import by.jadjer.etcu.data.repository.BleRepository
+import by.jadjer.etcu.domain.repository.BleRepository
 import kotlinx.coroutines.flow.*
 
 class SystemViewModel(repository: BleRepository) : ViewModel() {

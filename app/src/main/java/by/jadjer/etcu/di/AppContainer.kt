@@ -1,15 +1,13 @@
 package by.jadjer.etcu.di
 
 import android.content.Context
-import by.jadjer.etcu.data.repository.BleRepository
-import by.jadjer.etcu.data.repository.OtaRepository
-import by.jadjer.etcu.data.source.ble.BleManager
-import by.jadjer.etcu.data.source.local.BlePreferenceManager
+import by.jadjer.etcu.data.ble.BleManager
+import by.jadjer.etcu.data.local.BlePreferenceManager
+import by.jadjer.etcu.data.repository.BleRepositoryImpl
+import by.jadjer.etcu.data.repository.OtaRepositoryImpl
+import by.jadjer.etcu.domain.repository.BleRepository
+import by.jadjer.etcu.domain.repository.OtaRepository
 
-/**
- * Manual Dependency Injection container.
- * In larger projects, this would be replaced by Hilt or Koin.
- */
 class AppContainer(context: Context) {
 
     private val preferenceManager: BlePreferenceManager by lazy {
@@ -21,10 +19,10 @@ class AppContainer(context: Context) {
     }
 
     val bleRepository: BleRepository by lazy {
-        BleRepository(bleManager)
+        BleRepositoryImpl(bleManager)
     }
 
     val otaRepository: OtaRepository by lazy {
-        OtaRepository()
+        OtaRepositoryImpl()
     }
 }

@@ -1,7 +1,9 @@
 package by.jadjer.etcu.data.model
 
 data class DiscoveredDevice(
+    val isPaired: Boolean = false,
     val name: String,
     val macAddress: String,
-    val isPaired: Boolean = false
+    val rssi: Int = 0,
+    val distance: Double = 0.0
 )

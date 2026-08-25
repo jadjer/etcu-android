@@ -1,4 +1,4 @@
-package by.jadjer.etcu.data.source.network
+package by.jadjer.etcu.data.network
 
 import com.google.gson.annotations.SerializedName
 import okhttp3.ResponseBody
@@ -9,7 +9,7 @@ import retrofit2.http.Streaming
 import retrofit2.http.Url
 
 data class GitHubRelease(
-    val tag_name: String,
+    val tagName: String,
     val name: String,
     val assets: List<GitHubAsset>
 )

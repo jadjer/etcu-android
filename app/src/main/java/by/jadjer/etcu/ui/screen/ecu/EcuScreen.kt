@@ -7,7 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -62,14 +62,14 @@ fun EcuScreenContent(telemetry: EcuTelemetry) {
         
         StatusIndicator(
             label = "Двигатель запущен",
-            isActive = telemetry.started,
+            isActive = telemetry.isStarted,
             activeText = "Запущен",
             inactiveText = "Остановлен"
         )
         
         StatusIndicator(
             label = "Статус сцепления (ECU)",
-            isActive = telemetry.clutchEnabled,
+            isActive = telemetry.isClutchEnabled,
             activeText = "Нажато",
             inactiveText = "Отпущено"
         )
@@ -86,8 +86,8 @@ fun EcuScreenPreview() {
                 rpm = 2500,
                 speed = 60,
                 tps = 150,
-                started = true,
-                clutchEnabled = false
+                isStarted = true,
+                isClutchEnabled = false
             )
         )
     }

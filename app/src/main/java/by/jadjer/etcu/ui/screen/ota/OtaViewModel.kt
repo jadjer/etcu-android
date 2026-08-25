@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import by.jadjer.etcu.ETCUApplication
 import by.jadjer.etcu.data.model.OtaChunk
-import by.jadjer.etcu.data.repository.BleRepository
-import by.jadjer.etcu.data.repository.OtaRepository
+import by.jadjer.etcu.domain.repository.BleRepository
+import by.jadjer.etcu.domain.repository.OtaRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -60,9 +60,9 @@ class OtaViewModel(
             val binAsset = release?.assets?.find { it.name.endsWith(".bin") }
             
             if (binAsset != null) {
-                val isNewer = currentVersion == null || isVersionNewer(release.tag_name, currentVersion)
+                val isNewer = currentVersion == null || isVersionNewer(release.tagName, currentVersion)
                 if (isNewer) {
-                    _state.value = OtaState.UpdateAvailable(release.tag_name, binAsset.downloadUrl)
+                    _state.value = OtaState.UpdateAvailable(release.tagName, binAsset.downloadUrl)
                 } else {
                     _state.value = OtaState.Idle
                 }

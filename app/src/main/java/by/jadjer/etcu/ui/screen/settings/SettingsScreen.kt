@@ -16,7 +16,10 @@ import by.jadjer.etcu.data.model.SystemInfo
 import by.jadjer.etcu.ui.component.TelemetryRow
 
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel) {
+fun SettingsScreen(
+    viewModel: SettingsViewModel,
+    onOtaClick: () -> Unit
+) {
     val controlData by viewModel.controlData.collectAsState()
     val systemInfo by viewModel.systemInfo.collectAsState()
 
@@ -26,7 +29,8 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
         onSyncChange = { viewModel.updateSyncEnabled(it) },
         onOffsetChange = { viewModel.updateAcceleratorOffset(it.toInt()) },
         onDisconnectClick = { viewModel.disconnect() },
-        onForgetClick = { viewModel.forgetDevice() }
+        onForgetClick = { viewModel.forgetDevice() },
+        onOtaClick = onOtaClick
     )
 }
 
@@ -37,7 +41,8 @@ fun SettingsScreenContent(
     onSyncChange: (Boolean) -> Unit,
     onOffsetChange: (Float) -> Unit,
     onDisconnectClick: () -> Unit,
-    onForgetClick: () -> Unit
+    onForgetClick: () -> Unit,
+    onOtaClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -125,7 +130,7 @@ fun SettingsScreenContent(
         }
         
         OutlinedButton(
-            onClick = { /* TODO */ },
+            onClick = onOtaClick,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Проверить обновления")
@@ -150,7 +155,8 @@ fun SettingsScreenPreview() {
             onSyncChange = {},
             onOffsetChange = {},
             onDisconnectClick = {},
-            onForgetClick = {}
+            onForgetClick = {},
+            onOtaClick = {}
         )
     }
 }

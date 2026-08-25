@@ -2,16 +2,18 @@ package by.jadjer.etcu.ui.screen.scan_screen
 
 import android.content.Intent
 import android.provider.Settings
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -19,14 +21,13 @@ import by.jadjer.etcu.data.model.DiscoveredDevice
 
 @Composable
 fun ScanScreen(viewModel: ScanViewModel, onConnected: () -> Unit) {
-    val pairedDevices by viewModel.pairedDevices.collectAsState()
     val discoveredDevices by viewModel.discoveredDevices.collectAsState()
     val connectionStatus by viewModel.connectionState.collectAsState()
-    
+    val isScanning by viewModel.isScanning.collectAsState()
+
     val snackbarHostState = remember { SnackbarHostState() }
-    
+
     LaunchedEffect(Unit) {
-        viewModel.updatePairedDevices()
         viewModel.startScanning()
     }
 
@@ -40,8 +41,8 @@ fun ScanScreen(viewModel: ScanViewModel, onConnected: () -> Unit) {
     }
 
     ScanScreenContent(
-        pairedDevices = pairedDevices,
         discoveredDevices = discoveredDevices,
+        isScanning = isScanning,
         snackbarHostState = snackbarHostState,
         onRefreshClick = { viewModel.startScanning() },
         onDeviceClick = { device ->
@@ -53,14 +54,14 @@ fun ScanScreen(viewModel: ScanViewModel, onConnected: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScanScreenContent(
-    pairedDevices: List<DiscoveredDevice>,
     discoveredDevices: List<DiscoveredDevice>,
+    isScanning: Boolean,
     snackbarHostState: SnackbarHostState,
     onRefreshClick: () -> Unit,
     onDeviceClick: (DiscoveredDevice) -> Unit
 ) {
     val context = LocalContext.current
-    
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
@@ -74,62 +75,60 @@ fun ScanScreenContent(
             )
         }
     ) { padding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .verticalScroll(rememberScrollState())
         ) {
-            if (pairedDevices.isNotEmpty()) {
-                item {
-                    Text(
-                        "Сопряженные устройства",
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.titleSmall
-                    )
-                }
-                items(pairedDevices) { device ->
-                    DeviceItem(device) { onDeviceClick(device) }
-                }
-            }
-
-            item {
+            // Main content wrapper with weight
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
                 Text(
-                    "Доступные устройства",
+                    "Обнаруженные контроллеры",
                     modifier = Modifier.padding(16.dp),
                     style = MaterialTheme.typography.titleSmall
                 )
-            }
 
-            if (discoveredDevices.isEmpty()) {
-                item {
+                if (discoveredDevices.isEmpty()) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(32.dp),
+                            .padding(top = 32.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        if (isScanning) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        } else {
+                            Text(
+                                "Контроллеры не найдены. Убедитесь, что устройство включено.",
+                                modifier = Modifier.padding(24.dp),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
-                }
-            } else {
-                items(discoveredDevices) { device ->
-                    DeviceItem(device) { onDeviceClick(device) }
+                } else {
+                    discoveredDevices.forEach { device ->
+                        DeviceItem(device) { onDeviceClick(device) }
+                    }
                 }
             }
 
-            item {
-                Spacer(modifier = Modifier.height(24.dp))
-                Button(
-                    onClick = {
-                        val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
-                        context.startActivity(intent)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text("Настройки Bluetooth")
-                }
+            // Button stays at bottom if content is short, or at end of content if long
+            Button(
+                onClick = {
+                    val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
+                    context.startActivity(intent)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text("Настройки Bluetooth")
             }
         }
     }
@@ -139,10 +138,42 @@ fun ScanScreenContent(
 private fun DeviceItem(device: DiscoveredDevice, onClick: () -> Unit) {
     ListItem(
         headlineContent = { Text(device.name) },
-        supportingContent = { Text(device.macAddress) },
+        supportingContent = { 
+            Column {
+                Text(device.macAddress)
+                if (device.rssi != 0) {
+                    Text(
+                        text = "Сигнал: ${device.rssi} dBm (≈${"%.1f".format(device.distance)} м)",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        },
+        trailingContent = {
+            if (device.rssi != 0) {
+                SignalIcon(rssi = device.rssi)
+            }
+        },
         modifier = Modifier.clickable { onClick() }
     )
     HorizontalDivider()
+}
+
+@Composable
+private fun SignalIcon(rssi: Int) {
+    val color = when {
+        rssi > -60 -> Color(0xFF4CAF50) // Green
+        rssi > -70 -> Color(0xFF8BC34A) // Light Green
+        rssi > -80 -> Color(0xFFFFC107) // Yellow
+        else -> Color(0xFFF44336) // Red
+    }
+    
+    Box(
+        modifier = Modifier
+            .size(12.dp)
+            .background(color, shape = androidx.compose.foundation.shape.CircleShape)
+    )
 }
 
 @Preview(showBackground = true)
@@ -150,13 +181,23 @@ private fun DeviceItem(device: DiscoveredDevice, onClick: () -> Unit) {
 fun ScanScreenPreview() {
     MaterialTheme {
         ScanScreenContent(
-            pairedDevices = listOf(
-                DiscoveredDevice("ETCU-Controller-1", "AA:BB:CC:DD:EE:FF", true)
-            ),
             discoveredDevices = listOf(
-                DiscoveredDevice("ETCU-New-Device", "11:22:33:44:55:66", false),
-                DiscoveredDevice("Unknown", "77:88:99:00:11:22", false)
+                DiscoveredDevice(
+                    isPaired = false,
+                    name = "ETCU-New-Device",
+                    macAddress = "11:22:33:44:55:66",
+                    rssi = -55,
+                    distance = 1.2
+                ),
+                DiscoveredDevice(
+                    isPaired = false,
+                    name = "Unknown",
+                    macAddress = "77:88:99:00:11:22",
+                    rssi = -85,
+                    distance = 15.5
+                )
             ),
+            isScanning = false,
             snackbarHostState = remember { SnackbarHostState() },
             onRefreshClick = {},
             onDeviceClick = {}

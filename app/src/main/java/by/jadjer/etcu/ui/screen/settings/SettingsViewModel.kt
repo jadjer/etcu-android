@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import by.jadjer.etcu.ETCUApplication
 import by.jadjer.etcu.data.model.BleControlData
 import by.jadjer.etcu.data.model.SystemInfo
-import by.jadjer.etcu.data.repository.BleRepository
+import by.jadjer.etcu.domain.repository.BleRepository
 import kotlinx.coroutines.flow.*
 
 class SettingsViewModel(private val repository: BleRepository) : ViewModel() {

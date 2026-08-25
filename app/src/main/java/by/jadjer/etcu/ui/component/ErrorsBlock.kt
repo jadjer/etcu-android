@@ -25,7 +25,6 @@ fun ErrorsBlock(activeErrors: List<SystemError>) {
         )
 
         if (activeErrors.isEmpty()) {
-            // Система полностью исправна
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -35,7 +34,6 @@ fun ErrorsBlock(activeErrors: List<SystemError>) {
                 Text(text = "❌ Ошибок не обнаружено", color = Color(0xFF2E7D32))
             }
         } else {
-            // Выводим список возникших проблем
             activeErrors.forEach { error ->
                 Box(
                     modifier = Modifier

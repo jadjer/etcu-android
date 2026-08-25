@@ -7,8 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PedalBike
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -59,18 +58,13 @@ fun SystemScreenContent(
         
         StatusIndicator(
             label = "Защита (Guard)",
-            isActive = telemetry.guardActive,
+            isActive = telemetry.isGuardActive,
             icon = Icons.Default.Lock
         )
         
         StatusIndicator(
             label = "Тормоз",
-            isActive = telemetry.brakeEnabled
-        )
-        
-        StatusIndicator(
-            label = "Сцепление",
-            isActive = telemetry.clutchEnabled
+            isActive = telemetry.isBrakeEnabled
         )
     }
 }
@@ -81,12 +75,11 @@ fun SystemScreenPreview() {
     MaterialTheme {
         SystemScreenContent(
             telemetry = SystemTelemetry(
+                isGuardActive = false,
+                isBrakeEnabled = true,
                 systemState = SystemState.NORMAL,
                 acceleratorPosition = 300,
                 throttlePosition = 280,
-                guardActive = false,
-                brakeEnabled = true,
-                clutchEnabled = false
             )
         )
     }
