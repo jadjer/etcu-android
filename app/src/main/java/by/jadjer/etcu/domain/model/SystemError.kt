@@ -1,4 +1,4 @@
-package by.jadjer.etcu.data.model
+package by.jadjer.etcu.domain.model
 
 enum class SystemError(val bitMask: Long, val description: String) {
     GUARD_LOCK(1L shl 0, "Блокировка защиты (Guard Lock)"),

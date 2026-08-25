@@ -1,40 +1,33 @@
 package by.jadjer.etcu.data.repository
 
-import by.jadjer.etcu.data.ble.BleConstants
-import by.jadjer.etcu.data.network.GitHubRelease
+import by.jadjer.etcu.data.model.GitHubReleaseDto
 import by.jadjer.etcu.data.network.GitHubService
+import by.jadjer.etcu.data.network.NetworkConstants
+import by.jadjer.etcu.domain.model.FirmwareRelease
 import by.jadjer.etcu.domain.repository.OtaRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
-class OtaRepositoryImpl : OtaRepository {
+class OtaRepositoryImpl(
     private val service: GitHubService
+) : OtaRepository {
 
-    init {
-        val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        }
-        val client = OkHttpClient.Builder()
-            .addInterceptor(logging)
-            .build()
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.github.com/")
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        service = retrofit.create(GitHubService::class.java)
-    }
-
-    override suspend fun getLatestRelease(): GitHubRelease? = withContext(Dispatchers.IO) {
+    override suspend fun getLatestRelease(): FirmwareRelease? = withContext(Dispatchers.IO) {
         try {
-            val response = service.getLatestRelease(BleConstants.GITHUB_OWNER, BleConstants.GITHUB_REPO)
-            if (response.isSuccessful) response.body() else null
+            val response = service.getLatestRelease(NetworkConstants.GITHUB_OWNER, NetworkConstants.GITHUB_REPO)
+            if (response.isSuccessful) {
+                val body = response.body()
+                val asset = body?.assets?.find { it.name.endsWith(".bin") } ?: body?.assets?.firstOrNull()
+                
+                if (body != null && asset != null) {
+                    FirmwareRelease(
+                        version = body.tagName,
+                        name = body.name,
+                        downloadUrl = asset.downloadUrl,
+                        size = asset.size
+                    )
+                } else null
+            } else null
         } catch (e: Exception) {
             null
         }

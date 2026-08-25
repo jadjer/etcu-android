@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import by.jadjer.etcu.data.model.SystemError
+import by.jadjer.etcu.domain.model.SystemError
 
 @Composable
 fun ErrorsBlock(activeErrors: List<SystemError>) {

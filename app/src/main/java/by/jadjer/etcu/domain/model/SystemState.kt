@@ -1,4 +1,4 @@
-package by.jadjer.etcu.data.model
+package by.jadjer.etcu.domain.model
 
 enum class SystemState(val value: Int) {
     OFF(0),

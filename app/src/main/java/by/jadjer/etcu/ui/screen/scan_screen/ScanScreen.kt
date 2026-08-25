@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import by.jadjer.etcu.data.model.DiscoveredDevice
+import by.jadjer.etcu.domain.model.DiscoveredDevice
 
 @Composable
 fun ScanScreen(viewModel: ScanViewModel, onConnected: () -> Unit) {

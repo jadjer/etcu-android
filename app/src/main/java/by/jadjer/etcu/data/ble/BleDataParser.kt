@@ -1,11 +1,11 @@
 package by.jadjer.etcu.data.ble
 
-import by.jadjer.etcu.data.model.EcuTelemetry
-import by.jadjer.etcu.data.model.ServoTelemetry
-import by.jadjer.etcu.data.model.SystemError
-import by.jadjer.etcu.data.model.SystemInfo
-import by.jadjer.etcu.data.model.SystemState
-import by.jadjer.etcu.data.model.SystemTelemetry
+import by.jadjer.etcu.domain.model.EcuTelemetry
+import by.jadjer.etcu.domain.model.ServoTelemetry
+import by.jadjer.etcu.domain.model.SystemError
+import by.jadjer.etcu.domain.model.SystemInfo
+import by.jadjer.etcu.domain.model.SystemState
+import by.jadjer.etcu.domain.model.SystemTelemetry
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 

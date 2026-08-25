@@ -11,8 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import by.jadjer.etcu.data.model.BleControlData
-import by.jadjer.etcu.data.model.SystemInfo
+import by.jadjer.etcu.domain.model.BleControlData
+import by.jadjer.etcu.domain.model.SystemInfo
 import by.jadjer.etcu.ui.component.TelemetryRow
 
 @Composable

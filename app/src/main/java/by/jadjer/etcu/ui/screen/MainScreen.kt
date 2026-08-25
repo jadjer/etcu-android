@@ -31,7 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import by.jadjer.etcu.ETCUApplication
-import by.jadjer.etcu.data.model.EcuTelemetry
+import by.jadjer.etcu.domain.model.EcuTelemetry
 import by.jadjer.etcu.ui.component.ErrorsBlock
 import by.jadjer.etcu.ui.navigation.ScreenItem
 import by.jadjer.etcu.ui.screen.ecu.EcuScreen

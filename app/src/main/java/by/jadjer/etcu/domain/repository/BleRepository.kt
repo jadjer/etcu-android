@@ -1,7 +1,6 @@
 package by.jadjer.etcu.domain.repository
 
-import android.bluetooth.BluetoothDevice
-import by.jadjer.etcu.data.model.*
+import by.jadjer.etcu.domain.model.*
 import kotlinx.coroutines.flow.StateFlow
 
 interface BleRepository {
@@ -9,7 +8,7 @@ interface BleRepository {
     val isConnected: StateFlow<Boolean>
     val telemetry: StateFlow<SystemTelemetry>
     val systemInfo: StateFlow<SystemInfo>
-    val discoveredDevices: StateFlow<List<Pair<BluetoothDevice, Int>>>
+    val discoveredDevices: StateFlow<List<DiscoveredDevice>>
     val isScanning: StateFlow<Boolean>
     val otaFeedback: StateFlow<Int?>
     val savedMac: StateFlow<String?>
@@ -20,7 +19,7 @@ interface BleRepository {
     fun disconnect()
     fun autoConnect()
     fun clearLastMac()
-    fun getPairedDevices(): List<BluetoothDevice>
+    fun getPairedDevices(): List<DiscoveredDevice>
     fun sendControlData(data: BleControlData)
     fun sendOtaChunk(chunk: OtaChunk)
 }

@@ -11,8 +11,8 @@ import android.bluetooth.BluetoothProfile
 class BleConnectionHandler(
     private val dataParser: BleDataParser,
     private val onConnectionStateChange: (String, Boolean) -> Unit,
-    private val onTelemetryUpdate: (by.jadjer.etcu.data.model.SystemTelemetry) -> Unit,
-    private val onSystemInfoUpdate: (by.jadjer.etcu.data.model.SystemInfo) -> Unit,
+    private val onTelemetryUpdate: (by.jadjer.etcu.domain.model.SystemTelemetry) -> Unit,
+    private val onSystemInfoUpdate: (by.jadjer.etcu.domain.model.SystemInfo) -> Unit,
     private val onOtaFeedback: (Int) -> Unit,
     private val onServicesDiscovered: (BluetoothGatt) -> Unit
 ) : BluetoothGattCallback() {

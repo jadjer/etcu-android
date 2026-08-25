@@ -14,8 +14,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import by.jadjer.etcu.data.model.SystemState
-import by.jadjer.etcu.data.model.SystemTelemetry
+import by.jadjer.etcu.domain.model.SystemState
+import by.jadjer.etcu.domain.model.SystemTelemetry
 import by.jadjer.etcu.ui.component.StatusIndicator
 import by.jadjer.etcu.ui.component.TelemetryRow
 

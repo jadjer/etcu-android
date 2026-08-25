@@ -8,6 +8,7 @@ import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.os.ParcelUuid
+import by.jadjer.etcu.domain.model.DiscoveredDevice
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -18,8 +19,8 @@ class BleScanner(private val bluetoothAdapter: BluetoothAdapter?) {
 
     private val scannerScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
-    private val _discoveredDevices = MutableStateFlow<Map<String, Pair<BluetoothDevice, Int>>>(emptyMap())
-    val discoveredDevices: StateFlow<List<Pair<BluetoothDevice, Int>>> = _discoveredDevices
+    private val _discoveredDevices = MutableStateFlow<Map<String, DiscoveredDevice>>(emptyMap())
+    val discoveredDevices: StateFlow<List<DiscoveredDevice>> = _discoveredDevices
         .map { it.values.toList() }
         .stateIn(
             scope = scannerScope,
@@ -35,10 +36,23 @@ class BleScanner(private val bluetoothAdapter: BluetoothAdapter?) {
             val device = result.device
             if (device.name != null) {
                 _discoveredDevices.update { currentMap ->
-                    currentMap + (device.address to (device to result.rssi))
+                    val distance = calculateDistance(result.rssi)
+                    currentMap + (device.address to DiscoveredDevice(
+                        name = device.name ?: "Unknown",
+                        macAddress = device.address,
+                        rssi = result.rssi,
+                        distance = distance,
+                        isPaired = device.bondState == BluetoothDevice.BOND_BONDED
+                    ))
                 }
             }
         }
+    }
+
+    private fun calculateDistance(rssi: Int): Double {
+        if (rssi == 0) return -1.0
+        val txPower = -59 
+        return Math.pow(10.0, (txPower - rssi) / (10.0 * 2.0))
     }
 
     fun startScan() {

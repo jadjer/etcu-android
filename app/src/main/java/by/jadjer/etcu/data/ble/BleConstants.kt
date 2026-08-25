@@ -17,11 +17,4 @@ object BleConstants {
     // SharedPreferences
     const val PREFS_NAME = "ble_prefs"
     const val KEY_LAST_MAC = "last_mac"
-
-    // Navigation Routes
-    const val ROUTE_MAIN = "main"
-
-    // GitHub OTA
-    const val GITHUB_OWNER = "jadjer"
-    const val GITHUB_REPO = "etcu" 
 }

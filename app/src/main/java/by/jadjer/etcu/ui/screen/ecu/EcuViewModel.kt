@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import by.jadjer.etcu.ETCUApplication
-import by.jadjer.etcu.data.model.EcuTelemetry
+import by.jadjer.etcu.domain.model.EcuTelemetry
 import by.jadjer.etcu.domain.repository.BleRepository
 import kotlinx.coroutines.flow.*
 

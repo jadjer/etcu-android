@@ -8,7 +8,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import by.jadjer.etcu.ETCUApplication
-import by.jadjer.etcu.data.ble.BleConstants
 import by.jadjer.etcu.ui.screen.MainScreen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -34,9 +33,9 @@ fun AppNavGraph() {
 
     NavHost(
         navController = navController,
-        startDestination = BleConstants.ROUTE_MAIN
+        startDestination = NavRoutes.MAIN
     ) {
-        composable(BleConstants.ROUTE_MAIN) {
+        composable(NavRoutes.MAIN) {
             MainScreen()
         }
     }

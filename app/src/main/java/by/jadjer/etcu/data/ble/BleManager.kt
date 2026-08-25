@@ -3,7 +3,7 @@ package by.jadjer.etcu.data.ble
 import android.annotation.SuppressLint
 import android.bluetooth.*
 import android.content.Context
-import by.jadjer.etcu.data.model.*
+import by.jadjer.etcu.domain.model.*
 import by.jadjer.etcu.data.local.BlePreferenceManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
