@@ -1,4 +1,4 @@
-package by.jadjer.etcu.ui.screen.scan_screen
+package by.jadjer.etcu.ui.screen.scan
 
 import android.content.Intent
 import android.provider.Settings
@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.domain.model.DiscoveredDevice
 
 @Composable
-fun ScanScreen(viewModel: ScanViewModel, onConnected: () -> Unit) {
+fun ScanScreen(viewModel: ScanViewModel) {
     val discoveredDevices by viewModel.discoveredDevices.collectAsState()
     val connectionStatus by viewModel.connectionState.collectAsState()
     val isScanning by viewModel.isScanning.collectAsState()

@@ -1,13 +1,10 @@
-package by.jadjer.etcu.ui.screen.scan_screen
+package by.jadjer.etcu.ui.screen.scan
 
-import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
 import by.jadjer.etcu.ETCUApplication
 import by.jadjer.etcu.domain.model.DiscoveredDevice
 import by.jadjer.etcu.domain.repository.BleRepository
-import by.jadjer.etcu.util.BleUtils
 import kotlinx.coroutines.flow.*
 
 class ScanViewModel(private val repository: BleRepository) : ViewModel() {

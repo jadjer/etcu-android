@@ -39,8 +39,8 @@ import by.jadjer.etcu.ui.screen.ecu.EcuScreenContent
 import by.jadjer.etcu.ui.screen.ecu.EcuViewModel
 import by.jadjer.etcu.ui.screen.ota.OtaScreen
 import by.jadjer.etcu.ui.screen.ota.OtaViewModel
-import by.jadjer.etcu.ui.screen.scan_screen.ScanScreen
-import by.jadjer.etcu.ui.screen.scan_screen.ScanViewModel
+import by.jadjer.etcu.ui.screen.scan.ScanScreen
+import by.jadjer.etcu.ui.screen.scan.ScanViewModel
 import by.jadjer.etcu.ui.screen.servo.ServoScreen
 import by.jadjer.etcu.ui.screen.servo.ServoViewModel
 import by.jadjer.etcu.ui.screen.settings.SettingsScreen
@@ -64,8 +64,7 @@ fun MainScreen(viewModel: MainViewModel) {
             val context = LocalContext.current
             val app = context.applicationContext as ETCUApplication
             ScanScreen(
-                viewModel = viewModel(factory = ScanViewModel.Factory(app)),
-                onConnected = { /* Handled by isConnected state */ }
+                viewModel = viewModel(factory = ScanViewModel.Factory(app))
             )
         }
     } else {
