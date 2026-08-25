@@ -1,0 +1,46 @@
+<resources>
+    <string name="app_name">ETCU</string>
+
+    <!-- BLE Connection States -->
+    <string name="ble_state_disconnected">Отключено</string>
+    <string name="ble_state_connecting">Соединение с %s…</string>
+    <string name="ble_state_services_discovered">Службы найдены. Проверка характеристик…</string>
+    <string name="ble_state_error_protocol">Ошибка: Устройство не поддерживает ETCU протокол</string>
+    <string name="ble_state_bluetooth_off">Bluetooth выключен или недоступен</string>
+    <string name="ble_state_invalid_mac">Неверный MAC-адрес</string>
+    <string name="ble_state_scanning">Поиск…</string>
+
+    <!-- System Errors -->
+    <string name="error_guard_lock">Блокировка защиты (Guard Lock)</string>
+    <string name="error_servo_init">Ошибка инициализации сервопривода</string>
+    <string name="error_servo_comms">Ошибка связи с сервоприводом</string>
+    <string name="error_servo_protocol">Ошибка протокола сервопривода</string>
+    <string name="error_servo_checksum">Ошибка контрольной суммы сервопривода</string>
+    <string name="error_servo_read">Ошибка чтения данных сервопривода</string>
+    <string name="error_servo_write">Ошибка записи данных сервопривода</string>
+    <string name="error_servo_mode">Неверный режим работы сервопривода</string>
+    <string name="error_servo_speed">Ошибка скорости сервопривода</string>
+    <string name="error_servo_position">Ошибка позиционирования сервопривода</string>
+    <string name="error_servo_current">Ошибка тока сервопривода</string>
+    <string name="error_servo_torque">Ошибка крутящего момента сервопривода</string>
+    <string name="error_servo_overcurrent">Превышение допустимого тока сервопривода</string>
+    <string name="error_servo_overtemp">Перегрев сервопривода</string>
+    <string name="error_servo_calibrate">Ошибка калибровки сервопривода</string>
+    <string name="error_servo_power_fail">Сбой питания сервопривода</string>
+    <string name="error_accel_init">Сбой инициализации акселератора</string>
+    <string name="error_accel_calibrate">Сбой калибровки акселератора</string>
+    <string name="error_accel_read">Сбой чтения датчика акселератора</string>
+    <string name="error_accel_mismatch">Рассогласование каналов акселератора</string>
+    <string name="error_button_init">Сбой инициализации кнопок</string>
+    <string name="error_button_read">Сбой чтения состояния кнопок</string>
+    <string name="error_ecu_init">Сбой инициализации ЭБУ (ECU)</string>
+    <string name="error_indicator_init">Сбой инициализации индикатора</string>
+    <string name="error_bluetooth_init">Сбой инициализации Bluetooth на контроллере</string>
+    <string name="error_bluetooth_power">Ошибка настройки мощности Bluetooth</string>
+    <string name="error_bluetooth_mtu">Ошибка настройки MTU Bluetooth</string>
+    <string name="error_bluetooth_connected">Сбой соединения Bluetooth</string>
+
+    <!-- OTA -->
+    <string name="ota_error_no_release">Релиз не найден или отсутствует .bin файл</string>
+    <string name="ota_error_download">Ошибка скачивания прошивки</string>
+</resources>

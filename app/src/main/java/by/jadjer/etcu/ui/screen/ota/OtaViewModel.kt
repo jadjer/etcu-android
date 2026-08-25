@@ -7,6 +7,7 @@ import by.jadjer.etcu.ETCUApplication
 import by.jadjer.etcu.domain.model.OtaChunk
 import by.jadjer.etcu.domain.repository.BleRepository
 import by.jadjer.etcu.domain.repository.OtaRepository
+import by.jadjer.etcu.domain.util.Resource
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -56,17 +57,19 @@ class OtaViewModel(
     fun checkForUpdates(currentVersion: String? = null) {
         viewModelScope.launch {
             _state.value = OtaState.CheckingUpdates
-            val release = otaRepository.getLatestRelease()
-
-            if (release != null) {
-                val isNewer = currentVersion == null || isVersionNewer(release.version, currentVersion)
-                if (isNewer) {
-                    _state.value = OtaState.UpdateAvailable(release.version, release.downloadUrl)
-                } else {
-                    _state.value = OtaState.Idle
+            when (val result = otaRepository.getLatestRelease()) {
+                is Resource.Success -> {
+                    val release = result.data
+                    val isNewer = currentVersion == null || isVersionNewer(release.version, currentVersion)
+                    if (isNewer) {
+                        _state.value = OtaState.UpdateAvailable(release.version, release.downloadUrl)
+                    } else {
+                        _state.value = OtaState.Idle
+                    }
                 }
-            } else {
-                _state.value = OtaState.Error("Релиз не найден или отсутствует .bin файл")
+                is Resource.Error -> {
+                    _state.value = OtaState.Error(result.message)
+                }
             }
         }
     }
@@ -78,15 +81,18 @@ class OtaViewModel(
     fun startUpdate(downloadUrl: String) {
         viewModelScope.launch {
             _state.value = OtaState.Downloading
-            val data = otaRepository.downloadFirmware(downloadUrl)
-            if (data != null) {
-                firmwareData = data
-                val packageSize = 200 
-                totalChunks = (data.size + packageSize - 1) / packageSize
-                _state.value = OtaState.Uploading(0f, 0, totalChunks)
-                sendNextChunk(0)
-            } else {
-                _state.value = OtaState.Error("Ошибка скачивания прошивки")
+            when (val result = otaRepository.downloadFirmware(downloadUrl)) {
+                is Resource.Success -> {
+                    val data = result.data
+                    firmwareData = data
+                    val packageSize = 200 
+                    totalChunks = (data.size + packageSize - 1) / packageSize
+                    _state.value = OtaState.Uploading(0f, 0, totalChunks)
+                    sendNextChunk(0)
+                }
+                is Resource.Error -> {
+                    _state.value = OtaState.Error(result.message)
+                }
             }
         }
     }

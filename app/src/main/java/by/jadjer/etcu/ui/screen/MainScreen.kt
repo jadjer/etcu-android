@@ -49,20 +49,20 @@ import by.jadjer.etcu.ui.screen.system.SystemScreen
 import by.jadjer.etcu.ui.screen.system.SystemViewModel
 
 @Composable
-fun MainScreen() {
-    val context = LocalContext.current
-    val app = context.applicationContext as ETCUApplication
-    val isConnected by app.container.bleRepository.isConnected.collectAsState()
-    val connectionStatus by app.container.bleRepository.connectionState.collectAsState()
-    val savedMac by app.container.bleRepository.savedMac.collectAsState()
+fun MainScreen(viewModel: MainViewModel) {
+    val isConnected by viewModel.isConnected.collectAsState()
+    val connectionStatus by viewModel.connectionState.collectAsState()
+    val savedMac by viewModel.savedMac.collectAsState()
 
     if (!isConnected) {
         if (savedMac != null) {
             ConnectingStubScreen(
                 connectionStatus = connectionStatus,
-                onResetClick = { app.container.bleRepository.clearLastMac() }
+                onResetClick = { viewModel.clearLastMac() }
             )
         } else {
+            val context = LocalContext.current
+            val app = context.applicationContext as ETCUApplication
             ScanScreen(
                 viewModel = viewModel(factory = ScanViewModel.Factory(app)),
                 onConnected = { /* Handled by isConnected state */ }
@@ -70,7 +70,7 @@ fun MainScreen() {
         }
     } else {
         MainScreenContent(
-            app = app,
+            viewModel = viewModel,
             connectionStatus = connectionStatus
         )
     }
@@ -79,15 +79,18 @@ fun MainScreen() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MainScreenContent(
-    app: ETCUApplication,
+    viewModel: MainViewModel,
     connectionStatus: String
 ) {
     var currentScreen by remember { mutableStateOf<ScreenItem>(ScreenItem.Ecu) }
-    val telemetry by app.container.bleRepository.telemetry.collectAsState()
+    val telemetry by viewModel.telemetry.collectAsState()
     val activeErrors = telemetry.activeErrors
     
     var showErrorsSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
+    
+    val context = LocalContext.current
+    val app = context.applicationContext as ETCUApplication
 
     Scaffold(
         topBar = {
@@ -154,7 +157,6 @@ private fun MainScreenContent(
                     viewModel = viewModel(factory = SettingsViewModel.Factory(app)),
                     onOtaClick = { currentScreen = ScreenItem.Ota }
                 )
-                else -> {}
             }
         }
     }

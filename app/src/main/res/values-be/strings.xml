@@ -1,0 +1,46 @@
+<resources>
+    <string name="app_name">ETCU</string>
+
+    <!-- BLE Connection States -->
+    <string name="ble_state_disconnected">Адключана</string>
+    <string name="ble_state_connecting">Злучэнне з %s…</string>
+    <string name="ble_state_services_discovered">Службы знойдзены. Праверка характарыстык…</string>
+    <string name="ble_state_error_protocol">Памылка: Прылада не падтрымлівае ETCU пратакол</string>
+    <string name="ble_state_bluetooth_off">Bluetooth выключаны або недаступны</string>
+    <string name="ble_state_invalid_mac">Няслушны MAC-адрас</string>
+    <string name="ble_state_scanning">Пошук…</string>
+
+    <!-- System Errors -->
+    <string name="error_guard_lock">Блакіроўка абароны (Guard Lock)</string>
+    <string name="error_servo_init">Памылка ініцыялізацыі сервапрывада</string>
+    <string name="error_servo_comms">Памылка сувязі з сервапрывадам</string>
+    <string name="error_servo_protocol">Памылка пратаколу сервапрывада</string>
+    <string name="error_servo_checksum">Памылка кантрольнай сумы сервапрывада</string>
+    <string name="error_servo_read">Памылка чытання дадзеных сервапрывада</string>
+    <string name="error_servo_write">Памылка запісу дадзеных сервапрывада</string>
+    <string name="error_servo_mode">Няслушны рэжым працы сервапрывада</string>
+    <string name="error_servo_speed">Памылка хуткасці сервапрывада</string>
+    <string name="error_servo_position">Памылка пазіцыянавання сервапрывада</string>
+    <string name="error_servo_current">Памылка току сервапрывада</string>
+    <string name="error_servo_torque">Памылка круцільнага моманту сервапрывада</string>
+    <string name="error_servo_overcurrent">Перавышэнне дапушчальнага току сервапрывада</string>
+    <string name="error_servo_overtemp">Перагрэў сервапрывада</string>
+    <string name="error_servo_calibrate">Памылка каліброўкі сервапрывада</string>
+    <string name="error_servo_power_fail">Збой сілкавання сервапрывада</string>
+    <string name="error_accel_init">Збой ініцыялізацыі акселератара</string>
+    <string name="error_accel_calibrate">Збой каліброўкі акселератара</string>
+    <string name="error_accel_read">Збой чытання датчыка акселератара</string>
+    <string name="error_accel_mismatch">Разузгадненне каналаў акселератара</string>
+    <string name="error_button_init">Збой ініцыялізацыі кнопак</string>
+    <string name="error_button_read">Збой чытання стану кнопак</string>
+    <string name="error_ecu_init">Збой ініцыялізацыі ЭБУ (ECU)</string>
+    <string name="error_indicator_init">Збой ініцыялізацыі індыкатара</string>
+    <string name="error_bluetooth_init">Збой ініцыялізацыі Bluetooth на кантролеры</string>
+    <string name="error_bluetooth_power">Памылка налады магутнасці Bluetooth</string>
+    <string name="error_bluetooth_mtu">Памылка налады MTU Bluetooth</string>
+    <string name="error_bluetooth_connected">Збой злучэння Bluetooth</string>
+
+    <!-- OTA -->
+    <string name="ota_error_no_release">Рэліз не знойдзены або адсутнічае .bin файл</string>
+    <string name="ota_error_download">Памылка спампоўкі прашыўкі</string>
+</resources>

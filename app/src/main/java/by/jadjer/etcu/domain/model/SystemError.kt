@@ -1,36 +1,38 @@
 package by.jadjer.etcu.domain.model
 
-enum class SystemError(val bitMask: Long, val description: String) {
-    GUARD_LOCK(1L shl 0, "Блокировка защиты (Guard Lock)"),
+import by.jadjer.etcu.R
 
-    SERVO_INIT_ERROR(1L shl 1, "Ошибка инициализации сервопривода"),
-    SERVO_COMMS_ERROR(1L shl 2, "Ошибка связи с сервоприводом"),
-    SERVO_PROTOCOL_ERROR(1L shl 3, "Ошибка протокола сервопривода"),
-    SERVO_CHECKSUM_ERROR(1L shl 4, "Ошибка контрольной суммы сервопривода"),
-    SERVO_READ_ERROR(1L shl 5, "Ошибка чтения данных сервопривода"),
-    SERVO_WRITE_ERROR(1L shl 6, "Ошибка записи данных сервопривода"),
-    SERVO_MODE_ERROR(1L shl 7, "Неверный режим работы сервопривода"),
-    SERVO_SPEED_ERROR(1L shl 8, "Ошибка скорости сервопривода"),
-    SERVO_POSITION_ERROR(1L shl 9, "Ошибка позиционирования сервопривода"),
-    SERVO_CURRENT_ERROR(1L shl 10, "Ошибка тока сервопривода"),
-    SERVO_TORQUE_ERROR(1L shl 11, "Ошибка крутящего момента сервопривода"),
-    SERVO_OVERCURRENT(1L shl 12, "Превышение допустимого тока сервопривода"),
-    SERVO_OVERTEMP(1L shl 13, "Перегрев сервопривода"),
-    SERVO_CALIBRATE_ERROR(1L shl 14, "Ошибка калибровки сервопривода"),
-    SERVO_POWER_FAIL(1L shl 15, "Сбой питания сервопривода"),
+enum class SystemError(val bitMask: Long, val resId: Int) {
+    GUARD_LOCK(1L shl 0, R.string.error_guard_lock),
 
-    ACCELERATOR_INIT_FAULT(1L shl 16, "Сбой инициализации акселератора"),
-    ACCELERATOR_CALIBRATE_FAULT(1L shl 17, "Сбой калибровки акселератора"),
-    ACCELERATOR_READ_FAULT(1L shl 18, "Сбой чтения датчика акселератора"),
-    ACCELERATOR_MISMATCH(1L shl 19, "Рассогласование каналов акселератора"),
-    BUTTON_INIT_FAULT(1L shl 20, "Сбой инициализации кнопок"),
-    BUTTON_READ_FAULT(1L shl 21, "Сбой чтения состояния кнопок"),
-    ECU_INIT_FAULT(1L shl 22, "Сбой инициализации ЭБУ (ECU)"),
-    INDICATOR_INIT_FAULT(1L shl 23, "Сбой инициализации индикатора"),
-    BLUETOOTH_INIT_FAULT(1L shl 24, "Сбой инициализации Bluetooth на контроллере"),
-    BLUETOOTH_SET_POWER_FAULT(1L shl 25, "Ошибка настройки мощности Bluetooth"),
-    BLUETOOTH_SET_MTU_FAULT(1L shl 26, "Ошибка настройки MTU Bluetooth"),
-    BLUETOOTH_CONNECTED_FAULT(1L shl 27, "Сбой соединения Bluetooth");
+    SERVO_INIT_ERROR(1L shl 1, R.string.error_servo_init),
+    SERVO_COMMS_ERROR(1L shl 2, R.string.error_servo_comms),
+    SERVO_PROTOCOL_ERROR(1L shl 3, R.string.error_servo_protocol),
+    SERVO_CHECKSUM_ERROR(1L shl 4, R.string.error_servo_checksum),
+    SERVO_READ_ERROR(1L shl 5, R.string.error_servo_read),
+    SERVO_WRITE_ERROR(1L shl 6, R.string.error_servo_write),
+    SERVO_MODE_ERROR(1L shl 7, R.string.error_servo_mode),
+    SERVO_SPEED_ERROR(1L shl 8, R.string.error_servo_speed),
+    SERVO_POSITION_ERROR(1L shl 9, R.string.error_servo_position),
+    SERVO_CURRENT_ERROR(1L shl 10, R.string.error_servo_current),
+    SERVO_TORQUE_ERROR(1L shl 11, R.string.error_servo_torque),
+    SERVO_OVERCURRENT(1L shl 12, R.string.error_servo_overcurrent),
+    SERVO_OVERTEMP(1L shl 13, R.string.error_servo_overtemp),
+    SERVO_CALIBRATE_ERROR(1L shl 14, R.string.error_servo_calibrate),
+    SERVO_POWER_FAIL(1L shl 15, R.string.error_servo_power_fail),
+
+    ACCELERATOR_INIT_FAULT(1L shl 16, R.string.error_accel_init),
+    ACCELERATOR_CALIBRATE_FAULT(1L shl 17, R.string.error_accel_calibrate),
+    ACCELERATOR_READ_FAULT(1L shl 18, R.string.error_accel_read),
+    ACCELERATOR_MISMATCH(1L shl 19, R.string.error_accel_mismatch),
+    BUTTON_INIT_FAULT(1L shl 20, R.string.error_button_init),
+    BUTTON_READ_FAULT(1L shl 21, R.string.error_button_read),
+    ECU_INIT_FAULT(1L shl 22, R.string.error_ecu_init),
+    INDICATOR_INIT_FAULT(1L shl 23, R.string.error_indicator_init),
+    BLUETOOTH_INIT_FAULT(1L shl 24, R.string.error_bluetooth_init),
+    BLUETOOTH_SET_POWER_FAULT(1L shl 25, R.string.error_bluetooth_power),
+    BLUETOOTH_SET_MTU_FAULT(1L shl 26, R.string.error_bluetooth_mtu),
+    BLUETOOTH_CONNECTED_FAULT(1L shl 27, R.string.error_bluetooth_connected);
 
     companion object {
         fun parseErrors(errorsMask: Long): List<SystemError> {

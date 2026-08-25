@@ -1,3 +1,46 @@
 <resources>
     <string name="app_name">ETCU</string>
+
+    <!-- BLE Connection States -->
+    <string name="ble_state_disconnected">Disconnected</string>
+    <string name="ble_state_connecting">Connecting to %s…</string>
+    <string name="ble_state_services_discovered">Services discovered. Checking characteristics…</string>
+    <string name="ble_state_error_protocol">Error: Device does not support ETCU protocol</string>
+    <string name="ble_state_bluetooth_off">Bluetooth is off or unavailable</string>
+    <string name="ble_state_invalid_mac">Invalid MAC address</string>
+    <string name="ble_state_scanning">Scanning…</string>
+
+    <!-- System Errors -->
+    <string name="error_guard_lock">Guard Lock active</string>
+    <string name="error_servo_init">Servo initialization error</string>
+    <string name="error_servo_comms">Servo communication error</string>
+    <string name="error_servo_protocol">Servo protocol error</string>
+    <string name="error_servo_checksum">Servo checksum error</string>
+    <string name="error_servo_read">Servo data read error</string>
+    <string name="error_servo_write">Servo data write error</string>
+    <string name="error_servo_mode">Invalid servo operating mode</string>
+    <string name="error_servo_speed">Servo speed error</string>
+    <string name="error_servo_position">Servo positioning error</string>
+    <string name="error_servo_current">Servo current error</string>
+    <string name="error_servo_torque">Servo torque error</string>
+    <string name="error_servo_overcurrent">Servo overcurrent</string>
+    <string name="error_servo_overtemp">Servo overheating</string>
+    <string name="error_servo_calibrate">Servo calibration error</string>
+    <string name="error_servo_power_fail">Servo power failure</string>
+    <string name="error_accel_init">Accelerator initialization fault</string>
+    <string name="error_accel_calibrate">Accelerator calibration fault</string>
+    <string name="error_accel_read">Accelerator sensor read fault</string>
+    <string name="error_accel_mismatch">Accelerator channels mismatch</string>
+    <string name="error_button_init">Button initialization fault</string>
+    <string name="error_button_read">Button state read fault</string>
+    <string name="error_ecu_init">ECU initialization fault</string>
+    <string name="error_indicator_init">Indicator initialization fault</string>
+    <string name="error_bluetooth_init">Bluetooth initialization fault on controller</string>
+    <string name="error_bluetooth_power">Bluetooth power setting error</string>
+    <string name="error_bluetooth_mtu">Bluetooth MTU setting error</string>
+    <string name="error_bluetooth_connected">Bluetooth connection fault</string>
+
+    <!-- OTA -->
+    <string name="ota_error_no_release">Release not found or .bin file missing</string>
+    <string name="ota_error_download">Firmware download error</string>
 </resources>

@@ -7,8 +7,12 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothProfile
 
+import android.content.Context
+import by.jadjer.etcu.R
+
 @SuppressLint("MissingPermission")
 class BleConnectionHandler(
+    private val context: Context,
     private val dataParser: BleDataParser,
     private val onConnectionStateChange: (String, Boolean) -> Unit,
     private val onTelemetryUpdate: (by.jadjer.etcu.domain.model.SystemTelemetry) -> Unit,
@@ -23,7 +27,7 @@ class BleConnectionHandler(
                 onConnectionStateChange("Подключено. Поиск служб...", false)
                 gatt.discoverServices()
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                onConnectionStateChange("Отключено", false)
+                onConnectionStateChange(context.getString(R.string.ble_state_disconnected), false)
                 gatt.close()
             }
         } else {
