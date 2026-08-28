@@ -7,7 +7,6 @@ data class SystemTelemetry(
     val ecu: EcuTelemetry = EcuTelemetry(),
     val servo: ServoTelemetry = ServoTelemetry(),
     val acceleratorPosition: Int = 0,
-    val acceleratorOffset: Int = 0,
     val throttlePosition: Int = 0,
     val targetSpeed: Int = 0,
 

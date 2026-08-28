@@ -58,6 +58,7 @@ fun MainScreen(viewModel: MainViewModel) {
         if (savedMac != null) {
             ConnectingStubScreen(
                 connectionStatus = connectionStatus,
+                onRetryClick = { viewModel.retryConnection() },
                 onResetClick = { viewModel.clearLastMac() }
             )
         } else {
@@ -94,7 +95,7 @@ private fun MainScreenContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("ETCU Контроллер") },
+                title = { Text("ETCU") },
                 actions = {
                     Text(
                         text = connectionStatus,

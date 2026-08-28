@@ -20,6 +20,10 @@ class MainViewModel(
         bleRepository.clearLastMac()
     }
 
+    fun retryConnection() {
+        bleRepository.autoConnect()
+    }
+
     class Factory(private val app: ETCUApplication) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {

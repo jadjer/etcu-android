@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 interface BleRepository {
     val connectionState: StateFlow<String>
     val isConnected: StateFlow<Boolean>
+    val controlData: StateFlow<ControlData>
     val telemetry: StateFlow<SystemTelemetry>
     val systemInfo: StateFlow<SystemInfo>
     val discoveredDevices: StateFlow<List<DiscoveredDevice>>
@@ -19,7 +20,6 @@ interface BleRepository {
     fun disconnect()
     fun autoConnect()
     fun clearLastMac()
-    fun getPairedDevices(): List<DiscoveredDevice>
-    fun sendControlData(data: BleControlData)
+    fun sendControlData(data: ControlData)
     fun sendOtaChunk(chunk: OtaChunk)
 }

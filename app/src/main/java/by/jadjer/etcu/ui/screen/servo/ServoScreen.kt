@@ -45,12 +45,6 @@ fun ServoScreenContent(telemetry: ServoTelemetry) {
         )
         
         TelemetryRow(
-            label = "Нагрузка",
-            value = telemetry.load.toString(),
-            unit = "%"
-        )
-        
-        TelemetryRow(
             label = "Ток",
             value = telemetry.current.toString(),
             unit = "мА",
@@ -87,7 +81,6 @@ fun ServoScreenPreview() {
             telemetry = ServoTelemetry(
                 isConnected = true,
                 position = 512,
-                load = 25,
                 current = 450,
                 voltage = 12,
                 temperature = 38,

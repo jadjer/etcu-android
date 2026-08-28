@@ -4,15 +4,25 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import by.jadjer.etcu.ETCUApplication
-import by.jadjer.etcu.domain.model.BleControlData
+import by.jadjer.etcu.domain.model.ControlData
 import by.jadjer.etcu.domain.model.SystemInfo
 import by.jadjer.etcu.domain.repository.BleRepository
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 class SettingsViewModel(private val repository: BleRepository) : ViewModel() {
 
-    private val _controlData = MutableStateFlow(BleControlData())
-    val controlData: StateFlow<BleControlData> = _controlData
+    private val _controlData = MutableStateFlow(ControlData())
+    val controlData: StateFlow<ControlData> = _controlData.asStateFlow()
 
     val systemInfo: StateFlow<SystemInfo> = repository.systemInfo
         .stateIn(
@@ -20,6 +30,12 @@ class SettingsViewModel(private val repository: BleRepository) : ViewModel() {
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = SystemInfo()
         )
+
+    init {
+        repository.controlData
+            .onEach { _controlData.value = it }
+            .launchIn(viewModelScope)
+    }
     
     fun disconnect() {
         repository.disconnect()
@@ -30,14 +46,32 @@ class SettingsViewModel(private val repository: BleRepository) : ViewModel() {
         repository.disconnect()
     }
 
-    fun updateSyncEnabled(enabled: Boolean) {
-        _controlData.value = _controlData.value.copy(syncEnabled = enabled)
-        repository.sendControlData(_controlData.value)
+    private var updateJob: Job? = null
+
+    fun updateAccRange(min: Int, max: Int) {
+        val updated = _controlData.value.copy(
+            accMin = min,
+            accMax = max,
+        )
+        _controlData.value = updated
+        scheduleUpdate(updated)
     }
 
-    fun updateAcceleratorOffset(offset: Int) {
-        _controlData.value = _controlData.value.copy(acceleratorOffset = offset)
-        repository.sendControlData(_controlData.value)
+    fun updateServoRange(min: Int, max: Int) {
+        val updated = _controlData.value.copy(
+            servoMin = min,
+            servoMax = max,
+        )
+        _controlData.value = updated
+        scheduleUpdate(updated)
+    }
+
+    private fun scheduleUpdate(data: ControlData) {
+        updateJob?.cancel()
+        updateJob = viewModelScope.launch {
+            delay(100.milliseconds) // Задержка 100мс перед отправкой
+            repository.sendControlData(data)
+        }
     }
 
     class Factory(private val app: ETCUApplication) : ViewModelProvider.Factory {

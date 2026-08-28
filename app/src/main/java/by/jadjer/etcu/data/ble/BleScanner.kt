@@ -13,17 +13,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.*
+import kotlin.math.pow
 
 @SuppressLint("MissingPermission")
 class BleScanner(private val bluetoothAdapter: BluetoothAdapter?) {
-
-    private val scannerScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private val _scannerScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     private val _discoveredDevices = MutableStateFlow<Map<String, DiscoveredDevice>>(emptyMap())
     val discoveredDevices: StateFlow<List<DiscoveredDevice>> = _discoveredDevices
         .map { it.values.toList() }
         .stateIn(
-            scope = scannerScope,
+            scope = _scannerScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
@@ -51,8 +51,8 @@ class BleScanner(private val bluetoothAdapter: BluetoothAdapter?) {
 
     private fun calculateDistance(rssi: Int): Double {
         if (rssi == 0) return -1.0
-        val txPower = -59 
-        return Math.pow(10.0, (txPower - rssi) / (10.0 * 2.0))
+        val txPower = -59
+        return 10.0.pow((txPower - rssi) / (10.0 * 2.0))
     }
 
     fun startScan() {
@@ -76,15 +76,6 @@ class BleScanner(private val bluetoothAdapter: BluetoothAdapter?) {
         if (_isScanning.value) {
             _isScanning.value = false
             bluetoothAdapter?.bluetoothLeScanner?.stopScan(scanCallback)
-        }
-    }
-
-    fun getPairedDevices(): List<BluetoothDevice> {
-        return try {
-            if (bluetoothAdapter?.isEnabled != true) return emptyList()
-            bluetoothAdapter.bondedDevices.toList()
-        } catch (_: SecurityException) {
-            emptyList()
         }
     }
 }

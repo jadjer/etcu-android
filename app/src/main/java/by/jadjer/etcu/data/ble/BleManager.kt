@@ -13,14 +13,21 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import by.jadjer.etcu.R
 import by.jadjer.etcu.data.local.BlePreferenceManager
-import by.jadjer.etcu.domain.model.BleControlData
+import by.jadjer.etcu.domain.model.ControlData
 import by.jadjer.etcu.domain.model.OtaChunk
 import by.jadjer.etcu.domain.model.SystemInfo
 import by.jadjer.etcu.domain.model.SystemTelemetry
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import kotlin.time.Duration.Companion.milliseconds
 
 @SuppressLint("MissingPermission")
 class BleManager(
@@ -43,6 +50,9 @@ class BleManager(
     private val _isConnected = MutableStateFlow(false)
     val isConnected: StateFlow<Boolean> = _isConnected
 
+    private val _controlData = MutableStateFlow(ControlData())
+    val controlData: StateFlow<ControlData> = _controlData
+
     private val _telemetry = MutableStateFlow(SystemTelemetry())
     val telemetry: StateFlow<SystemTelemetry> = _telemetry
 
@@ -55,33 +65,45 @@ class BleManager(
     private val _savedMac = MutableStateFlow<String?>(preferenceManager.getLastMac())
     val savedMac: StateFlow<String?> = _savedMac
 
+    private val managerScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var isManualDisconnect = false
+    private var reconnectJob: Job? = null
+
     private val gattCallback = BleConnectionHandler(
         context = context,
         dataParser = dataParser,
         onConnectionStateChange = { state, connected ->
             _connectionState.value = state
             _isConnected.value = connected
-            if (!connected && state == context.getString(R.string.ble_state_disconnected)) bluetoothGatt =
-                null
+            if (!connected) {
+                bluetoothGatt = null
+                if (!isManualDisconnect) {
+                    startAutoReconnect()
+                }
+            }
         },
+        onControlDataUpdate = { _controlData.value = it },
         onTelemetryUpdate = { _telemetry.value = it },
         onSystemInfoUpdate = { _systemInfo.value = it },
         onOtaFeedback = { _otaFeedback.value = it },
-        onServicesDiscovered = { handleServicesDiscovered(it) }
+        onServicesDiscovered = { handleServicesDiscovered(it) },
+        onMtuChanged = { gatt ->
+            if (!subscribeToCharacteristics(gatt)) {
+                _connectionState.value = context.getString(R.string.ble_state_error_protocol)
+                disconnect()
+            }
+        }
     )
 
     private fun handleServicesDiscovered(gatt: BluetoothGatt) {
         _connectionState.value = context.getString(R.string.ble_state_services_discovered)
-        if (subscribeToCharacteristics(gatt)) {
-            val mac = gatt.device.address
-            preferenceManager.saveLastMac(mac)
-            _savedMac.value = mac
-            _isConnected.value = true
-            gatt.requestMtu(BleConstants.DEFAULT_MTU)
-        } else {
-            _connectionState.value = context.getString(R.string.ble_state_error_protocol)
-            disconnect()
-        }
+
+        val mac = gatt.device.address
+        preferenceManager.saveLastMac(mac)
+        _savedMac.value = mac
+
+        // Запрос MTU (никаких других BLE вызовов тут быть не должно!)
+        gatt.requestMtu(BleConstants.DEFAULT_MTU)
     }
 
     fun connect(macAddress: String) {
@@ -89,6 +111,12 @@ class BleManager(
             _connectionState.value = context.getString(R.string.ble_state_bluetooth_off)
             return
         }
+
+        reconnectJob?.cancel()
+        isManualDisconnect = false
+
+        bluetoothGatt?.close()
+        bluetoothGatt = null
 
         try {
             val device = bluetoothAdapter.getRemoteDevice(macAddress)
@@ -114,14 +142,30 @@ class BleManager(
     }
 
     fun disconnect() {
+        isManualDisconnect = true
+        reconnectJob?.cancel()
         bluetoothGatt?.disconnect()
     }
 
-    fun writeControlData(data: BleControlData) {
+    private fun startAutoReconnect() {
+        val mac = preferenceManager.getLastMac() ?: return
+        reconnectJob?.cancel()
+        reconnectJob = managerScope.launch {
+            delay(3000.milliseconds)
+            if (!_isConnected.value) {
+                connect(mac)
+            }
+        }
+    }
+
+    fun writeControlData(data: ControlData) {
         val characteristic = getCharacteristic(BleConstants.CONTROL_UUID) ?: return
-        val buffer = ByteBuffer.allocate(3).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.put(if (data.syncEnabled) 1.toByte() else 0.toByte())
-        buffer.putShort(data.acceleratorOffset.toShort())
+
+        val buffer = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN)
+        buffer.putShort(data.accMin.toShort())
+        buffer.putShort(data.accMax.toShort())
+        buffer.putShort(data.servoMin.toShort())
+        buffer.putShort(data.servoMax.toShort())
 
         bluetoothGatt?.writeCharacteristic(
             characteristic,
@@ -155,21 +199,16 @@ class BleManager(
 
     private fun subscribeToCharacteristics(gatt: BluetoothGatt): Boolean {
         val service = gatt.getService(BleConstants.SERVICE_UUID)
-        val telemetryChar = service?.getCharacteristic(BleConstants.TELEMETRY_UUID)
-        val systemInfoChar = service?.getCharacteristic(BleConstants.SYSTEM_INFO_UUID)
+        val telemetryChar = service?.getCharacteristic(BleConstants.TELEMETRY_UUID) ?: return false
 
-        if (telemetryChar == null) return false
-
+        // Локальное разрешение на прием уведомлений в Android
         gatt.setCharacteristicNotification(telemetryChar, true)
-        telemetryChar.getDescriptor(BleConstants.DESCRIPTION_UUID)?.let {
-            gatt.writeDescriptor(it, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
-        }
 
-        if (systemInfoChar != null) {
-            gatt.readCharacteristic(systemInfoChar)
-        }
+        val descriptor = telemetryChar.getDescriptor(BleConstants.DESCRIPTION_UUID) ?: return false
 
-        return true
+        // На API 35 пишем дескриптор напрямую новым методом
+        val statusCode = gatt.writeDescriptor(descriptor, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
+        return statusCode == BluetoothGatt.GATT_SUCCESS
     }
 
     fun autoConnect() {

@@ -1,5 +1,6 @@
 package by.jadjer.etcu.data.ble
 
+import by.jadjer.etcu.domain.model.ControlData
 import by.jadjer.etcu.domain.model.EcuTelemetry
 import by.jadjer.etcu.domain.model.ServoTelemetry
 import by.jadjer.etcu.domain.model.SystemError
@@ -11,11 +12,29 @@ import java.nio.ByteOrder
 
 class BleDataParser {
 
+    fun parseControlData(bytes: ByteArray): ControlData {
+        if (bytes.size < 8) return ControlData()
+
+        val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
+
+        val accMin = buffer.short.toInt() and 0xFFFF
+        val accMax = buffer.short.toInt() and 0xFFFF
+        val servoMin = buffer.short.toInt() and 0xFFFF
+        val servoMax = buffer.short.toInt() and 0xFFFF
+
+        return ControlData(
+            accMin = accMin,
+            accMax = accMax,
+            servoMin = servoMin,
+            servoMax = servoMax,
+        )
+    }
+
     fun parseSystemInfo(bytes: ByteArray): SystemInfo {
         if (bytes.size < 48) return SystemInfo()
 
-        val boardVersion = String(bytes, 0, 16, Charsets.UTF_8).trim { it <= '\u0000' }
-        val buildDate = String(bytes, 16, 16, Charsets.UTF_8).trim { it <= '\u0000' }
+        val buildDate = String(bytes, 0, 16, Charsets.UTF_8).trim { it <= '\u0000' }
+        val boardVersion = String(bytes, 16, 16, Charsets.UTF_8).trim { it <= '\u0000' }
         val firmwareVersion = String(bytes, 32, 16, Charsets.UTF_8).trim { it <= '\u0000' }
 
         return SystemInfo(
@@ -25,9 +44,8 @@ class BleDataParser {
         )
     }
 
-    fun parseTelemetry(bytes: ByteArray): SystemTelemetry {
-        // SystemTelemetry size = 37 bytes (1+1 + 9 + 13 + 2+2+2+2 + 1 + 4)
-        if (bytes.size < 37) return SystemTelemetry()
+    fun parseSystemTelemetry(bytes: ByteArray): SystemTelemetry {
+        if (bytes.size < 30) return SystemTelemetry()
 
         val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
 
@@ -42,12 +60,12 @@ class BleDataParser {
         val servo = parseServoTelemetry(buffer)
 
         // 4. SystemTelemetry Remaining fields
-        val accelPos = buffer.short.toInt() and 0xFFFF
-        val accelOffset = buffer.short.toInt() and 0xFFFF
+        val targetSpeed = buffer.get().toInt() and 0xFF
         val throttlePos = buffer.short.toInt() and 0xFFFF
-        val targetSpeed = buffer.short.toInt() and 0xFFFF
+        val accelPos = buffer.short.toInt() and 0xFFFF
 
         val systemState = SystemState.fromByte(buffer.get())
+
         val rawErrorsMask = buffer.int.toLong() and 0xFFFFFFFFL
         val activeErrorsList = SystemError.parseErrors(rawErrorsMask)
 
@@ -57,7 +75,6 @@ class BleDataParser {
             ecu = ecu,
             servo = servo,
             acceleratorPosition = accelPos,
-            acceleratorOffset = accelOffset,
             throttlePosition = throttlePos,
             targetSpeed = targetSpeed,
             systemState = systemState,
@@ -65,34 +82,13 @@ class BleDataParser {
         )
     }
 
-    private fun parseServoTelemetry(buffer: ByteBuffer): ServoTelemetry {
-        val isConnected = buffer.get().toInt() != 0
-        val isMoved = buffer.get().toInt() != 0
-        val load = buffer.short.toInt() and 0xFFFF
-        val speed = buffer.short.toInt() and 0xFFFF
-        val current = buffer.short.toInt() and 0xFFFF
-        val voltage = buffer.get().toInt() and 0xFF
-        val position = buffer.short.toInt() and 0xFFFF // uint16_t in new struct
-        val temperature = buffer.short.toInt() and 0xFFFF
-
-        return ServoTelemetry(
-            isConnected = isConnected,
-            isMoved = isMoved,
-            load = load,
-            speed = speed,
-            current = current,
-            voltage = voltage,
-            position = position,
-            temperature = temperature
-        )
-    }
-
     private fun parseEcuTelemetry(buffer: ByteBuffer): EcuTelemetry {
         val isConnected = buffer.get().toInt() != 0
         val isStarted = buffer.get().toInt() != 0
         val isClutchEnabled = buffer.get().toInt() != 0
+
         val rpm = buffer.short.toInt() and 0xFFFF
-        val speed = buffer.short.toInt() and 0xFFFF
+        val speed = buffer.get().toInt() and 0xFF
         val tps = buffer.short.toInt() and 0xFFFF
 
         return EcuTelemetry(
@@ -104,6 +100,31 @@ class BleDataParser {
             tps = tps,
         )
     }
+
+    private fun parseServoTelemetry(buffer: ByteBuffer): ServoTelemetry {
+        val isConnected = buffer.get().toInt() != 0
+        val isEnabled = buffer.get().toInt() != 0
+        val isMoved = buffer.get().toInt() != 0
+
+        val speed = buffer.get().toInt() and 0xFF
+        val voltage = buffer.get().toInt() and 0xFF
+        val current = buffer.short.toInt() and 0xFFFF
+        val position = buffer.short.toInt() and 0xFFFF
+        val temperature = buffer.get().toInt() and 0xFF
+
+        return ServoTelemetry(
+            isConnected = isConnected,
+            isEnabled = isEnabled,
+            isMoved = isMoved,
+            speed = speed,
+            current = current,
+            voltage = voltage,
+            position = position,
+            temperature = temperature
+        )
+    }
+
+
 
     fun parseOtaFeedback(bytes: ByteArray): Int? {
         return if (bytes.size >= 2) {

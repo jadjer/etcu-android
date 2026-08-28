@@ -1,6 +1,6 @@
 package by.jadjer.etcu.data.network
 
-import by.jadjer.etcu.data.model.GitHubReleaseDto
+import by.jadjer.etcu.data.model.GitHubReleaseDTO
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.GET
@@ -13,7 +13,7 @@ interface GitHubService {
     suspend fun getLatestRelease(
         @Path("owner") owner: String,
         @Path("repo") repo: String
-    ): Response<GitHubReleaseDto>
+    ): Response<GitHubReleaseDTO>
 
     @Streaming
     @GET

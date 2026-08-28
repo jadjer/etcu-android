@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ConnectingStubScreen(
     connectionStatus: String,
+    onRetryClick: () -> Unit,
     onResetClick: () -> Unit
 ) {
     Box(
@@ -48,8 +49,18 @@ fun ConnectingStubScreen(
             
             Spacer(modifier = Modifier.height(32.dp))
             
+            Button(
+                onClick = onRetryClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Повторить попытку")
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
             OutlinedButton(
                 onClick = onResetClick,
+                modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.error
                 )
@@ -66,6 +77,7 @@ fun ConnectingStubScreenPreview() {
     MaterialTheme {
         ConnectingStubScreen(
             connectionStatus = "Соединение с AA:BB:CC:DD:EE:FF...",
+            onRetryClick = {},
             onResetClick = {}
         )
     }
