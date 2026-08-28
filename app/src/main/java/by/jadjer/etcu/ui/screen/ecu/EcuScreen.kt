@@ -12,8 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.EcuTelemetry
 import by.jadjer.etcu.ui.component.StatusIndicator
 import by.jadjer.etcu.ui.component.TelemetryRow
@@ -33,45 +35,45 @@ fun EcuScreenContent(telemetry: EcuTelemetry) {
             .verticalScroll(rememberScrollState())
     ) {
         StatusIndicator(
-            label = "Связь с ЭБУ",
+            label = stringResource(R.string.ecu_conn_status),
             isActive = telemetry.isConnected,
-            activeText = "Есть связь",
-            inactiveText = "Нет связи"
+            activeText = stringResource(R.string.ecu_connected),
+            inactiveText = stringResource(R.string.ecu_disconnected)
         )
         
         TelemetryRow(
-            label = "Обороты двигателя",
+            label = stringResource(R.string.ecu_rpm),
             value = telemetry.rpm.toString(),
             unit = "RPM",
             icon = Icons.Default.Timer
         )
         
         TelemetryRow(
-            label = "Скорость автомобиля",
+            label = stringResource(R.string.ecu_speed),
             value = telemetry.speed.toString(),
             unit = "км/ч",
             icon = Icons.Default.Speed
         )
         
         TelemetryRow(
-            label = "Положение TPS",
+            label = stringResource(R.string.ecu_tps),
             value = telemetry.tps.toString(),
             unit = "/ 1000",
             icon = Icons.Default.DirectionsCar
         )
         
         StatusIndicator(
-            label = "Двигатель запущен",
+            label = stringResource(R.string.ecu_engine_status),
             isActive = telemetry.isStarted,
-            activeText = "Запущен",
-            inactiveText = "Остановлен"
+            activeText = stringResource(R.string.ecu_engine_started),
+            inactiveText = stringResource(R.string.ecu_engine_stopped)
         )
         
         StatusIndicator(
-            label = "Статус сцепления (ECU)",
+            label = stringResource(R.string.ecu_clutch_status),
             isActive = telemetry.isClutchEnabled,
-            activeText = "Нажато",
-            inactiveText = "Отпущено"
+            activeText = stringResource(R.string.ecu_clutch_pressed),
+            inactiveText = stringResource(R.string.ecu_clutch_released)
         )
     }
 }

@@ -11,8 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.ServoTelemetry
 import by.jadjer.etcu.ui.component.StatusIndicator
 import by.jadjer.etcu.ui.component.TelemetryRow
@@ -32,43 +34,43 @@ fun ServoScreenContent(telemetry: ServoTelemetry) {
             .verticalScroll(rememberScrollState())
     ) {
         StatusIndicator(
-            label = "Связь с приводом",
+            label = stringResource(R.string.servo_conn_status),
             isActive = telemetry.isConnected,
-            activeText = "Есть связь",
-            inactiveText = "Нет связи"
+            activeText = stringResource(R.string.servo_connected),
+            inactiveText = stringResource(R.string.servo_disconnected)
         )
         
         TelemetryRow(
-            label = "Позиция",
+            label = stringResource(R.string.servo_position),
             value = telemetry.position.toString(),
             unit = "/ 1024"
         )
         
         TelemetryRow(
-            label = "Ток",
+            label = stringResource(R.string.servo_current),
             value = telemetry.current.toString(),
             unit = "мА",
             icon = Icons.Default.Bolt
         )
         
         TelemetryRow(
-            label = "Напряжение",
+            label = stringResource(R.string.servo_voltage),
             value = telemetry.voltage.toString(),
             unit = "В"
         )
         
         TelemetryRow(
-            label = "Температура",
+            label = stringResource(R.string.servo_temp),
             value = telemetry.temperature.toString(),
             unit = "°C",
             icon = Icons.Default.DeviceThermostat
         )
         
         StatusIndicator(
-            label = "Движение",
+            label = stringResource(R.string.servo_motion_status),
             isActive = telemetry.isMoved,
-            activeText = "В движении",
-            inactiveText = "Статичен"
+            activeText = stringResource(R.string.servo_moving),
+            inactiveText = stringResource(R.string.servo_static)
         )
     }
 }

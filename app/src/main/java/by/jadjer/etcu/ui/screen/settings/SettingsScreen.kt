@@ -21,8 +21,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.ControlData
 import by.jadjer.etcu.domain.model.SystemInfo
 import by.jadjer.etcu.ui.component.TelemetryRow
@@ -73,32 +75,32 @@ fun SettingsScreenContent(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text("Информация об устройстве", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.settings_device_info), style = MaterialTheme.typography.titleLarge)
 
         TelemetryRow(
-            label = "Версия платы",
+            label = stringResource(R.string.settings_board_version),
             value = systemInfo.boardVersion
         )
 
         TelemetryRow(
-            label = "Дата прошивки",
+            label = stringResource(R.string.settings_build_date),
             value = systemInfo.buildDate
         )
 
         TelemetryRow(
-            label = "Версия прошивки",
+            label = stringResource(R.string.settings_firmware_version),
             value = systemInfo.firmwareVersion
         )
 
         HorizontalDivider()
 
-        Text("Управление", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.settings_control), style = MaterialTheme.typography.titleLarge)
 
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text("Диапазон акселератора: от ${controlData.accMin} до ${controlData.accMax}")
+                Text(stringResource(R.string.settings_accel_range, controlData.accMin, controlData.accMax))
 
                 RangeSlider(
                     value = controlData.accMin.toFloat()..controlData.accMax.toFloat(),
@@ -111,7 +113,7 @@ fun SettingsScreenContent(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text("Диапазон серво: от ${controlData.servoMin} до ${controlData.servoMax}")
+                Text(stringResource(R.string.settings_servo_range, controlData.servoMin, controlData.servoMax))
 
                 RangeSlider(
                     value = controlData.servoMin.toFloat()..controlData.servoMax.toFloat(),
@@ -126,7 +128,7 @@ fun SettingsScreenContent(
 
         HorizontalDivider()
 
-        Text("Настройки устройства", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.settings_device_settings), style = MaterialTheme.typography.titleLarge)
 
         Button(
             onClick = onDisconnectClick,
@@ -135,7 +137,7 @@ fun SettingsScreenContent(
                 containerColor = MaterialTheme.colorScheme.secondary
             )
         ) {
-            Text("Отключить устройство")
+            Text(stringResource(R.string.btn_disconnect))
         }
 
         Button(
@@ -145,21 +147,21 @@ fun SettingsScreenContent(
                 containerColor = MaterialTheme.colorScheme.error
             )
         ) {
-            Text("Забыть устройство")
+            Text(stringResource(R.string.btn_forget))
         }
 
         OutlinedButton(
             onClick = { /* TODO */ },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Запустить калибровку")
+            Text(stringResource(R.string.btn_calibrate))
         }
 
         OutlinedButton(
             onClick = onOtaClick,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Проверить обновления")
+            Text(stringResource(R.string.btn_check_updates))
         }
     }
 }

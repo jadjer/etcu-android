@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothProfile
-
 import android.content.Context
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.ControlData
@@ -23,20 +22,20 @@ class BleConnectionHandler(
     private val onSystemInfoUpdate: (SystemInfo) -> Unit,
     private val onOtaFeedback: (Int) -> Unit,
     private val onServicesDiscovered: (BluetoothGatt) -> Unit,
-    private val onMtuChanged: (BluetoothGatt) -> Unit // Новый колбек для API 35
+    private val onMtuChanged: (BluetoothGatt) -> Unit
 ) : BluetoothGattCallback() {
 
     override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
         if (status == BluetoothGatt.GATT_SUCCESS) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                onConnectionStateChange("Подключено. Поиск служб...", false)
+                onConnectionStateChange(context.getString(R.string.ble_state_connected_discovering), false)
                 gatt.discoverServices()
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 onConnectionStateChange(context.getString(R.string.ble_state_disconnected), false)
                 gatt.close()
             }
         } else {
-            onConnectionStateChange("Ошибка подключения: $status", false)
+            onConnectionStateChange(context.getString(R.string.ble_error_connection, status), false)
             gatt.close()
         }
     }
@@ -45,42 +44,45 @@ class BleConnectionHandler(
         if (status == BluetoothGatt.GATT_SUCCESS) {
             onServicesDiscovered(gatt)
         } else {
-            onConnectionStateChange("Ошибка поиска служб: $status", false)
+            onConnectionStateChange(context.getString(R.string.ble_error_services, status), false)
         }
     }
 
-    // Шаг 2: Вызывается операционной системой, когда MTU успешно изменен
     override fun onMtuChanged(gatt: BluetoothGatt, mtu: Int, status: Int) {
         if (status == BluetoothGatt.GATT_SUCCESS) {
             onMtuChanged(gatt)
         } else {
-            onConnectionStateChange("Ошибка согласования MTU: $status", false)
+            onConnectionStateChange(context.getString(R.string.ble_error_mtu, status), false)
         }
     }
 
-    // Шаг 4: Вызывается, когда дескриптор подписки записан. Линия СВОБОДНА.
-    override fun onDescriptorWrite(gatt: BluetoothGatt, descriptor: BluetoothGattDescriptor, status: Int) {
+    override fun onDescriptorWrite(
+        gatt: BluetoothGatt,
+        descriptor: BluetoothGattDescriptor,
+        status: Int
+    ) {
         if (status == BluetoothGatt.GATT_SUCCESS) {
-            onConnectionStateChange("Подписка подтверждена. Чтение SystemInfo...", false)
+            onConnectionStateChange(context.getString(R.string.ble_state_subscribed_reading_info), false)
 
             val service = gatt.getService(BleConstants.SERVICE_UUID)
             val systemInfoChar = service?.getCharacteristic(BleConstants.SYSTEM_INFO_UUID)
 
             if (systemInfoChar != null) {
-                // Прямой вызов без проверок Build.VERSION — мы на API 35!
                 val success = gatt.readCharacteristic(systemInfoChar)
                 if (!success) {
-                    onConnectionStateChange("Ошибка: Стек Bluetooth отклонил чтение SystemInfo", false)
+                    onConnectionStateChange(
+                        context.getString(R.string.ble_error_read_info),
+                        false
+                    )
                 }
             } else {
-                onConnectionStateChange("Характеристика SystemInfo не найдена", false)
+                onConnectionStateChange(context.getString(R.string.ble_error_info_not_found), false)
             }
         } else {
-            onConnectionStateChange("Ошибка записи дескриптора: $status", false)
+            onConnectionStateChange(context.getString(R.string.ble_error_descriptor_write, status), false)
         }
     }
 
-    // Шаг 5: Финал. Данные SystemInfo получены физически.
     override fun onCharacteristicRead(
         gatt: BluetoothGatt,
         characteristic: BluetoothGattCharacteristic,
@@ -92,26 +94,29 @@ class BleConnectionHandler(
                 BleConstants.SYSTEM_INFO_UUID -> {
                     onSystemInfoUpdate(dataParser.parseSystemInfo(value))
 
-                    // Шаг 6: Читаем ControlData
                     val service = gatt.getService(BleConstants.SERVICE_UUID)
                     val controlChar = service?.getCharacteristic(BleConstants.CONTROL_UUID)
                     if (controlChar != null) {
-                        onConnectionStateChange("Чтение настроек...", false)
+                        onConnectionStateChange(context.getString(R.string.ble_state_reading_settings), false)
                         val success = gatt.readCharacteristic(controlChar)
                         if (!success) {
-                            onConnectionStateChange("Устройство готово к работе", true)
+                            onConnectionStateChange(context.getString(R.string.ble_state_ready), true)
                         }
                     } else {
-                        onConnectionStateChange("Устройство готово к работе", true)
+                        onConnectionStateChange(context.getString(R.string.ble_state_ready), true)
                     }
                 }
+
                 BleConstants.CONTROL_UUID -> {
                     onControlDataUpdate(dataParser.parseControlData(value))
-                    onConnectionStateChange("Устройство готово к работе", true)
+                    onConnectionStateChange(context.getString(R.string.ble_state_ready), true)
                 }
             }
         } else {
-            onConnectionStateChange("Ошибка чтения ${characteristic.uuid}: $status", false)
+            onConnectionStateChange(
+                context.getString(R.string.ble_error_read_char, characteristic.uuid.toString(), status),
+                false
+            )
         }
     }
 

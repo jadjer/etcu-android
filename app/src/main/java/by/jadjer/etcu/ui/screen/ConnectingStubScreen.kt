@@ -5,9 +5,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import by.jadjer.etcu.R
 
 @Composable
 fun ConnectingStubScreen(
@@ -41,7 +43,7 @@ fun ConnectingStubScreen(
             Spacer(modifier = Modifier.height(8.dp))
             
             Text(
-                text = "Пытаемся восстановить связь с вашим устройством...",
+                text = stringResource(R.string.connecting_stub_message),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -53,7 +55,7 @@ fun ConnectingStubScreen(
                 onClick = onRetryClick,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Повторить попытку")
+                Text(stringResource(R.string.btn_retry))
             }
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -65,7 +67,7 @@ fun ConnectingStubScreen(
                     contentColor = MaterialTheme.colorScheme.error
                 )
             ) {
-                Text("Сбросить устройство")
+                Text(stringResource(R.string.btn_reset_device))
             }
         }
     }

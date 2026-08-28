@@ -9,6 +9,78 @@
     <string name="ble_state_bluetooth_off">Bluetooth выключен или недоступен</string>
     <string name="ble_state_invalid_mac">Неверный MAC-адрес</string>
     <string name="ble_state_scanning">Поиск…</string>
+    <string name="ble_state_connected_discovering">Подключено. Поиск служб…</string>
+    <string name="ble_state_subscribed_reading_info">Подписка подтверждена. Чтение SystemInfo…</string>
+    <string name="ble_state_reading_settings">Чтение настроек…</string>
+    <string name="ble_state_ready">Устройство готово к работе</string>
+
+    <!-- BLE Errors -->
+    <string name="ble_error_connection">Ошибка подключения: %d</string>
+    <string name="ble_error_services">Ошибка поиска служб: %d</string>
+    <string name="ble_error_mtu">Ошибка согласования MTU: %d</string>
+    <string name="ble_error_read_info">Ошибка: Стек Bluetooth отклонил чтение SystemInfo</string>
+    <string name="ble_error_info_not_found">Характеристика SystemInfo не найдена</string>
+    <string name="ble_error_descriptor_write">Ошибка записи дескриптора: %d</string>
+    <string name="ble_error_read_char">Ошибка чтения %1$s: %2$d</string>
+
+    <!-- Connection Stub -->
+    <string name="connecting_stub_message">Пытаемся восстановить связь с вашим устройством…</string>
+    <string name="btn_retry">Повторить попытку</string>
+    <string name="btn_reset_device">Сбросить устройство</string>
+
+    <!-- Scan Screen -->
+    <string name="scan_title">Выберите устройство</string>
+    <string name="scan_controllers_detected">Обнаруженные контроллеры</string>
+    <string name="scan_not_found">Контроллеры не найдены. Убедитесь, что устройство включено.</string>
+    <string name="btn_bluetooth_settings">Настройки Bluetooth</string>
+    <string name="scan_signal_info">Сигнал: %1$d dBm (≈%2$.1f м)</string>
+
+    <!-- ECU Screen -->
+    <string name="ecu_conn_status">Связь с ЭБУ</string>
+    <string name="ecu_connected">Есть связь</string>
+    <string name="ecu_disconnected">Нет связи</string>
+    <string name="ecu_rpm">Обороты двигателя</string>
+    <string name="ecu_speed">Скорость автомобиля</string>
+    <string name="ecu_tps">Положение TPS</string>
+    <string name="ecu_engine_status">Двигатель запущен</string>
+    <string name="ecu_engine_started">Запущен</string>
+    <string name="ecu_engine_stopped">Остановлен</string>
+    <string name="ecu_clutch_status">Статус сцепления (ECU)</string>
+    <string name="ecu_clutch_pressed">Нажато</string>
+    <string name="ecu_clutch_released">Отпущено</string>
+
+    <!-- Servo Screen -->
+    <string name="servo_conn_status">Связь с приводом</string>
+    <string name="servo_connected">Есть связь</string>
+    <string name="servo_disconnected">Нет связи</string>
+    <string name="servo_position">Позиция</string>
+    <string name="servo_current">Ток</string>
+    <string name="servo_voltage">Напряжение</string>
+    <string name="servo_temp">Температура</string>
+    <string name="servo_motion_status">Движение</string>
+    <string name="servo_moving">В движении</string>
+    <string name="servo_static">Статичен</string>
+
+    <!-- System Screen -->
+    <string name="system_telemetry_title">Текущая телеметрия</string>
+    <string name="system_mode">Режим системы</string>
+    <string name="system_accel">Акселератор</string>
+    <string name="system_throttle_target">Дроссель (цель)</string>
+    <string name="system_guard">Защита (Guard)</string>
+    <string name="system_brake">Тормоз</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_device_info">Информация об устройстве</string>
+    <string name="settings_board_version">Версия платы</string>
+    <string name="settings_build_date">Дата прошивки</string>
+    <string name="settings_firmware_version">Версия прошивки</string>
+    <string name="settings_control">Управление</string>
+    <string name="settings_accel_range">Диапазон акселератора: от %1$d до %2$d</string>
+    <string name="settings_servo_range">Диапазон серво: от %1$d до %2$d</string>
+    <string name="settings_device_settings">Настройки устройства</string>
+    <string name="btn_disconnect">Отключить устройство</string>
+    <string name="btn_forget">Забыть устройство</string>
+    <string name="btn_calibrate">Запустить калибровку</string>
 
     <!-- System Errors -->
     <string name="error_guard_lock">Блокировка защиты (Guard Lock)</string>
@@ -41,6 +113,18 @@
     <string name="error_bluetooth_connected">Сбой соединения Bluetooth</string>
 
     <!-- OTA -->
+    <string name="ota_title">Обновление прошивки</string>
+    <string name="btn_check_updates">Проверить обновления</string>
+    <string name="ota_searching">Поиск новой версии…</string>
+    <string name="ota_update_available">Доступна новая версия: %s</string>
+    <string name="btn_download_install">Скачать и установить</string>
+    <string name="ota_downloading_progress">Скачивание прошивки: %d%%</string>
+    <string name="ota_uploading_progress">Передача прошивки: %d%%</string>
+    <string name="ota_chunk_info">Чанк %1$d из %2$d</string>
+    <string name="ota_success">Обновление успешно завершено!</string>
+    <string name="btn_done">Готово</string>
+    <string name="ota_error_generic">Ошибка: %s</string>
+    <string name="btn_try_again">Попробовать снова</string>
     <string name="ota_error_no_release">Релиз не найден или отсутствует .bin файл</string>
     <string name="ota_error_download">Ошибка скачивания прошивки</string>
 </resources>

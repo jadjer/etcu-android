@@ -14,8 +14,8 @@ import kotlinx.coroutines.launch
 sealed class OtaState {
     object Idle : OtaState()
     object CheckingUpdates : OtaState()
-    data class UpdateAvailable(val version: String, val downloadUrl: String) : OtaState()
-    object Downloading : OtaState()
+    data class UpdateAvailable(val version: String, val downloadUrl: String, val size: Long) : OtaState()
+    data class Downloading(val progress: Float) : OtaState()
     data class Uploading(val progress: Float, val currentChunk: Int, val totalChunks: Int) : OtaState()
     object Success : OtaState()
     data class Error(val message: String) : OtaState()
@@ -62,7 +62,7 @@ class OtaViewModel(
                     val release = result.data
                     val isNewer = currentVersion == null || isVersionNewer(release.version, currentVersion)
                     if (isNewer) {
-                        _state.value = OtaState.UpdateAvailable(release.version, release.downloadUrl)
+                        _state.value = OtaState.UpdateAvailable(release.version, release.downloadUrl, release.size)
                     } else {
                         _state.value = OtaState.Idle
                     }
@@ -78,10 +78,13 @@ class OtaViewModel(
         return newVersion.replace("v", "") != currentVersion.replace("v", "")
     }
 
-    fun startUpdate(downloadUrl: String) {
+    fun startUpdate(downloadUrl: String, expectedSize: Long) {
         viewModelScope.launch {
-            _state.value = OtaState.Downloading
-            when (val result = otaRepository.downloadFirmware(downloadUrl)) {
+            _state.value = OtaState.Downloading(0f)
+            val result = otaRepository.downloadFirmware(downloadUrl, expectedSize) { progress ->
+                _state.value = OtaState.Downloading(progress)
+            }
+            when (result) {
                 is Resource.Success -> {
                     val data = result.data
                     firmwareData = data

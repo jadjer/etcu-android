@@ -9,6 +9,78 @@
     <string name="ble_state_bluetooth_off">Bluetooth выключаны або недаступны</string>
     <string name="ble_state_invalid_mac">Няслушны MAC-адрас</string>
     <string name="ble_state_scanning">Пошук…</string>
+    <string name="ble_state_connected_discovering">Падключана. Пошук службаў…</string>
+    <string name="ble_state_subscribed_reading_info">Падпіска пацверджана. Чытанне SystemInfo…</string>
+    <string name="ble_state_reading_settings">Чытанне налад…</string>
+    <string name="ble_state_ready">Прылада гатова да працы</string>
+
+    <!-- BLE Errors -->
+    <string name="ble_error_connection">Памылка падключэння: %d</string>
+    <string name="ble_error_services">Памылка пошуку службаў: %d</string>
+    <string name="ble_error_mtu">Памылка ўзгаднення MTU: %d</string>
+    <string name="ble_error_read_info">Памылка: Стэк Bluetooth адхіліў чытанне SystemInfo</string>
+    <string name="ble_error_info_not_found">Характарыстыка SystemInfo не знойдзена</string>
+    <string name="ble_error_descriptor_write">Памылка запісу дэскрыптара: %d</string>
+    <string name="ble_error_read_char">Памылка чытання %1$s: %2$d</string>
+
+    <!-- Connection Stub -->
+    <string name="connecting_stub_message">Спрабуем аднавіць сувязь з вашай прыладай…</string>
+    <string name="btn_retry">Паўтарыць спробу</string>
+    <string name="btn_reset_device">Скінуць прыладу</string>
+
+    <!-- Scan Screen -->
+    <string name="scan_title">Выберыце прыладу</string>
+    <string name="scan_controllers_detected">Выяўленыя кантролеры</string>
+    <string name="scan_not_found">Кантролеры не знойдзены. Пераканайцеся, што прылада ўключана.</string>
+    <string name="btn_bluetooth_settings">Налады Bluetooth</string>
+    <string name="scan_signal_info">Сігнал: %1$d dBm (≈%2$.1f м)</string>
+
+    <!-- ECU Screen -->
+    <string name="ecu_conn_status">Сувязь з ЭБУ</string>
+    <string name="ecu_connected">Ёсць сувязь</string>
+    <string name="ecu_disconnected">Няма сувязі</string>
+    <string name="ecu_rpm">Абароты рухавіка</string>
+    <string name="ecu_speed">Хуткасць аўтамабіля</string>
+    <string name="ecu_tps">Палажэнне TPS</string>
+    <string name="ecu_engine_status">Рухавік запушчаны</string>
+    <string name="ecu_engine_started">Запушчаны</string>
+    <string name="ecu_engine_stopped">Спынены</string>
+    <string name="ecu_clutch_status">Статус счэпленага (ECU)</string>
+    <string name="ecu_clutch_pressed">Націснута</string>
+    <string name="ecu_clutch_released">Адпушчана</string>
+
+    <!-- Servo Screen -->
+    <string name="servo_conn_status">Сувязь з прывадам</string>
+    <string name="servo_connected">Ёсць сувязь</string>
+    <string name="servo_disconnected">Няма сувязі</string>
+    <string name="servo_position">Пазіцыя</string>
+    <string name="servo_current">Ток</string>
+    <string name="servo_voltage">Напружанне</string>
+    <string name="servo_temp">Тэмпература</string>
+    <string name="servo_motion_status">Рух</string>
+    <string name="servo_moving">У руху</string>
+    <string name="servo_static">Статычны</string>
+
+    <!-- System Screen -->
+    <string name="system_telemetry_title">Бягучая тэлеметрыя</string>
+    <string name="system_mode">Рэжым сістэмы</string>
+    <string name="system_accel">Акселератар</string>
+    <string name="system_throttle_target">Дросель (мэта)</string>
+    <string name="system_guard">Абарона (Guard)</string>
+    <string name="system_brake">Тормаз</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_device_info">Інфармацыя аб прыладзе</string>
+    <string name="settings_board_version">Версія платы</string>
+    <string name="settings_build_date">Дата прашыўкі</string>
+    <string name="settings_firmware_version">Версія прашыўкі</string>
+    <string name="settings_control">Кіраванне</string>
+    <string name="settings_accel_range">Дыяпазон акселератара: ад %1$d да %2$d</string>
+    <string name="settings_servo_range">Дыяпазон серва: ад %1$d да %2$d</string>
+    <string name="settings_device_settings">Налады прылады</string>
+    <string name="btn_disconnect">Адключыць прыладу</string>
+    <string name="btn_forget">Забыць прыладу</string>
+    <string name="btn_calibrate">Запусціць каліброўку</string>
 
     <!-- System Errors -->
     <string name="error_guard_lock">Блакіроўка абароны (Guard Lock)</string>
@@ -37,10 +109,22 @@
     <string name="error_indicator_init">Збой ініцыялізацыі індыкатара</string>
     <string name="error_bluetooth_init">Збой ініцыялізацыі Bluetooth на кантролеры</string>
     <string name="error_bluetooth_power">Памылка налады магутнасці Bluetooth</string>
-    <string name="error_bluetooth_mtu">Памылка налады MTU Bluetooth</string>
+    <string name="error_bluetooth_mtu">Памылка налады МТU Bluetooth</string>
     <string name="error_bluetooth_connected">Збой злучэння Bluetooth</string>
 
     <!-- OTA -->
+    <string name="ota_title">Абнаўленне прашыўкі</string>
+    <string name="btn_check_updates">Праверыць абнаўленні</string>
+    <string name="ota_searching">Пошук новай версіі…</string>
+    <string name="ota_update_available">Даступная новая версія: %s</string>
+    <string name="btn_download_install">Спампаваць і ўсталяваць</string>
+    <string name="ota_downloading_progress">Спампоўка прашыўкі: %d%%</string>
+    <string name="ota_uploading_progress">Перадача прашыўкі: %d%%</string>
+    <string name="ota_chunk_info">Чанк %1$d з %2$d</string>
+    <string name="ota_success">Абнаўленне паспяхова завершана!</string>
+    <string name="btn_done">Гатова</string>
+    <string name="ota_error_generic">Памылка: %s</string>
+    <string name="btn_try_again">Паспрабаваць зноў</string>
     <string name="ota_error_no_release">Рэліз не знойдзены або адсутнічае .bin файл</string>
     <string name="ota_error_download">Памылка спампоўкі прашыўкі</string>
 </resources>

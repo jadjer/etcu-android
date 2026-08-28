@@ -9,6 +9,78 @@
     <string name="ble_state_bluetooth_off">Bluetooth is off or unavailable</string>
     <string name="ble_state_invalid_mac">Invalid MAC address</string>
     <string name="ble_state_scanning">Scanning…</string>
+    <string name="ble_state_connected_discovering">Connected. Discovering services…</string>
+    <string name="ble_state_subscribed_reading_info">Subscription confirmed. Reading SystemInfo…</string>
+    <string name="ble_state_reading_settings">Reading settings…</string>
+    <string name="ble_state_ready">Device is ready</string>
+
+    <!-- BLE Errors -->
+    <string name="ble_error_connection">Connection error: %d</string>
+    <string name="ble_error_services">Service discovery error: %d</string>
+    <string name="ble_error_mtu">MTU negotiation error: %d</string>
+    <string name="ble_error_read_info">Error: Bluetooth stack rejected SystemInfo read</string>
+    <string name="ble_error_info_not_found">SystemInfo characteristic not found</string>
+    <string name="ble_error_descriptor_write">Descriptor write error: %d</string>
+    <string name="ble_error_read_char">Read error %1$s: %2$d</string>
+
+    <!-- Connection Stub -->
+    <string name="connecting_stub_message">Attempting to restore connection with your device…</string>
+    <string name="btn_retry">Retry</string>
+    <string name="btn_reset_device">Reset Device</string>
+
+    <!-- Scan Screen -->
+    <string name="scan_title">Select Device</string>
+    <string name="scan_controllers_detected">Discovered Controllers</string>
+    <string name="scan_not_found">No controllers found. Make sure the device is powered on.</string>
+    <string name="btn_bluetooth_settings">Bluetooth Settings</string>
+    <string name="scan_signal_info">Signal: %1$d dBm (≈%2$.1f m)</string>
+
+    <!-- ECU Screen -->
+    <string name="ecu_conn_status">ECU Communication</string>
+    <string name="ecu_connected">Connected</string>
+    <string name="ecu_disconnected">Disconnected</string>
+    <string name="ecu_rpm">Engine RPM</string>
+    <string name="ecu_speed">Vehicle Speed</string>
+    <string name="ecu_tps">TPS Position</string>
+    <string name="ecu_engine_status">Engine Status</string>
+    <string name="ecu_engine_started">Started</string>
+    <string name="ecu_engine_stopped">Stopped</string>
+    <string name="ecu_clutch_status">Clutch Status (ECU)</string>
+    <string name="ecu_clutch_pressed">Pressed</string>
+    <string name="ecu_clutch_released">Released</string>
+
+    <!-- Servo Screen -->
+    <string name="servo_conn_status">Servo Communication</string>
+    <string name="servo_connected">Connected</string>
+    <string name="servo_disconnected">Disconnected</string>
+    <string name="servo_position">Position</string>
+    <string name="servo_current">Current</string>
+    <string name="servo_voltage">Voltage</string>
+    <string name="servo_temp">Temperature</string>
+    <string name="servo_motion_status">Motion Status</string>
+    <string name="servo_moving">Moving</string>
+    <string name="servo_static">Static</string>
+
+    <!-- System Screen -->
+    <string name="system_telemetry_title">Current Telemetry</string>
+    <string name="system_mode">System Mode</string>
+    <string name="system_accel">Accelerator</string>
+    <string name="system_throttle_target">Throttle (Target)</string>
+    <string name="system_guard">Guard Mode</string>
+    <string name="system_brake">Brake</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_device_info">Device Information</string>
+    <string name="settings_board_version">Board Version</string>
+    <string name="settings_build_date">Build Date</string>
+    <string name="settings_firmware_version">Firmware Version</string>
+    <string name="settings_control">Control</string>
+    <string name="settings_accel_range">Accelerator range: from %1$d to %2$d</string>
+    <string name="settings_servo_range">Servo range: from %1$d to %2$d</string>
+    <string name="settings_device_settings">Device Settings</string>
+    <string name="btn_disconnect">Disconnect Device</string>
+    <string name="btn_forget">Forget Device</string>
+    <string name="btn_calibrate">Start Calibration</string>
 
     <!-- System Errors -->
     <string name="error_guard_lock">Guard Lock active</string>
@@ -41,6 +113,18 @@
     <string name="error_bluetooth_connected">Bluetooth connection fault</string>
 
     <!-- OTA -->
+    <string name="ota_title">Firmware Update</string>
+    <string name="btn_check_updates">Check for Updates</string>
+    <string name="ota_searching">Searching for new version…</string>
+    <string name="ota_update_available">New version available: %s</string>
+    <string name="btn_download_install">Download and Install</string>
+    <string name="ota_downloading_progress">Downloading firmware: %d%%</string>
+    <string name="ota_uploading_progress">Uploading firmware: %d%%</string>
+    <string name="ota_chunk_info">Chunk %1$d of %2$d</string>
+    <string name="ota_success">Update completed successfully!</string>
+    <string name="btn_done">Done</string>
+    <string name="ota_error_generic">Error: %s</string>
+    <string name="btn_try_again">Try Again</string>
     <string name="ota_error_no_release">Release not found or .bin file missing</string>
     <string name="ota_error_download">Firmware download error</string>
 </resources>

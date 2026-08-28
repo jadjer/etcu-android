@@ -37,16 +37,35 @@ class OtaRepositoryImpl(
         }
     }
 
-    override suspend fun downloadFirmware(url: String): Resource<ByteArray> = withContext(Dispatchers.IO) {
+    override suspend fun downloadFirmware(
+        url: String,
+        expectedSize: Long,
+        onProgress: (Float) -> Unit
+    ): Resource<ByteArray> = withContext(Dispatchers.IO) {
         try {
             val response = service.downloadFile(url)
             if (response.isSuccessful) {
-                val bytes = response.body()?.bytes()
-                if (bytes != null) {
-                    Resource.Success(bytes)
-                } else {
-                    Resource.Error("Пустой ответ от сервера")
+                val body = response.body() ?: return@withContext Resource.Error("Пустой ответ от сервера")
+                
+                // Используем размер из заголовка, если он есть, иначе берем переданный ожидаемый размер
+                val contentLength = if (body.contentLength() > 0) body.contentLength() else expectedSize
+                
+                val inputStream = body.byteStream()
+                val outputStream = java.io.ByteArrayOutputStream()
+                val buffer = ByteArray(8 * 1024)
+                var bytesRead: Int
+                var totalBytesRead: Long = 0
+
+                while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                    outputStream.write(buffer, 0, bytesRead)
+                    totalBytesRead += bytesRead
+                    
+                    if (contentLength > 0) {
+                        onProgress(totalBytesRead.toFloat() / contentLength)
+                    }
                 }
+
+                Resource.Success(outputStream.toByteArray())
             } else {
                 Resource.Error("Ошибка загрузки: ${response.code()}")
             }

@@ -15,8 +15,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.DiscoveredDevice
 
 @Composable
@@ -24,6 +26,7 @@ fun ScanScreen(viewModel: ScanViewModel) {
     val discoveredDevices by viewModel.discoveredDevices.collectAsState()
     val connectionStatus by viewModel.connectionState.collectAsState()
     val isScanning by viewModel.isScanning.collectAsState()
+    val disconnectedText = stringResource(R.string.ble_state_disconnected)
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -32,7 +35,7 @@ fun ScanScreen(viewModel: ScanViewModel) {
     }
 
     LaunchedEffect(connectionStatus) {
-        if (connectionStatus != "Отключено") {
+        if (connectionStatus != disconnectedText) {
             snackbarHostState.showSnackbar(
                 message = connectionStatus,
                 duration = SnackbarDuration.Short
@@ -66,7 +69,7 @@ fun ScanScreenContent(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Выберите устройство") },
+                title = { Text(stringResource(R.string.scan_title)) },
                 actions = {
                     IconButton(onClick = onRefreshClick) {
                         Icon(Icons.Default.Refresh, contentDescription = "Refresh")
@@ -81,14 +84,13 @@ fun ScanScreenContent(
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Main content wrapper with weight
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
             ) {
                 Text(
-                    "Обнаруженные контроллеры",
+                    stringResource(R.string.scan_controllers_detected),
                     modifier = Modifier.padding(16.dp),
                     style = MaterialTheme.typography.titleSmall
                 )
@@ -104,7 +106,7 @@ fun ScanScreenContent(
                             CircularProgressIndicator(modifier = Modifier.size(24.dp))
                         } else {
                             Text(
-                                "Контроллеры не найдены. Убедитесь, что устройство включено.",
+                                stringResource(R.string.scan_not_found),
                                 modifier = Modifier.padding(24.dp),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -118,7 +120,6 @@ fun ScanScreenContent(
                 }
             }
 
-            // Button stays at bottom if content is short, or at end of content if long
             Button(
                 onClick = {
                     val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
@@ -128,7 +129,7 @@ fun ScanScreenContent(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Text("Настройки Bluetooth")
+                Text(stringResource(R.string.btn_bluetooth_settings))
             }
         }
     }
@@ -143,7 +144,7 @@ private fun DeviceItem(device: DiscoveredDevice, onClick: () -> Unit) {
                 Text(device.macAddress)
                 if (device.rssi != 0) {
                     Text(
-                        text = "Сигнал: ${device.rssi} dBm (≈${"%.1f".format(device.distance)} м)",
+                        text = stringResource(R.string.scan_signal_info, device.rssi, device.distance),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

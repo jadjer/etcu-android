@@ -12,8 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.SystemState
 import by.jadjer.etcu.domain.model.SystemTelemetry
 import by.jadjer.etcu.ui.component.StatusIndicator
@@ -35,35 +37,35 @@ fun SystemScreenContent(
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        Text("Текущая телеметрия", style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.system_telemetry_title), style = MaterialTheme.typography.titleMedium)
 
         TelemetryRow(
-            label = "Режим системы",
+            label = stringResource(R.string.system_mode),
             value = telemetry.systemState.name,
             icon = Icons.Default.Info
         )
         
         TelemetryRow(
-            label = "Акселератор",
+            label = stringResource(R.string.system_accel),
             value = telemetry.acceleratorPosition.toString(),
             unit = "/ 1000",
             icon = Icons.Default.PedalBike
         )
         
         TelemetryRow(
-            label = "Дроссель (цель)",
+            label = stringResource(R.string.system_throttle_target),
             value = telemetry.throttlePosition.toString(),
             unit = "/ 1000"
         )
         
         StatusIndicator(
-            label = "Защита (Guard)",
+            label = stringResource(R.string.system_guard),
             isActive = telemetry.isGuardActive,
             icon = Icons.Default.Lock
         )
         
         StatusIndicator(
-            label = "Тормоз",
+            label = stringResource(R.string.system_brake),
             isActive = telemetry.isBrakeEnabled
         )
     }
