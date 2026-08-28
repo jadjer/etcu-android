@@ -5,12 +5,9 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
-import android.bluetooth.BluetoothGattConnectionSettings
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothManager
 import android.content.Context
-import android.os.Build
-import androidx.core.content.ContextCompat
 import by.jadjer.etcu.R
 import by.jadjer.etcu.data.local.BlePreferenceManager
 import by.jadjer.etcu.domain.model.ControlData
@@ -76,12 +73,21 @@ class BleManager(
             _connectionState.value = state
             _isConnected.value = connected
 
-            // Обнуляем только если реально отключились
-            if (!connected && state == context.getString(R.string.ble_state_disconnected)) {
-                bluetoothGatt?.close()
-                bluetoothGatt = null
-                if (!isManualDisconnect) {
-                    startAutoReconnect()
+            if (!connected) {
+                // Список состояний, при которых НЕ НУЖНО закрывать соединение и реконнектиться
+                val isTransient = state == context.getString(R.string.ble_state_connected_discovering) ||
+                        state == context.getString(R.string.ble_state_services_discovered) ||
+                        state == context.getString(R.string.ble_state_subscribed_reading_info) ||
+                        state == context.getString(R.string.ble_state_reading_settings) ||
+                        state == context.getString(R.string.ble_state_scanning) ||
+                        state.contains(context.getString(R.string.ble_state_connecting).split("%")[0])
+
+                if (!isTransient) {
+                    bluetoothGatt?.close()
+                    bluetoothGatt = null
+                    if (!isManualDisconnect) {
+                        startAutoReconnect()
+                    }
                 }
             }
         },
@@ -129,19 +135,8 @@ class BleManager(
             val device = bluetoothAdapter.getRemoteDevice(macAddress)
             _connectionState.value = context.getString(R.string.ble_state_connecting, macAddress)
 
-            bluetoothGatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) {
-                val settings = BluetoothGattConnectionSettings.Builder()
-                    .setTransport(BluetoothDevice.TRANSPORT_LE)
-                    .setAutoConnectEnabled(false)
-                    .build()
-
-                val executor = ContextCompat.getMainExecutor(context)
-
-                device.connectGatt(settings, executor, gattCallback)
-            } else {
-                @Suppress("DEPRECATION")
-                device.connectGatt(context, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
-            }
+            @Suppress("DEPRECATION")
+            bluetoothGatt = device.connectGatt(context, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
 
         } catch (_: IllegalArgumentException) {
             _connectionState.value = context.getString(R.string.ble_state_invalid_mac)

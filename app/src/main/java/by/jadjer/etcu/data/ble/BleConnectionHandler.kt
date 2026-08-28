@@ -29,7 +29,9 @@ class BleConnectionHandler(
         if (status == BluetoothGatt.GATT_SUCCESS) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 onConnectionStateChange(context.getString(R.string.ble_state_connected_discovering), false)
-                gatt.discoverServices()
+                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                    gatt.discoverServices()
+                }, 500)
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 onConnectionStateChange(context.getString(R.string.ble_state_disconnected), false)
                 gatt.close()
@@ -68,13 +70,7 @@ class BleConnectionHandler(
             val systemInfoChar = service?.getCharacteristic(BleConstants.SYSTEM_INFO_UUID)
 
             if (systemInfoChar != null) {
-                val success = gatt.readCharacteristic(systemInfoChar)
-                if (!success) {
-                    onConnectionStateChange(
-                        context.getString(R.string.ble_error_read_info),
-                        false
-                    )
-                }
+                gatt.readCharacteristic(systemInfoChar)
             } else {
                 onConnectionStateChange(context.getString(R.string.ble_error_info_not_found), false)
             }
@@ -98,7 +94,6 @@ class BleConnectionHandler(
                     val controlChar = service?.getCharacteristic(BleConstants.CONTROL_UUID)
                     if (controlChar != null) {
                         onConnectionStateChange(context.getString(R.string.ble_state_reading_settings), false)
-
                         gatt.readCharacteristic(controlChar)
                     } else {
                         onConnectionStateChange(context.getString(R.string.ble_state_ready), true)
