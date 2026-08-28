@@ -18,6 +18,7 @@
     <string name="ble_state_scanning">Scanning…</string>
     <string name="ble_state_connected_discovering">Connected. Discovering services…</string>
     <string name="ble_state_subscribed_reading_info">Subscription confirmed. Reading SystemInfo…</string>
+    <string name="ble_state_ota_setup">Setting up OTA…</string>
     <string name="ble_state_reading_settings">Reading settings…</string>
     <string name="ble_state_ready">Device is ready</string>
 
@@ -148,6 +149,10 @@
     <string name="ota_downloading_progress">Downloading firmware: %d%%</string>
     <string name="ota_uploading_progress">Uploading firmware: %d%%</string>
     <string name="ota_chunk_info">Chunk %1$d of %2$d</string>
+    <string name="ota_firmware_size">Firmware size: %1$.2f KB</string>
+    <string name="ota_chunks_total">Total chunks: %1$d</string>
+    <string name="ota_chunks_transferred">Transferred: %1$d</string>
+    <string name="ota_chunks_remaining">Remaining: %1$d</string>
     <string name="ota_success">Update completed successfully!</string>
     <string name="btn_done">Done</string>
     <string name="ota_error_generic">Error: %s</string>

@@ -18,6 +18,7 @@
     <string name="ble_state_scanning">Пошук…</string>
     <string name="ble_state_connected_discovering">Падключана. Пошук службаў…</string>
     <string name="ble_state_subscribed_reading_info">Падпіска пацверджана. Чытанне SystemInfo…</string>
+    <string name="ble_state_ota_setup">Налада OTA…</string>
     <string name="ble_state_reading_settings">Чытанне налад…</string>
     <string name="ble_state_ready">Прылада гатова да працы</string>
 
@@ -148,6 +149,10 @@
     <string name="ota_downloading_progress">Спампоўка прашыўкі: %d%%</string>
     <string name="ota_uploading_progress">Перадача прашыўкі: %d%%</string>
     <string name="ota_chunk_info">Чанк %1$d з %2$d</string>
+    <string name="ota_firmware_size">Памер прашыўкі: %1$.2f КБ</string>
+    <string name="ota_chunks_total">Усяго чанкаў: %1$d</string>
+    <string name="ota_chunks_transferred">Перададзена: %1$d</string>
+    <string name="ota_chunks_remaining">Засталося: %1$d</string>
     <string name="ota_success">Абнаўленне паспяхова завершана!</string>
     <string name="btn_done">Гатова</string>
     <string name="ota_error_generic">Памылка: %s</string>

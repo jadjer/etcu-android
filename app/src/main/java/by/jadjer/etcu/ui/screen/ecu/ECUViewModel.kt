@@ -1,14 +1,18 @@
 package by.jadjer.etcu.ui.screen.ecu
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import by.jadjer.etcu.ETCUApplication
 import by.jadjer.etcu.domain.model.ECUTelemetry
 import by.jadjer.etcu.domain.repository.BLERepository
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
-class EcuViewModel(repository: BLERepository) : ViewModel() {
+class ECUViewModel(repository: BLERepository) : ViewModel() {
     val ecuTelemetry: StateFlow<ECUTelemetry> = repository.telemetry
         .map { it.ecu }
         .stateIn(
@@ -17,10 +21,11 @@ class EcuViewModel(repository: BLERepository) : ViewModel() {
             initialValue = ECUTelemetry()
         )
 
-    class Factory(private val app: ETCUApplication) : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return EcuViewModel(app.container.bleRepository) as T
+    companion object {
+        fun Factory(app: ETCUApplication) = viewModelFactory {
+            initializer {
+                ECUViewModel(app.container.bleRepository)
+            }
         }
     }
 }

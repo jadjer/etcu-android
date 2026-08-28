@@ -3,6 +3,7 @@ package by.jadjer.etcu.ui.screen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import by.jadjer.etcu.ETCUApplication
+import by.jadjer.etcu.domain.model.ConnectionState
 import by.jadjer.etcu.domain.model.SystemTelemetry
 import by.jadjer.etcu.domain.repository.BLERepository
 import kotlinx.coroutines.flow.StateFlow
@@ -12,7 +13,7 @@ class MainViewModel(
 ) : ViewModel() {
 
     val isConnected: StateFlow<Boolean> = bleRepository.isConnected
-    val connectionState: StateFlow<String> = bleRepository.connectionState
+    val connectionState: StateFlow<ConnectionState> = bleRepository.connectionState
     val savedMac: StateFlow<String?> = bleRepository.savedMac
     val telemetry: StateFlow<SystemTelemetry> = bleRepository.telemetry
 

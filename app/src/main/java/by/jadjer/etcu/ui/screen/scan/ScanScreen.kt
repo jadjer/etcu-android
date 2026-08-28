@@ -19,14 +19,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
+import by.jadjer.etcu.domain.model.ConnectionState
 import by.jadjer.etcu.domain.model.DiscoveredDevice
+import by.jadjer.etcu.ui.screen.toDisplayString
 
 @Composable
 fun ScanScreen(viewModel: ScanViewModel) {
     val discoveredDevices by viewModel.discoveredDevices.collectAsState()
-    val connectionStatus by viewModel.connectionState.collectAsState()
+    val connectionState by viewModel.connectionState.collectAsState()
     val isScanning by viewModel.isScanning.collectAsState()
-    val disconnectedText = stringResource(R.string.ble_state_disconnected)
+    
+    val connectionStatus = connectionState.toDisplayString()
+    val isDisconnected = connectionState == ConnectionState.DISCONNECTED
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -34,8 +38,8 @@ fun ScanScreen(viewModel: ScanViewModel) {
         viewModel.startScanning()
     }
 
-    LaunchedEffect(connectionStatus) {
-        if (connectionStatus != disconnectedText) {
+    LaunchedEffect(connectionState) {
+        if (!isDisconnected) {
             snackbarHostState.showSnackbar(
                 message = connectionStatus,
                 duration = SnackbarDuration.Short

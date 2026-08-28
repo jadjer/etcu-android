@@ -38,7 +38,7 @@ import by.jadjer.etcu.ui.component.ErrorsBlock
 import by.jadjer.etcu.ui.navigation.ScreenItem
 import by.jadjer.etcu.ui.screen.ecu.EcuScreen
 import by.jadjer.etcu.ui.screen.ecu.EcuScreenContent
-import by.jadjer.etcu.ui.screen.ecu.EcuViewModel
+import by.jadjer.etcu.ui.screen.ecu.ECUViewModel
 import by.jadjer.etcu.ui.screen.ota.OtaScreen
 import by.jadjer.etcu.ui.screen.ota.OtaViewModel
 import by.jadjer.etcu.ui.screen.scan.ScanScreen
@@ -53,8 +53,10 @@ import by.jadjer.etcu.ui.screen.system.SystemViewModel
 @Composable
 fun MainScreen(viewModel: MainViewModel) {
     val isConnected by viewModel.isConnected.collectAsState()
-    val connectionStatus by viewModel.connectionState.collectAsState()
+    val connectionState by viewModel.connectionState.collectAsState()
     val savedMac by viewModel.savedMac.collectAsState()
+    
+    val connectionStatus = connectionState.toDisplayString(savedMac ?: "")
 
     if (!isConnected) {
         if (savedMac != null) {
@@ -151,7 +153,7 @@ private fun MainScreenContent(
                 .fillMaxSize()
         ) {
             when (currentScreen) {
-                ScreenItem.Ecu -> EcuScreen(viewModel(factory = EcuViewModel.Factory(app)))
+                ScreenItem.Ecu -> EcuScreen(viewModel(factory = ECUViewModel.Factory(app)))
                 ScreenItem.Servo -> ServoScreen(viewModel(factory = ServoViewModel.Factory(app)))
                 ScreenItem.System -> SystemScreen(viewModel(factory = SystemViewModel.Factory(app)))
                 ScreenItem.Ota -> OtaScreen(viewModel(factory = OtaViewModel.Factory(app)))

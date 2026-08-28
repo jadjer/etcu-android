@@ -26,7 +26,7 @@ fun OtaScreen(viewModel: OtaViewModel) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OtaScreenContent(
-    state: OtaState,
+    state: OTAState,
     onCheckUpdates: () -> Unit,
     onStartUpdate: (String, Long) -> Unit
 ) {
@@ -41,24 +41,24 @@ fun OtaScreenContent(
         Spacer(modifier = Modifier.height(32.dp))
 
         when (state) {
-            OtaState.Idle -> {
+            OTAState.Idle -> {
                 Button(onClick = onCheckUpdates) {
                     Text(stringResource(R.string.btn_check_updates))
                 }
             }
-            OtaState.CheckingUpdates -> {
+            OTAState.CheckingUpdates -> {
                 CircularProgressIndicator()
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(stringResource(R.string.ota_searching))
             }
-            is OtaState.UpdateAvailable -> {
+            is OTAState.UpdateAvailable -> {
                 Text(stringResource(R.string.ota_update_available, state.version))
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(onClick = { onStartUpdate(state.downloadUrl, state.size) }) {
                     Text(stringResource(R.string.btn_download_install))
                 }
             }
-            is OtaState.Downloading -> {
+            is OTAState.Downloading -> {
                 Text(stringResource(R.string.ota_downloading_progress, (state.progress * 100).toInt()))
                 Spacer(modifier = Modifier.height(8.dp))
                 LinearProgressIndicator(
@@ -66,26 +66,45 @@ fun OtaScreenContent(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-            is OtaState.Uploading -> {
+            is OTAState.Uploading -> {
                 Text(stringResource(R.string.ota_uploading_progress, (state.progress * 100).toInt()))
                 Spacer(modifier = Modifier.height(8.dp))
                 LinearProgressIndicator(
                     progress = { state.progress },
                     modifier = Modifier.fillMaxWidth()
                 )
-                Text(
-                    stringResource(R.string.ota_chunk_info, state.currentChunk, state.totalChunks),
-                    style = MaterialTheme.typography.labelMedium
-                )
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        stringResource(R.string.ota_firmware_size, state.firmwareSize / 1024f),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        stringResource(R.string.ota_chunks_total, state.totalChunks),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        stringResource(R.string.ota_chunks_transferred, state.currentChunk),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        stringResource(R.string.ota_chunks_remaining, state.totalChunks - state.currentChunk),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
-            OtaState.Success -> {
+            OTAState.Success -> {
                 Text(stringResource(R.string.ota_success), color = MaterialTheme.colorScheme.primary)
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(onClick = onCheckUpdates) {
                     Text(stringResource(R.string.btn_done))
                 }
             }
-            is OtaState.Error -> {
+            is OTAState.Error -> {
                 Text(stringResource(R.string.ota_error_generic, state.message), color = MaterialTheme.colorScheme.error)
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(onClick = onCheckUpdates) {
@@ -101,7 +120,7 @@ fun OtaScreenContent(
 fun OtaScreenPreview() {
     MaterialTheme {
         OtaScreenContent(
-            state = OtaState.Uploading(0.45f, 45, 100),
+            state = OTAState.Uploading(0.45f, 45, 100, 20480),
             onCheckUpdates = {},
             onStartUpdate = { _, _ -> }
         )

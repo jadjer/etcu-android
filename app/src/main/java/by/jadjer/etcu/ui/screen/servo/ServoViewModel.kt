@@ -1,12 +1,16 @@
 package by.jadjer.etcu.ui.screen.servo
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import by.jadjer.etcu.ETCUApplication
 import by.jadjer.etcu.domain.model.ServoTelemetry
 import by.jadjer.etcu.domain.repository.BLERepository
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 class ServoViewModel(repository: BLERepository) : ViewModel() {
     val servoTelemetry: StateFlow<ServoTelemetry> = repository.telemetry
@@ -17,10 +21,11 @@ class ServoViewModel(repository: BLERepository) : ViewModel() {
             initialValue = ServoTelemetry()
         )
 
-    class Factory(private val app: ETCUApplication) : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ServoViewModel(app.container.bleRepository) as T
+    companion object {
+        fun Factory(app: ETCUApplication) = viewModelFactory {
+            initializer {
+                ServoViewModel(app.container.bleRepository)
+            }
         }
     }
 }

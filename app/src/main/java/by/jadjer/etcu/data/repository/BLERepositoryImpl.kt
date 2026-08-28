@@ -1,21 +1,22 @@
 package by.jadjer.etcu.data.repository
 
-import by.jadjer.etcu.data.ble.BleManager
+import by.jadjer.etcu.data.ble.BLEManager
 import by.jadjer.etcu.domain.model.*
 import by.jadjer.etcu.domain.repository.BLERepository
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class BLERepositoryImpl(
-    private val bleManager: BleManager
+    private val bleManager: BLEManager
 ) : BLERepository {
-    override val connectionState: StateFlow<String> = bleManager.connectionState
+    override val connectionState: StateFlow<ConnectionState> = bleManager.connectionState
     override val isConnected: StateFlow<Boolean> = bleManager.isConnected
     override val controlData: StateFlow<ControlData> = bleManager.controlData
     override val telemetry: StateFlow<SystemTelemetry> = bleManager.telemetry
     override val systemInfo: StateFlow<SystemInfo> = bleManager.systemInfo
     override val discoveredDevices: StateFlow<List<DiscoveredDevice>> = bleManager.scanner.discoveredDevices
     override val isScanning: StateFlow<Boolean> = bleManager.scanner.isScanning
-    override val otaFeedback: StateFlow<Int?> = bleManager.otaFeedback
+    override val otaFeedback: SharedFlow<OTAStatus> = bleManager.otaFeedback
     override val savedMac: StateFlow<String?> = bleManager.savedMac
 
     override fun startScan() = bleManager.scanner.startScan()

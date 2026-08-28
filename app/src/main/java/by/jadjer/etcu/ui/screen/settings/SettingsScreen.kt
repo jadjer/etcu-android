@@ -137,13 +137,6 @@ fun SettingsScreenContent(
         }
 
         OutlinedButton(
-            onClick = { /* TODO */ },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(stringResource(R.string.btn_calibrate))
-        }
-
-        OutlinedButton(
             onClick = onOtaClick,
             modifier = Modifier.fillMaxWidth()
         ) {

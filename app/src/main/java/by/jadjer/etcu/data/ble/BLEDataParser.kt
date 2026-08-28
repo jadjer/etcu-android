@@ -2,6 +2,7 @@ package by.jadjer.etcu.data.ble
 
 import by.jadjer.etcu.domain.model.ControlData
 import by.jadjer.etcu.domain.model.ECUTelemetry
+import by.jadjer.etcu.domain.model.OTAStatus
 import by.jadjer.etcu.domain.model.ServoTelemetry
 import by.jadjer.etcu.domain.model.SystemError
 import by.jadjer.etcu.domain.model.SystemInfo
@@ -10,7 +11,7 @@ import by.jadjer.etcu.domain.model.SystemTelemetry
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-class BleDataParser {
+class BLEDataParser {
 
     fun parseControlData(bytes: ByteArray): ControlData {
         if (bytes.size < 8) return ControlData()
@@ -124,11 +125,10 @@ class BleDataParser {
         )
     }
 
+    fun parseOtaFeedback(bytes: ByteArray): OTAStatus {
+        if (bytes.isEmpty()) return OTAStatus.ERROR
 
-
-    fun parseOtaFeedback(bytes: ByteArray): Int? {
-        return if (bytes.size >= 2) {
-            ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).short.toInt() and 0xFFFF
-        } else null
+        val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
+        return OTAStatus.fromByte(buffer.get())
     }
 }

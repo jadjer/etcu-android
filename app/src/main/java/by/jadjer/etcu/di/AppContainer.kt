@@ -1,8 +1,8 @@
 package by.jadjer.etcu.di
 
 import android.content.Context
-import by.jadjer.etcu.data.ble.BleManager
-import by.jadjer.etcu.data.local.BlePreferenceManager
+import by.jadjer.etcu.data.ble.BLEManager
+import by.jadjer.etcu.data.local.BLEPreferenceManager
 import by.jadjer.etcu.data.network.GitHubService
 import by.jadjer.etcu.data.repository.BLERepositoryImpl
 import by.jadjer.etcu.data.repository.OTARepositoryImpl
@@ -15,12 +15,14 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class AppContainer(context: Context) {
 
-    private val preferenceManager: BlePreferenceManager by lazy {
-        BlePreferenceManager(context)
+    private val appContext = context.applicationContext
+
+    private val preferenceManager: BLEPreferenceManager by lazy {
+        BLEPreferenceManager(appContext)
     }
 
-    private val bleManager: BleManager by lazy {
-        BleManager(context, preferenceManager)
+    private val bleManager: BLEManager by lazy {
+        BLEManager(appContext, preferenceManager)
     }
 
     private val githubService: GitHubService by lazy {
@@ -44,6 +46,6 @@ class AppContainer(context: Context) {
     }
 
     val otaRepository: OTARepository by lazy {
-        OTARepositoryImpl(githubService, context)
+        OTARepositoryImpl(githubService, appContext)
     }
 }

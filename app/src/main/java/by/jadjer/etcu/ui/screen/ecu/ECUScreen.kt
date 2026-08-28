@@ -21,7 +21,7 @@ import by.jadjer.etcu.ui.component.StatusIndicator
 import by.jadjer.etcu.ui.component.TelemetryRow
 
 @Composable
-fun EcuScreen(viewModel: EcuViewModel) {
+fun EcuScreen(viewModel: ECUViewModel) {
     val telemetry by viewModel.ecuTelemetry.collectAsState()
     EcuScreenContent(telemetry)
 }

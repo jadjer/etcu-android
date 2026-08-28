@@ -8,8 +8,6 @@ import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.os.ParcelUuid
-import android.content.Context
-import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.DiscoveredDevice
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,37 +16,39 @@ import kotlinx.coroutines.flow.*
 import kotlin.math.pow
 
 @SuppressLint("MissingPermission")
-class BleScanner(
-    private val context: Context,
+class BLEScanner(
     private val bluetoothAdapter: BluetoothAdapter?
 ) {
-    private val _scannerScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private val scannerScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     private val _discoveredDevices = MutableStateFlow<Map<String, DiscoveredDevice>>(emptyMap())
     val discoveredDevices: StateFlow<List<DiscoveredDevice>> = _discoveredDevices
         .map { it.values.toList() }
         .stateIn(
-            scope = _scannerScope,
+            scope = scannerScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
 
     private val _isScanning = MutableStateFlow(false)
-    val isScanning: StateFlow<Boolean> = _isScanning
+    val isScanning = _isScanning.asStateFlow()
 
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             val device = result.device
-            if (device.name != null) {
-                _discoveredDevices.update { currentMap ->
-                    val distance = calculateDistance(result.rssi)
-                    currentMap + (device.address to DiscoveredDevice(
-                        name = device.name ?: context.getString(R.string.unknown),
-                        macAddress = device.address,
-                        rssi = result.rssi,
-                        distance = distance,
-                        isPaired = device.bondState == BluetoothDevice.BOND_BONDED
-                    ))
+            val name = device.name ?: return // Пропускаем устройства без имени атомарно
+
+            _discoveredDevices.update { currentMap ->
+                currentMap.toMutableMap().apply {
+                    put(
+                        device.address, DiscoveredDevice(
+                            name = name,
+                            macAddress = device.address,
+                            rssi = result.rssi,
+                            distance = calculateDistance(result.rssi),
+                            isPaired = device.bondState == BluetoothDevice.BOND_BONDED
+                        )
+                    )
                 }
             }
         }
@@ -56,25 +56,24 @@ class BleScanner(
 
     private fun calculateDistance(rssi: Int): Double {
         if (rssi == 0) return -1.0
-        val txPower = -59
-        return 10.0.pow((txPower - rssi) / (10.0 * 2.0))
+        return 10.0.pow((-59 - rssi) / 20.0)
     }
 
     fun startScan() {
-        if (bluetoothAdapter?.isEnabled == true && !_isScanning.value) {
-            _discoveredDevices.value = emptyMap()
-            _isScanning.value = true
+        if (bluetoothAdapter?.isEnabled != true || _isScanning.value) return
 
-            val filter = ScanFilter.Builder()
-                .setServiceUuid(ParcelUuid(BleConstants.SERVICE_UUID))
-                .build()
+        _discoveredDevices.value = emptyMap()
+        _isScanning.value = true
 
-            val settings = ScanSettings.Builder()
-                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                .build()
+        val filter = ScanFilter.Builder()
+            .setServiceUuid(ParcelUuid(BLEConstants.SERVICE_UUID))
+            .build()
 
-            bluetoothAdapter.bluetoothLeScanner?.startScan(listOf(filter), settings, scanCallback)
-        }
+        val settings = ScanSettings.Builder()
+            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+            .build()
+
+        bluetoothAdapter.bluetoothLeScanner?.startScan(listOf(filter), settings, scanCallback)
     }
 
     fun stopScan() {

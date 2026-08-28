@@ -18,6 +18,7 @@
     <string name="ble_state_scanning">Поиск…</string>
     <string name="ble_state_connected_discovering">Подключено. Поиск служб…</string>
     <string name="ble_state_subscribed_reading_info">Подписка подтверждена. Чтение SystemInfo…</string>
+    <string name="ble_state_ota_setup">Настройка OTA…</string>
     <string name="ble_state_reading_settings">Чтение настроек…</string>
     <string name="ble_state_ready">Устройство готово к работе</string>
 
@@ -148,6 +149,10 @@
     <string name="ota_downloading_progress">Скачивание прошивки: %d%%</string>
     <string name="ota_uploading_progress">Передача прошивки: %d%%</string>
     <string name="ota_chunk_info">Чанк %1$d из %2$d</string>
+    <string name="ota_firmware_size">Размер прошивки: %1$.2f КБ</string>
+    <string name="ota_chunks_total">Всего чанков: %1$d</string>
+    <string name="ota_chunks_transferred">Передано: %1$d</string>
+    <string name="ota_chunks_remaining">Осталось: %1$d</string>
     <string name="ota_success">Обновление успешно завершено!</string>
     <string name="btn_done">Готово</string>
     <string name="ota_error_generic">Ошибка: %s</string>

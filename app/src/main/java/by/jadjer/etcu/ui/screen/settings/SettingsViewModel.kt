@@ -1,8 +1,9 @@
 package by.jadjer.etcu.ui.screen.settings
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import by.jadjer.etcu.ETCUApplication
 import by.jadjer.etcu.domain.model.ControlData
 import by.jadjer.etcu.domain.model.SystemInfo
@@ -74,10 +75,11 @@ class SettingsViewModel(private val repository: BLERepository) : ViewModel() {
         }
     }
 
-    class Factory(private val app: ETCUApplication) : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return SettingsViewModel(app.container.bleRepository) as T
+    companion object {
+        fun Factory(app: ETCUApplication) = viewModelFactory {
+            initializer {
+                SettingsViewModel(app.container.bleRepository)
+            }
         }
     }
 }
