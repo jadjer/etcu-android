@@ -4,10 +4,10 @@ import android.content.Context
 import by.jadjer.etcu.data.ble.BleManager
 import by.jadjer.etcu.data.local.BlePreferenceManager
 import by.jadjer.etcu.data.network.GitHubService
-import by.jadjer.etcu.data.repository.BleRepositoryImpl
-import by.jadjer.etcu.data.repository.OtaRepositoryImpl
-import by.jadjer.etcu.domain.repository.BleRepository
-import by.jadjer.etcu.domain.repository.OtaRepository
+import by.jadjer.etcu.data.repository.BLERepositoryImpl
+import by.jadjer.etcu.data.repository.OTARepositoryImpl
+import by.jadjer.etcu.domain.repository.BLERepository
+import by.jadjer.etcu.domain.repository.OTARepository
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -39,11 +39,11 @@ class AppContainer(context: Context) {
             .create(GitHubService::class.java)
     }
 
-    val bleRepository: BleRepository by lazy {
-        BleRepositoryImpl(bleManager)
+    val bleRepository: BLERepository by lazy {
+        BLERepositoryImpl(bleManager)
     }
 
-    val otaRepository: OtaRepository by lazy {
-        OtaRepositoryImpl(githubService, context)
+    val otaRepository: OTARepository by lazy {
+        OTARepositoryImpl(githubService, context)
     }
 }

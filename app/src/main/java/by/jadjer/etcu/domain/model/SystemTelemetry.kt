@@ -4,7 +4,7 @@ data class SystemTelemetry(
     val isGuardActive: Boolean = false,
     val isBrakeEnabled: Boolean = false,
 
-    val ecu: EcuTelemetry = EcuTelemetry(),
+    val ecu: ECUTelemetry = ECUTelemetry(),
     val servo: ServoTelemetry = ServoTelemetry(),
     val acceleratorPosition: Int = 0,
     val throttlePosition: Int = 0,

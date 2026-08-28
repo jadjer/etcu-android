@@ -1,19 +1,24 @@
 package by.jadjer.etcu.domain.model
 
-data class OtaChunk(
-    val data: ByteArray,
-    val chunkNumber: Int,
+data class OTAChunk(
+    val firmwareSize: Long,
     val totalChunks: Int,
-    val firmwareSize: Long
+    val chunkNumber: Int,
+    val chunkSize: Int,
+    val data: ByteArray,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-        other as OtaChunk
-        if (!data.contentEquals(other.data)) return false
-        if (chunkNumber != other.chunkNumber) return false
-        if (totalChunks != other.totalChunks) return false
+
+        other as OTAChunk
+
         if (firmwareSize != other.firmwareSize) return false
+        if (totalChunks != other.totalChunks) return false
+        if (chunkNumber != other.chunkNumber) return false
+        if (chunkSize != other.chunkSize) return false
+        if (!data.contentEquals(other.data)) return false
+
         return true
     }
 

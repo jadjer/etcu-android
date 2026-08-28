@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import by.jadjer.etcu.ETCUApplication
 import by.jadjer.etcu.R
-import by.jadjer.etcu.domain.model.EcuTelemetry
+import by.jadjer.etcu.domain.model.ECUTelemetry
 import by.jadjer.etcu.ui.component.ErrorsBlock
 import by.jadjer.etcu.ui.navigation.ScreenItem
 import by.jadjer.etcu.ui.screen.ecu.EcuScreen
@@ -202,7 +202,7 @@ fun MainScreenPreview() {
         ) { padding ->
             Box(Modifier.padding(padding)) {
                 EcuScreenContent(
-                    telemetry = EcuTelemetry(isConnected = true, rpm = 1200, isStarted = true)
+                    telemetry = ECUTelemetry(isConnected = true, rpm = 1200, isStarted = true)
                 )
             }
         }

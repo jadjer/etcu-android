@@ -1,7 +1,7 @@
 package by.jadjer.etcu.data.ble
 
 import by.jadjer.etcu.domain.model.ControlData
-import by.jadjer.etcu.domain.model.EcuTelemetry
+import by.jadjer.etcu.domain.model.ECUTelemetry
 import by.jadjer.etcu.domain.model.ServoTelemetry
 import by.jadjer.etcu.domain.model.SystemError
 import by.jadjer.etcu.domain.model.SystemInfo
@@ -82,7 +82,7 @@ class BleDataParser {
         )
     }
 
-    private fun parseEcuTelemetry(buffer: ByteBuffer): EcuTelemetry {
+    private fun parseEcuTelemetry(buffer: ByteBuffer): ECUTelemetry {
         val isConnected = buffer.get().toInt() != 0
         val isStarted = buffer.get().toInt() != 0
         val isClutchEnabled = buffer.get().toInt() != 0
@@ -91,7 +91,7 @@ class BleDataParser {
         val speed = buffer.get().toInt() and 0xFF
         val tps = buffer.short.toInt() and 0xFFFF
 
-        return EcuTelemetry(
+        return ECUTelemetry(
             isConnected = isConnected,
             isStarted = isStarted,
             isClutchEnabled = isClutchEnabled,

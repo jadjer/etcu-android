@@ -3,7 +3,7 @@ package by.jadjer.etcu.domain.repository
 import by.jadjer.etcu.domain.model.*
 import kotlinx.coroutines.flow.StateFlow
 
-interface BleRepository {
+interface BLERepository {
     val connectionState: StateFlow<String>
     val isConnected: StateFlow<Boolean>
     val controlData: StateFlow<ControlData>
@@ -21,5 +21,5 @@ interface BleRepository {
     fun autoConnect()
     fun clearLastMac()
     fun sendControlData(data: ControlData)
-    fun sendOtaChunk(chunk: OtaChunk)
+    fun sendOtaChunk(chunk: OTAChunk)
 }

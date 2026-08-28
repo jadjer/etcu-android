@@ -5,10 +5,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import by.jadjer.etcu.ETCUApplication
 import by.jadjer.etcu.domain.model.SystemTelemetry
-import by.jadjer.etcu.domain.repository.BleRepository
+import by.jadjer.etcu.domain.repository.BLERepository
 import kotlinx.coroutines.flow.*
 
-class SystemViewModel(repository: BleRepository) : ViewModel() {
+class SystemViewModel(repository: BLERepository) : ViewModel() {
     val telemetry: StateFlow<SystemTelemetry> = repository.telemetry
         .stateIn(
             scope = viewModelScope,

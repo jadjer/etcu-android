@@ -98,10 +98,8 @@ class BleConnectionHandler(
                     val controlChar = service?.getCharacteristic(BleConstants.CONTROL_UUID)
                     if (controlChar != null) {
                         onConnectionStateChange(context.getString(R.string.ble_state_reading_settings), false)
-                        val success = gatt.readCharacteristic(controlChar)
-                        if (!success) {
-                            onConnectionStateChange(context.getString(R.string.ble_state_ready), true)
-                        }
+
+                        gatt.readCharacteristic(controlChar)
                     } else {
                         onConnectionStateChange(context.getString(R.string.ble_state_ready), true)
                     }
@@ -126,9 +124,20 @@ class BleConnectionHandler(
         value: ByteArray
     ) {
         when (characteristic.uuid) {
-            BleConstants.CONTROL_UUID -> onControlDataUpdate(dataParser.parseControlData(value))
             BleConstants.TELEMETRY_UUID -> onTelemetryUpdate(dataParser.parseSystemTelemetry(value))
             BleConstants.OTA_UUID -> dataParser.parseOtaFeedback(value)?.let(onOtaFeedback)
+        }
+    }
+
+    override fun onCharacteristicWrite(
+        gatt: BluetoothGatt,
+        characteristic: BluetoothGattCharacteristic,
+        status: Int
+    ) {
+        if (status == BluetoothGatt.GATT_SUCCESS) {
+            onConnectionStateChange(context.getString(R.string.ble_state_ready), true)
+        } else {
+            onConnectionStateChange(context.getString(R.string.ble_error_read_char, "Write ${characteristic.uuid}", status), false)
         }
     }
 }

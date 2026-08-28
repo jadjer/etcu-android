@@ -14,7 +14,7 @@ import androidx.core.content.ContextCompat
 import by.jadjer.etcu.R
 import by.jadjer.etcu.data.local.BlePreferenceManager
 import by.jadjer.etcu.domain.model.ControlData
-import by.jadjer.etcu.domain.model.OtaChunk
+import by.jadjer.etcu.domain.model.OTAChunk
 import by.jadjer.etcu.domain.model.SystemInfo
 import by.jadjer.etcu.domain.model.SystemTelemetry
 import kotlinx.coroutines.CoroutineScope
@@ -75,7 +75,10 @@ class BleManager(
         onConnectionStateChange = { state, connected ->
             _connectionState.value = state
             _isConnected.value = connected
-            if (!connected) {
+
+            // Обнуляем только если реально отключились
+            if (!connected && state == context.getString(R.string.ble_state_disconnected)) {
+                bluetoothGatt?.close()
                 bluetoothGatt = null
                 if (!isManualDisconnect) {
                     startAutoReconnect()
@@ -86,8 +89,12 @@ class BleManager(
         onTelemetryUpdate = { _telemetry.value = it },
         onSystemInfoUpdate = { _systemInfo.value = it },
         onOtaFeedback = { _otaFeedback.value = it },
-        onServicesDiscovered = { handleServicesDiscovered(it) },
+        onServicesDiscovered = { gatt ->
+            bluetoothGatt = gatt // Обновляем ссылку на актуальный объект
+            handleServicesDiscovered(gatt)
+        },
         onMtuChanged = { gatt ->
+            bluetoothGatt = gatt // Обновляем ссылку на актуальный объект
             if (!subscribeToCharacteristics(gatt)) {
                 _connectionState.value = context.getString(R.string.ble_state_error_protocol)
                 disconnect()
@@ -160,8 +167,8 @@ class BleManager(
 
     fun writeControlData(data: ControlData) {
         val characteristic = getCharacteristic(BleConstants.CONTROL_UUID) ?: return
-
         val buffer = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN)
+
         buffer.putShort(data.accMin.toShort())
         buffer.putShort(data.accMax.toShort())
         buffer.putShort(data.servoMin.toShort())
@@ -174,7 +181,7 @@ class BleManager(
         )
     }
 
-    fun writeOtaChunk(otaChunk: OtaChunk) {
+    fun writeOtaChunk(otaChunk: OTAChunk) {
         val characteristic = getCharacteristic(BleConstants.OTA_UUID) ?: return
         val packageSize = otaChunk.data.size
         val buffer = ByteBuffer.allocate(packageSize + 10).order(ByteOrder.LITTLE_ENDIAN)
@@ -207,7 +214,8 @@ class BleManager(
         val descriptor = telemetryChar.getDescriptor(BleConstants.DESCRIPTION_UUID) ?: return false
 
         // На API 35 пишем дескриптор напрямую новым методом
-        val statusCode = gatt.writeDescriptor(descriptor, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
+        val statusCode =
+            gatt.writeDescriptor(descriptor, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
         return statusCode == BluetoothGatt.GATT_SUCCESS
     }
 

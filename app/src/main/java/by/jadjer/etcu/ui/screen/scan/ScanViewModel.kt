@@ -4,10 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import by.jadjer.etcu.ETCUApplication
 import by.jadjer.etcu.domain.model.DiscoveredDevice
-import by.jadjer.etcu.domain.repository.BleRepository
+import by.jadjer.etcu.domain.repository.BLERepository
 import kotlinx.coroutines.flow.*
 
-class ScanViewModel(private val repository: BleRepository) : ViewModel() {
+class ScanViewModel(private val repository: BLERepository) : ViewModel() {
     
     val connectionState: StateFlow<String> = repository.connectionState
     val isScanning: StateFlow<Boolean> = repository.isScanning

@@ -1,6 +1,6 @@
 package by.jadjer.etcu.domain.model
 
-data class EcuTelemetry(
+data class ECUTelemetry(
     val isConnected: Boolean = false,
     val isStarted: Boolean = false,
     val isClutchEnabled: Boolean = false,

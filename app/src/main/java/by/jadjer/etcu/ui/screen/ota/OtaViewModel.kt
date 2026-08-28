@@ -4,9 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import by.jadjer.etcu.ETCUApplication
-import by.jadjer.etcu.domain.model.OtaChunk
-import by.jadjer.etcu.domain.repository.BleRepository
-import by.jadjer.etcu.domain.repository.OtaRepository
+import by.jadjer.etcu.domain.model.OTAChunk
+import by.jadjer.etcu.domain.repository.BLERepository
+import by.jadjer.etcu.domain.repository.OTARepository
 import by.jadjer.etcu.domain.util.Resource
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -14,16 +14,20 @@ import kotlinx.coroutines.launch
 sealed class OtaState {
     object Idle : OtaState()
     object CheckingUpdates : OtaState()
-    data class UpdateAvailable(val version: String, val downloadUrl: String, val size: Long) : OtaState()
+    data class UpdateAvailable(val version: String, val downloadUrl: String, val size: Long) :
+        OtaState()
+
     data class Downloading(val progress: Float) : OtaState()
-    data class Uploading(val progress: Float, val currentChunk: Int, val totalChunks: Int) : OtaState()
+    data class Uploading(val progress: Float, val currentChunk: Int, val totalChunks: Int) :
+        OtaState()
+
     object Success : OtaState()
     data class Error(val message: String) : OtaState()
 }
 
 class OtaViewModel(
-    private val bleRepository: BleRepository,
-    private val otaRepository: OtaRepository
+    private val bleRepository: BLERepository,
+    private val otaRepository: OTARepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<OtaState>(OtaState.Idle)
@@ -60,13 +64,19 @@ class OtaViewModel(
             when (val result = otaRepository.getLatestRelease()) {
                 is Resource.Success -> {
                     val release = result.data
-                    val isNewer = currentVersion == null || isVersionNewer(release.version, currentVersion)
+                    val isNewer =
+                        currentVersion == null || isVersionNewer(release.version, currentVersion)
                     if (isNewer) {
-                        _state.value = OtaState.UpdateAvailable(release.version, release.downloadUrl, release.size)
+                        _state.value = OtaState.UpdateAvailable(
+                            release.version,
+                            release.downloadUrl,
+                            release.size
+                        )
                     } else {
                         _state.value = OtaState.Idle
                     }
                 }
+
                 is Resource.Error -> {
                     _state.value = OtaState.Error(result.message)
                 }
@@ -88,11 +98,12 @@ class OtaViewModel(
                 is Resource.Success -> {
                     val data = result.data
                     firmwareData = data
-                    val packageSize = 200 
+                    val packageSize = 200
                     totalChunks = (data.size + packageSize - 1) / packageSize
                     _state.value = OtaState.Uploading(0f, 0, totalChunks)
                     sendNextChunk(0)
                 }
+
                 is Resource.Error -> {
                     _state.value = OtaState.Error(result.message)
                 }
@@ -103,7 +114,7 @@ class OtaViewModel(
     private fun sendNextChunk(chunkNumber: Int) {
         val data = firmwareData ?: return
         val packageSize = 200
-        
+
         if (chunkNumber >= totalChunks) {
             _state.value = OtaState.Success
             return
@@ -113,11 +124,12 @@ class OtaViewModel(
         val end = minOf(start + packageSize, data.size)
         val chunkData = data.sliceArray(start until end)
 
-        val chunk = OtaChunk(
-            data = chunkData,
-            chunkNumber = chunkNumber,
+        val chunk = OTAChunk(
+            firmwareSize = data.size.toLong(),
             totalChunks = totalChunks,
-            firmwareSize = data.size.toLong()
+            chunkNumber = chunkNumber,
+            chunkSize = packageSize,
+            data = chunkData,
         )
 
         _state.value = OtaState.Uploading(
@@ -125,7 +137,7 @@ class OtaViewModel(
             currentChunk = chunkNumber,
             totalChunks = totalChunks
         )
-        
+
         bleRepository.sendOtaChunk(chunk)
     }
 

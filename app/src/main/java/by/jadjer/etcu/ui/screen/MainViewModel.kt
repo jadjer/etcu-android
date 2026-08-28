@@ -4,11 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import by.jadjer.etcu.ETCUApplication
 import by.jadjer.etcu.domain.model.SystemTelemetry
-import by.jadjer.etcu.domain.repository.BleRepository
+import by.jadjer.etcu.domain.repository.BLERepository
 import kotlinx.coroutines.flow.StateFlow
 
 class MainViewModel(
-    private val bleRepository: BleRepository
+    private val bleRepository: BLERepository
 ) : ViewModel() {
 
     val isConnected: StateFlow<Boolean> = bleRepository.isConnected

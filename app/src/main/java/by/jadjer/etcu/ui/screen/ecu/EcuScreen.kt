@@ -16,7 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
-import by.jadjer.etcu.domain.model.EcuTelemetry
+import by.jadjer.etcu.domain.model.ECUTelemetry
 import by.jadjer.etcu.ui.component.StatusIndicator
 import by.jadjer.etcu.ui.component.TelemetryRow
 
@@ -27,7 +27,7 @@ fun EcuScreen(viewModel: EcuViewModel) {
 }
 
 @Composable
-fun EcuScreenContent(telemetry: EcuTelemetry) {
+fun EcuScreenContent(telemetry: ECUTelemetry) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -83,7 +83,7 @@ fun EcuScreenContent(telemetry: EcuTelemetry) {
 fun EcuScreenPreview() {
     MaterialTheme {
         EcuScreenContent(
-            telemetry = EcuTelemetry(
+            telemetry = ECUTelemetry(
                 isConnected = true,
                 rpm = 2500,
                 speed = 60,

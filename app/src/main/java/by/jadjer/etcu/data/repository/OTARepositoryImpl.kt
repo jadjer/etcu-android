@@ -5,16 +5,16 @@ import by.jadjer.etcu.R
 import by.jadjer.etcu.data.network.GitHubService
 import by.jadjer.etcu.data.network.NetworkConstants
 import by.jadjer.etcu.domain.model.FirmwareRelease
-import by.jadjer.etcu.domain.repository.OtaRepository
+import by.jadjer.etcu.domain.repository.OTARepository
 import by.jadjer.etcu.domain.util.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 
-class OtaRepositoryImpl(
+class OTARepositoryImpl(
     private val service: GitHubService,
     private val context: Context
-) : OtaRepository {
+) : OTARepository {
 
     override suspend fun getLatestRelease(): Resource<FirmwareRelease> = withContext(Dispatchers.IO) {
         try {

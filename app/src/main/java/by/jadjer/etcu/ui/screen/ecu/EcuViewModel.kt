@@ -4,17 +4,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import by.jadjer.etcu.ETCUApplication
-import by.jadjer.etcu.domain.model.EcuTelemetry
-import by.jadjer.etcu.domain.repository.BleRepository
+import by.jadjer.etcu.domain.model.ECUTelemetry
+import by.jadjer.etcu.domain.repository.BLERepository
 import kotlinx.coroutines.flow.*
 
-class EcuViewModel(repository: BleRepository) : ViewModel() {
-    val ecuTelemetry: StateFlow<EcuTelemetry> = repository.telemetry
+class EcuViewModel(repository: BLERepository) : ViewModel() {
+    val ecuTelemetry: StateFlow<ECUTelemetry> = repository.telemetry
         .map { it.ecu }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = EcuTelemetry()
+            initialValue = ECUTelemetry()
         )
 
     class Factory(private val app: ETCUApplication) : ViewModelProvider.Factory {

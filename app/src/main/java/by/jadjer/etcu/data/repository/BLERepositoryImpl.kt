@@ -2,12 +2,12 @@ package by.jadjer.etcu.data.repository
 
 import by.jadjer.etcu.data.ble.BleManager
 import by.jadjer.etcu.domain.model.*
-import by.jadjer.etcu.domain.repository.BleRepository
+import by.jadjer.etcu.domain.repository.BLERepository
 import kotlinx.coroutines.flow.StateFlow
 
-class BleRepositoryImpl(
+class BLERepositoryImpl(
     private val bleManager: BleManager
-) : BleRepository {
+) : BLERepository {
     override val connectionState: StateFlow<String> = bleManager.connectionState
     override val isConnected: StateFlow<Boolean> = bleManager.isConnected
     override val controlData: StateFlow<ControlData> = bleManager.controlData
@@ -26,5 +26,5 @@ class BleRepositoryImpl(
     override fun clearLastMac() = bleManager.clearLastMac()
 
     override fun sendControlData(data: ControlData) = bleManager.writeControlData(data)
-    override fun sendOtaChunk(chunk: OtaChunk) = bleManager.writeOtaChunk(chunk)
+    override fun sendOtaChunk(chunk: OTAChunk) = bleManager.writeOtaChunk(chunk)
 }

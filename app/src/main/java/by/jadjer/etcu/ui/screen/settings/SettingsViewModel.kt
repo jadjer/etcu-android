@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import by.jadjer.etcu.ETCUApplication
 import by.jadjer.etcu.domain.model.ControlData
 import by.jadjer.etcu.domain.model.SystemInfo
-import by.jadjer.etcu.domain.repository.BleRepository
+import by.jadjer.etcu.domain.repository.BLERepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
-class SettingsViewModel(private val repository: BleRepository) : ViewModel() {
+class SettingsViewModel(private val repository: BLERepository) : ViewModel() {
 
     private val _controlData = MutableStateFlow(ControlData())
     val controlData: StateFlow<ControlData> = _controlData.asStateFlow()
@@ -69,7 +69,7 @@ class SettingsViewModel(private val repository: BleRepository) : ViewModel() {
     private fun scheduleUpdate(data: ControlData) {
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
-            delay(100.milliseconds)
+            delay(250.milliseconds)
             repository.sendControlData(data)
         }
     }
