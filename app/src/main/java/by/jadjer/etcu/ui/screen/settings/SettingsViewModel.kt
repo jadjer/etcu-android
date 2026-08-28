@@ -69,7 +69,7 @@ class SettingsViewModel(private val repository: BleRepository) : ViewModel() {
     private fun scheduleUpdate(data: ControlData) {
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
-            delay(100.milliseconds) // Задержка 100мс перед отправкой
+            delay(100.milliseconds)
             repository.sendControlData(data)
         }
     }

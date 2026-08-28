@@ -2,10 +2,8 @@ package by.jadjer.etcu.ui.screen.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -15,7 +13,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -27,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.ControlData
 import by.jadjer.etcu.domain.model.SystemInfo
+import by.jadjer.etcu.ui.component.ControlRangeSlider
 import by.jadjer.etcu.ui.component.TelemetryRow
 
 @Composable
@@ -97,31 +95,19 @@ fun SettingsScreenContent(
         Text(stringResource(R.string.settings_control), style = MaterialTheme.typography.titleLarge)
 
         Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(stringResource(R.string.settings_accel_range, controlData.accMin, controlData.accMax))
-
-                RangeSlider(
-                    value = controlData.accMin.toFloat()..controlData.accMax.toFloat(),
-                    onValueChange = { range ->
-                        onAccRangeChange(range.start, range.endInclusive)
-                    },
-                    valueRange = 0f..1000f,
-                    steps = 100
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                ControlRangeSlider(
+                    label = stringResource(R.string.settings_accel_range, controlData.accMin, controlData.accMax),
+                    currentMin = controlData.accMin,
+                    currentMax = controlData.accMax,
+                    onRangeChange = onAccRangeChange
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(stringResource(R.string.settings_servo_range, controlData.servoMin, controlData.servoMax))
-
-                RangeSlider(
-                    value = controlData.servoMin.toFloat()..controlData.servoMax.toFloat(),
-                    onValueChange = { range ->
-                        onServoRangeChange(range.start, range.endInclusive)
-                    },
-                    valueRange = 0f..1000f,
-                    steps = 100
+                ControlRangeSlider(
+                    label = stringResource(R.string.settings_servo_range, controlData.servoMin, controlData.servoMax),
+                    currentMin = controlData.servoMin,
+                    currentMax = controlData.servoMax,
+                    onRangeChange = onServoRangeChange
                 )
             }
         }
