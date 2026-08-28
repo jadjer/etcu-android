@@ -1,6 +1,13 @@
 <resources>
     <string name="app_name">ETCU</string>
 
+    <!-- Navigation -->
+    <string name="nav_ecu">ЭБУ</string>
+    <string name="nav_servo">Прывад</string>
+    <string name="nav_system">Сістэма</string>
+    <string name="nav_ota">OTA</string>
+    <string name="nav_settings">Налады</string>
+
     <!-- BLE Connection States -->
     <string name="ble_state_disconnected">Адключана</string>
     <string name="ble_state_connecting">Злучэнне з %s…</string>
@@ -64,10 +71,30 @@
     <!-- System Screen -->
     <string name="system_telemetry_title">Бягучая тэлеметрыя</string>
     <string name="system_mode">Рэжым сістэмы</string>
-    <string name="system_accel">Акселератар</string>
+    <string name="system_accel">Акселератара</string>
     <string name="system_throttle_target">Дросель (мэта)</string>
     <string name="system_guard">Абарона (Guard)</string>
     <string name="system_brake">Тормаз</string>
+
+    <!-- System States -->
+    <string name="sys_state_off">Выключаны</string>
+    <string name="sys_state_normal">Нармальны</string>
+    <string name="sys_state_calibration">Каліброўка</string>
+    <string name="sys_state_update">Абнаўленне</string>
+
+    <!-- Diagnostics -->
+    <string name="diag_title">Статус дыягностыкі:</string>
+    <string name="diag_no_errors">✅ Памылак не выяўлена</string>
+
+    <!-- Units -->
+    <string name="unit_rpm">аб/мін</string>
+    <string name="unit_kmh">км/г</string>
+    <string name="unit_ma">мА</string>
+    <string name="unit_v">В</string>
+    <string name="unit_celsius">°C</string>
+    <string name="unit_raw_1000">/ 1000</string>
+    <string name="unit_raw_1024">/ 1024</string>
+    <string name="unit_meters">м</string>
 
     <!-- Settings Screen -->
     <string name="settings_device_info">Інфармацыя аб прыладзе</string>
@@ -127,4 +154,10 @@
     <string name="btn_try_again">Паспрабаваць зноў</string>
     <string name="ota_error_no_release">Рэліз не знойдзены або адсутнічае .bin файл</string>
     <string name="ota_error_download">Памылка спампоўкі прашыўкі</string>
+    <string name="ota_error_server">Памылка сервера: %d</string>
+    <string name="ota_error_network">Памылка сеткі: %s</string>
+    <string name="ota_error_empty">Пусты адказ ад сервера</string>
+
+    <!-- Misc -->
+    <string name="unknown">Невядома</string>
 </resources>

@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
+import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.SystemError
 
 @Composable
@@ -20,7 +21,7 @@ fun ErrorsBlock(activeErrors: List<SystemError>) {
             .padding(vertical = 8.dp)
     ) {
         Text(
-            text = "Статус диагностики:",
+            text = stringResource(R.string.diag_title),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
@@ -32,7 +33,7 @@ fun ErrorsBlock(activeErrors: List<SystemError>) {
                     .background(Color(0xFFE8F5E9), RoundedCornerShape(8.dp))
                     .padding(12.dp)
             ) {
-                Text(text = "✅ Ошибок не обнаружено", color = Color(0xFF2E7D32))
+                Text(text = stringResource(R.string.diag_no_errors), color = Color(0xFF2E7D32))
             }
         } else {
             activeErrors.forEach { error ->

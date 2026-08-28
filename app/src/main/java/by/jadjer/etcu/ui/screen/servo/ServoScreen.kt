@@ -43,26 +43,26 @@ fun ServoScreenContent(telemetry: ServoTelemetry) {
         TelemetryRow(
             label = stringResource(R.string.servo_position),
             value = telemetry.position.toString(),
-            unit = "/ 1024"
+            unit = stringResource(R.string.unit_raw_1024)
         )
         
         TelemetryRow(
             label = stringResource(R.string.servo_current),
             value = telemetry.current.toString(),
-            unit = "мА",
+            unit = stringResource(R.string.unit_ma),
             icon = Icons.Default.Bolt
         )
         
         TelemetryRow(
             label = stringResource(R.string.servo_voltage),
             value = telemetry.voltage.toString(),
-            unit = "В"
+            unit = stringResource(R.string.unit_v)
         )
         
         TelemetryRow(
             label = stringResource(R.string.servo_temp),
             value = telemetry.temperature.toString(),
-            unit = "°C",
+            unit = stringResource(R.string.unit_celsius),
             icon = Icons.Default.DeviceThermostat
         )
         

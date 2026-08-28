@@ -137,8 +137,9 @@ fun ScanScreenContent(
 
 @Composable
 private fun DeviceItem(device: DiscoveredDevice, onClick: () -> Unit) {
+    val deviceName = device.name.ifEmpty { stringResource(R.string.unknown) }
     ListItem(
-        headlineContent = { Text(device.name) },
+        headlineContent = { Text(deviceName) },
         supportingContent = { 
             Column {
                 Text(device.macAddress)

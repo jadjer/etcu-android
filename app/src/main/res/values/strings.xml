@@ -1,6 +1,13 @@
 <resources>
     <string name="app_name">ETCU</string>
 
+    <!-- Navigation -->
+    <string name="nav_ecu">ECU</string>
+    <string name="nav_servo">Servo</string>
+    <string name="nav_system">System</string>
+    <string name="nav_ota">OTA</string>
+    <string name="nav_settings">Settings</string>
+
     <!-- BLE Connection States -->
     <string name="ble_state_disconnected">Disconnected</string>
     <string name="ble_state_connecting">Connecting to %s…</string>
@@ -69,6 +76,26 @@
     <string name="system_guard">Guard Mode</string>
     <string name="system_brake">Brake</string>
 
+    <!-- System States -->
+    <string name="sys_state_off">Off</string>
+    <string name="sys_state_normal">Normal</string>
+    <string name="sys_state_calibration">Calibration</string>
+    <string name="sys_state_update">Update</string>
+
+    <!-- Diagnostics -->
+    <string name="diag_title">Diagnostic Status:</string>
+    <string name="diag_no_errors">✅ No errors detected</string>
+
+    <!-- Units -->
+    <string name="unit_rpm">RPM</string>
+    <string name="unit_kmh">km/h</string>
+    <string name="unit_ma">mA</string>
+    <string name="unit_v">V</string>
+    <string name="unit_celsius">°C</string>
+    <string name="unit_raw_1000">/ 1000</string>
+    <string name="unit_raw_1024">/ 1024</string>
+    <string name="unit_meters">m</string>
+
     <!-- Settings Screen -->
     <string name="settings_device_info">Device Information</string>
     <string name="settings_board_version">Board Version</string>
@@ -127,4 +154,10 @@
     <string name="btn_try_again">Try Again</string>
     <string name="ota_error_no_release">Release not found or .bin file missing</string>
     <string name="ota_error_download">Firmware download error</string>
+    <string name="ota_error_server">Server error: %d</string>
+    <string name="ota_error_network">Network error: %s</string>
+    <string name="ota_error_empty">Empty response from server</string>
+
+    <!-- Misc -->
+    <string name="unknown">Unknown</string>
 </resources>

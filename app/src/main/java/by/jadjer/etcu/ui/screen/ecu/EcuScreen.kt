@@ -44,21 +44,21 @@ fun EcuScreenContent(telemetry: EcuTelemetry) {
         TelemetryRow(
             label = stringResource(R.string.ecu_rpm),
             value = telemetry.rpm.toString(),
-            unit = "RPM",
+            unit = stringResource(R.string.unit_rpm),
             icon = Icons.Default.Timer
         )
         
         TelemetryRow(
             label = stringResource(R.string.ecu_speed),
             value = telemetry.speed.toString(),
-            unit = "км/ч",
+            unit = stringResource(R.string.unit_kmh),
             icon = Icons.Default.Speed
         )
         
         TelemetryRow(
             label = stringResource(R.string.ecu_tps),
             value = telemetry.tps.toString(),
-            unit = "/ 1000",
+            unit = stringResource(R.string.unit_raw_1000),
             icon = Icons.Default.DirectionsCar
         )
         

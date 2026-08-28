@@ -8,6 +8,8 @@ import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.os.ParcelUuid
+import android.content.Context
+import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.DiscoveredDevice
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +18,10 @@ import kotlinx.coroutines.flow.*
 import kotlin.math.pow
 
 @SuppressLint("MissingPermission")
-class BleScanner(private val bluetoothAdapter: BluetoothAdapter?) {
+class BleScanner(
+    private val context: Context,
+    private val bluetoothAdapter: BluetoothAdapter?
+) {
     private val _scannerScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     private val _discoveredDevices = MutableStateFlow<Map<String, DiscoveredDevice>>(emptyMap())
@@ -38,7 +43,7 @@ class BleScanner(private val bluetoothAdapter: BluetoothAdapter?) {
                 _discoveredDevices.update { currentMap ->
                     val distance = calculateDistance(result.rssi)
                     currentMap + (device.address to DiscoveredDevice(
-                        name = device.name ?: "Unknown",
+                        name = device.name ?: context.getString(R.string.unknown),
                         macAddress = device.address,
                         rssi = result.rssi,
                         distance = distance,

@@ -39,7 +39,7 @@ class BleManager(
     private val bluetoothAdapter: BluetoothAdapter? = bluetoothManager?.adapter
 
     private val dataParser = BleDataParser()
-    val scanner = BleScanner(bluetoothAdapter)
+    val scanner = BleScanner(context, bluetoothAdapter)
 
     private var bluetoothGatt: BluetoothGatt? = null
 

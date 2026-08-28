@@ -6,13 +6,13 @@ import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SettingsInputComponent
 import androidx.compose.material.icons.filled.SystemUpdate
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
+import by.jadjer.etcu.R
 
-sealed class ScreenItem(val title: String, val icon: ImageVector) {
-    object Ecu : ScreenItem("ECU", Icons.Default.DirectionsCar)
-    object Servo : ScreenItem("Servo", Icons.Default.SettingsInputComponent)
-    object System : ScreenItem("System", Icons.Default.Dns)
-    object Ota : ScreenItem("OTA", Icons.Default.SystemUpdate)
-    object Settings : ScreenItem("Settings", Icons.Default.Settings)
+sealed class ScreenItem(val titleResId: Int, val icon: ImageVector) {
+    object Ecu : ScreenItem(R.string.nav_ecu, Icons.Default.DirectionsCar)
+    object Servo : ScreenItem(R.string.nav_servo, Icons.Default.SettingsInputComponent)
+    object System : ScreenItem(R.string.nav_system, Icons.Default.Dns)
+    object Ota : ScreenItem(R.string.nav_ota, Icons.Default.SystemUpdate)
+    object Settings : ScreenItem(R.string.nav_settings, Icons.Default.Settings)
 }

@@ -41,21 +41,21 @@ fun SystemScreenContent(
 
         TelemetryRow(
             label = stringResource(R.string.system_mode),
-            value = telemetry.systemState.name,
+            value = stringResource(telemetry.systemState.resId),
             icon = Icons.Default.Info
         )
         
         TelemetryRow(
             label = stringResource(R.string.system_accel),
             value = telemetry.acceleratorPosition.toString(),
-            unit = "/ 1000",
+            unit = stringResource(R.string.unit_raw_1000),
             icon = Icons.Default.PedalBike
         )
         
         TelemetryRow(
             label = stringResource(R.string.system_throttle_target),
             value = telemetry.throttlePosition.toString(),
-            unit = "/ 1000"
+            unit = stringResource(R.string.unit_raw_1000)
         )
         
         StatusIndicator(

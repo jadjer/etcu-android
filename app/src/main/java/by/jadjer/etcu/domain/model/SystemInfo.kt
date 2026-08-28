@@ -1,7 +1,7 @@
 package by.jadjer.etcu.domain.model
 
 data class SystemInfo(
-    val buildDate: String = "Unknown",
-    val boardVersion: String = "Unknown",
-    val firmwareVersion: String = "0.0.0"
+    val buildDate: String = "",
+    val boardVersion: String = "",
+    val firmwareVersion: String = ""
 )

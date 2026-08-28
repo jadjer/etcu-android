@@ -79,17 +79,17 @@ fun SettingsScreenContent(
 
         TelemetryRow(
             label = stringResource(R.string.settings_board_version),
-            value = systemInfo.boardVersion
+            value = systemInfo.boardVersion.ifEmpty { stringResource(R.string.unknown) }
         )
 
         TelemetryRow(
             label = stringResource(R.string.settings_build_date),
-            value = systemInfo.buildDate
+            value = systemInfo.buildDate.ifEmpty { stringResource(R.string.unknown) }
         )
 
         TelemetryRow(
             label = stringResource(R.string.settings_firmware_version),
-            value = systemInfo.firmwareVersion
+            value = systemInfo.firmwareVersion.ifEmpty { "0.0.0" }
         )
 
         HorizontalDivider()

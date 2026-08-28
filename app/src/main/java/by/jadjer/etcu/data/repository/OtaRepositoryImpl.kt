@@ -1,5 +1,7 @@
 package by.jadjer.etcu.data.repository
 
+import android.content.Context
+import by.jadjer.etcu.R
 import by.jadjer.etcu.data.network.GitHubService
 import by.jadjer.etcu.data.network.NetworkConstants
 import by.jadjer.etcu.domain.model.FirmwareRelease
@@ -7,9 +9,11 @@ import by.jadjer.etcu.domain.repository.OtaRepository
 import by.jadjer.etcu.domain.util.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 
 class OtaRepositoryImpl(
-    private val service: GitHubService
+    private val service: GitHubService,
+    private val context: Context
 ) : OtaRepository {
 
     override suspend fun getLatestRelease(): Resource<FirmwareRelease> = withContext(Dispatchers.IO) {
@@ -27,13 +31,13 @@ class OtaRepositoryImpl(
                         size = asset.size
                     ))
                 } else {
-                    Resource.Error("Релиз не найден или отсутствует .bin файл")
+                    Resource.Error(context.getString(R.string.ota_error_no_release))
                 }
             } else {
-                Resource.Error("Ошибка сервера: ${response.code()}")
+                Resource.Error(context.getString(R.string.ota_error_server, response.code()))
             }
         } catch (e: Exception) {
-            Resource.Error("Ошибка сети: ${e.message}", e)
+            Resource.Error(context.getString(R.string.ota_error_network, e.message ?: ""))
         }
     }
 
@@ -45,13 +49,13 @@ class OtaRepositoryImpl(
         try {
             val response = service.downloadFile(url)
             if (response.isSuccessful) {
-                val body = response.body() ?: return@withContext Resource.Error("Пустой ответ от сервера")
+                val body = response.body() ?: return@withContext Resource.Error(context.getString(R.string.ota_error_empty))
                 
                 // Используем размер из заголовка, если он есть, иначе берем переданный ожидаемый размер
                 val contentLength = if (body.contentLength() > 0) body.contentLength() else expectedSize
                 
                 val inputStream = body.byteStream()
-                val outputStream = java.io.ByteArrayOutputStream()
+                val outputStream = ByteArrayOutputStream()
                 val buffer = ByteArray(8 * 1024)
                 var bytesRead: Int
                 var totalBytesRead: Long = 0
@@ -67,10 +71,10 @@ class OtaRepositoryImpl(
 
                 Resource.Success(outputStream.toByteArray())
             } else {
-                Resource.Error("Ошибка загрузки: ${response.code()}")
+                Resource.Error(context.getString(R.string.ota_error_server, response.code()))
             }
         } catch (e: Exception) {
-            Resource.Error("Ошибка сети: ${e.message}", e)
+            Resource.Error(context.getString(R.string.ota_error_network, e.message ?: ""))
         }
     }
 }

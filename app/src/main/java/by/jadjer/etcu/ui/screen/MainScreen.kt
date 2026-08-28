@@ -27,10 +27,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import by.jadjer.etcu.ETCUApplication
+import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.EcuTelemetry
 import by.jadjer.etcu.ui.component.ErrorsBlock
 import by.jadjer.etcu.ui.navigation.ScreenItem
@@ -95,7 +97,7 @@ private fun MainScreenContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("ETCU") },
+                title = { Text(stringResource(R.string.app_name)) },
                 actions = {
                     Text(
                         text = connectionStatus,
@@ -175,9 +177,10 @@ private fun MainNavigationBar(
     )
     NavigationBar {
         items.forEach { screen ->
+            val title = stringResource(screen.titleResId)
             NavigationBarItem(
-                icon = { Icon(screen.icon, contentDescription = screen.title) },
-                label = { Text(screen.title) },
+                icon = { Icon(screen.icon, contentDescription = title) },
+                label = { Text(title) },
                 selected = selectedScreen == screen,
                 onClick = { onScreenSelected(screen) }
             )

@@ -44,6 +44,6 @@ class AppContainer(context: Context) {
     }
 
     val otaRepository: OtaRepository by lazy {
-        OtaRepositoryImpl(githubService)
+        OtaRepositoryImpl(githubService, context)
     }
 }
