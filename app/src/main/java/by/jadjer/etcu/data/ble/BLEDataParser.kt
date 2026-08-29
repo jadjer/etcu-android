@@ -1,34 +1,36 @@
 package by.jadjer.etcu.data.ble
 
-import by.jadjer.etcu.domain.model.*
+import by.jadjer.etcu.domain.model.ControlData
+import by.jadjer.etcu.domain.model.ECUTelemetry
+import by.jadjer.etcu.domain.model.OTAChunk
+import by.jadjer.etcu.domain.model.OTAStatus
+import by.jadjer.etcu.domain.model.ServoTelemetry
+import by.jadjer.etcu.domain.model.SystemError
+import by.jadjer.etcu.domain.model.SystemInfo
+import by.jadjer.etcu.domain.model.SystemState
+import by.jadjer.etcu.domain.model.SystemTelemetry
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 class BLEDataParser {
 
     companion object {
-        const val MIN_CONTROL_DATA_SIZE = 8
-        const val SYSTEM_INFO_SIZE = 48
-        const val MIN_TELEMETRY_SIZE = 30
-        
-        const val INFO_STR_LEN = 16
+        private const val MIN_CONTROL_DATA_SIZE = 8
+        private const val SYSTEM_INFO_SIZE = 48
+        private const val MIN_TELEMETRY_SIZE = 30
+        private const val INFO_STR_LEN = 16
     }
 
     fun parseControlData(bytes: ByteArray): ControlData {
         if (bytes.size < MIN_CONTROL_DATA_SIZE) return ControlData()
 
         return try {
-            val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
-            val accMin = buffer.short.toInt() and 0xFFFF
-            val accMax = buffer.short.toInt() and 0xFFFF
-            val servoMin = buffer.short.toInt() and 0xFFFF
-            val servoMax = buffer.short.toInt() and 0xFFFF
-
+            val buffer = bytes.toLittleEndianBuffer()
             ControlData(
-                accMin = accMin,
-                accMax = accMax,
-                servoMin = servoMin,
-                servoMax = servoMax,
+                accMin = buffer.uShort,
+                accMax = buffer.uShort,
+                servoMin = buffer.uShort,
+                servoMax = buffer.uShort,
             )
         } catch (_: Exception) {
             ControlData()
@@ -39,9 +41,9 @@ class BLEDataParser {
         if (bytes.size < SYSTEM_INFO_SIZE) return SystemInfo()
 
         return try {
-            val buildDate = String(bytes, 0, INFO_STR_LEN, Charsets.UTF_8).trim { it <= '\u0000' }
-            val boardVersion = String(bytes, INFO_STR_LEN, INFO_STR_LEN, Charsets.UTF_8).trim { it <= '\u0000' }
-            val firmwareVersion = String(bytes, INFO_STR_LEN * 2, INFO_STR_LEN, Charsets.UTF_8).trim { it <= '\u0000' }
+            val buildDate = bytes.readString(0, INFO_STR_LEN)
+            val boardVersion = bytes.readString(INFO_STR_LEN, INFO_STR_LEN)
+            val firmwareVersion = bytes.readString(INFO_STR_LEN * 2, INFO_STR_LEN)
 
             SystemInfo(
                 boardVersion = boardVersion,
@@ -57,94 +59,79 @@ class BLEDataParser {
         if (bytes.size < MIN_TELEMETRY_SIZE) return SystemTelemetry()
 
         return try {
-            val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
-
-            // 1. System-level flags (bools)
-            val isGuardActive = buffer.get().toInt() != 0
-            val isBrakeEnabled = buffer.get().toInt() != 0
-
-            // 2. ECUTelemetry (9 bytes)
-            val ecu = parseEcuTelemetry(buffer)
-
-            // 3. ServoTelemetry (13 bytes)
-            val servo = parseServoTelemetry(buffer)
-
-            // 4. SystemTelemetry Remaining fields
-            val targetSpeed = buffer.get().toInt() and 0xFF
-            val throttlePos = buffer.short.toInt() and 0xFFFF
-            val accelPos = buffer.short.toInt() and 0xFFFF
-
-            val systemState = SystemState.fromByte(buffer.get())
-
-            val rawErrorsMask = buffer.int.toLong() and 0xFFFFFFFFL
-            val activeErrorsList = SystemError.parseErrors(rawErrorsMask)
+            val buffer = bytes.toLittleEndianBuffer()
 
             SystemTelemetry(
-                isGuardActive = isGuardActive,
-                isBrakeEnabled = isBrakeEnabled,
-                ecu = ecu,
-                servo = servo,
-                acceleratorPosition = accelPos,
-                throttlePosition = throttlePos,
-                targetSpeed = targetSpeed,
-                systemState = systemState,
-                activeErrors = activeErrorsList
+                isGuardActive = buffer.bool,
+                isBrakeEnabled = buffer.bool,
+                ecu = buffer.parseEcuTelemetry(),
+                servo = buffer.parseServoTelemetry(),
+                targetSpeed = buffer.uByte,
+                throttlePosition = buffer.uShort,
+                acceleratorPosition = buffer.uShort,
+                systemState = SystemState.fromByte(buffer.get()),
+                activeErrors = SystemError.parseErrors(buffer.uInt)
             )
         } catch (_: Exception) {
             SystemTelemetry()
         }
     }
 
-    private fun parseEcuTelemetry(buffer: ByteBuffer): ECUTelemetry {
-        val isConnected = buffer.get().toInt() != 0
-        val isStarted = buffer.get().toInt() != 0
-        val isClutchEnabled = buffer.get().toInt() != 0
+    private fun ByteBuffer.parseEcuTelemetry() = ECUTelemetry(
+        isConnected = bool,
+        isStarted = bool,
+        isClutchEnabled = bool,
+        rpm = uShort,
+        speed = uByte,
+        tps = uShort,
+    )
 
-        val rpm = buffer.short.toInt() and 0xFFFF
-        val speed = buffer.get().toInt() and 0xFF
-        val tps = buffer.short.toInt() and 0xFFFF
-
-        return ECUTelemetry(
-            isConnected = isConnected,
-            isStarted = isStarted,
-            isClutchEnabled = isClutchEnabled,
-            rpm = rpm,
-            speed = speed,
-            tps = tps,
-        )
-    }
-
-    private fun parseServoTelemetry(buffer: ByteBuffer): ServoTelemetry {
-        val isConnected = buffer.get().toInt() != 0
-        val isEnabled = buffer.get().toInt() != 0
-        val isMoved = buffer.get().toInt() != 0
-
-        val speed = buffer.get().toInt() and 0xFF
-        val voltage = buffer.get().toInt() and 0xFF
-        val current = buffer.short.toInt() and 0xFFFF
-        val position = buffer.short.toInt() and 0xFFFF
-        val temperature = buffer.get().toInt() and 0xFF
-
-        return ServoTelemetry(
-            isConnected = isConnected,
-            isEnabled = isEnabled,
-            isMoved = isMoved,
-            speed = speed,
-            current = current,
-            voltage = voltage,
-            position = position,
-            temperature = temperature
-        )
-    }
+    private fun ByteBuffer.parseServoTelemetry() = ServoTelemetry(
+        isConnected = bool,
+        isEnabled = bool,
+        isMoved = bool,
+        speed = uByte,
+        voltage = uByte,
+        current = uShort,
+        position = uShort,
+        temperature = uByte
+    )
 
     fun parseOtaFeedback(bytes: ByteArray): OTAStatus {
         if (bytes.isEmpty()) return OTAStatus.ERROR
-
         return try {
-            val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
-            OTAStatus.fromByte(buffer.get())
+            OTAStatus.fromByte(bytes[0])
         } catch (_: Exception) {
             OTAStatus.ERROR
         }
     }
+
+    fun serializeControlData(data: ControlData): ByteArray {
+        return ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN)
+            .putShort(data.accMin.toShort())
+            .putShort(data.accMax.toShort())
+            .putShort(data.servoMin.toShort())
+            .putShort(data.servoMax.toShort())
+            .array()
+    }
+
+    fun serializeOtaChunk(chunk: OTAChunk): ByteArray {
+        return ByteBuffer.allocate(BLEConstants.OTA_PACKAGE_SIZE).order(ByteOrder.LITTLE_ENDIAN)
+            .putInt(chunk.firmwareSize.toInt())
+            .putShort(chunk.totalChunks.toShort())
+            .putShort(chunk.chunkNumber.toShort())
+            .put(chunk.data)
+            .array()
+    }
+
+    // Helper Extensions
+    private fun ByteArray.toLittleEndianBuffer() = ByteBuffer.wrap(this).order(ByteOrder.LITTLE_ENDIAN)
+    
+    private fun ByteArray.readString(offset: Int, length: Int) = 
+        String(this, offset, length, Charsets.UTF_8).trim { it <= '\u0000' }
+
+    private val ByteBuffer.bool get() = get().toInt() != 0
+    private val ByteBuffer.uByte get() = get().toInt() and 0xFF
+    private val ByteBuffer.uShort get() = short.toInt() and 0xFFFF
+    private val ByteBuffer.uInt get() = int.toLong() and 0xFFFFFFFFL
 }

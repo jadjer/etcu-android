@@ -1,4 +1,4 @@
-package by.jadjer.etcu.ui.screen.system
+package by.jadjer.etcu.ui.features.device
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -22,7 +22,7 @@ import by.jadjer.etcu.ui.component.StatusIndicator
 import by.jadjer.etcu.ui.component.TelemetryRow
 
 @Composable
-fun SystemScreen(viewModel: SystemViewModel) {
+fun SystemScreen(viewModel: DeviceViewModel) {
     val telemetry by viewModel.telemetry.collectAsState()
     SystemScreenContent(telemetry)
 }

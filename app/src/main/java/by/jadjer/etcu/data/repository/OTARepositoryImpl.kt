@@ -34,7 +34,16 @@ class OTARepositoryImpl(
                     Resource.Error(context.getString(R.string.ota_error_no_release))
                 }
             } else {
-                Resource.Error(context.getString(R.string.ota_error_server, response.code()))
+                val code = response.code()
+                val errorBody = response.errorBody()?.string() ?: ""
+                val rateRemaining = response.headers()["X-RateLimit-Remaining"]
+                
+                val message = if (code == 403 && rateRemaining == "0") {
+                    "GitHub API rate limit exceeded (60 req/hour). Try again later."
+                } else {
+                    "GitHub API Error $code: $errorBody"
+                }
+                Resource.Error(message)
             }
         } catch (e: Exception) {
             Resource.Error(context.getString(R.string.ota_error_network, e.message ?: ""), e)
@@ -72,7 +81,9 @@ class OTARepositoryImpl(
 
                 Resource.Success(outputStream.toByteArray())
             } else {
-                Resource.Error(context.getString(R.string.ota_error_server, response.code()))
+                val code = response.code()
+                val errorBody = response.errorBody()?.string() ?: ""
+                Resource.Error("Download Error $code: $errorBody")
             }
         } catch (e: Exception) {
             Resource.Error(context.getString(R.string.ota_error_network, e.message ?: ""), e)

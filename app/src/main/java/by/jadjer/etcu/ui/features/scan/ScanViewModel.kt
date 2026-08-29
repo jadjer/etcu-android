@@ -1,9 +1,6 @@
-package by.jadjer.etcu.ui.screen.scan
+package by.jadjer.etcu.ui.features.scan
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import by.jadjer.etcu.ETCUApplication
 import by.jadjer.etcu.domain.model.ConnectionState
 import by.jadjer.etcu.domain.model.DiscoveredDevice
 import by.jadjer.etcu.domain.repository.BLERepository
@@ -27,13 +24,5 @@ class ScanViewModel(private val repository: BLERepository) : ViewModel() {
 
     override fun onCleared() {
         stopScanning()
-    }
-
-    companion object {
-        fun Factory(app: ETCUApplication) = viewModelFactory {
-            initializer {
-                ScanViewModel(app.container.bleRepository)
-            }
-        }
     }
 }

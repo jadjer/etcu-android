@@ -1,4 +1,4 @@
-package by.jadjer.etcu.ui.screen.scan
+package by.jadjer.etcu.ui.features.scan
 
 import android.content.Intent
 import android.provider.Settings
@@ -20,7 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.DiscoveredDevice
-import by.jadjer.etcu.ui.screen.toDisplayString
+import by.jadjer.etcu.ui.features.main.toDisplayString
 
 @Composable
 fun ScanScreen(viewModel: ScanViewModel) {

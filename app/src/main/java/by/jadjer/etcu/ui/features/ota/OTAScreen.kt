@@ -1,4 +1,4 @@
-package by.jadjer.etcu.ui.screen.ota
+package by.jadjer.etcu.ui.features.ota
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*

@@ -1,4 +1,4 @@
-package by.jadjer.etcu.ui.screen.ecu
+package by.jadjer.etcu.ui.features.device
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -21,9 +21,9 @@ import by.jadjer.etcu.ui.component.StatusIndicator
 import by.jadjer.etcu.ui.component.TelemetryRow
 
 @Composable
-fun EcuScreen(viewModel: ECUViewModel) {
-    val telemetry by viewModel.ecuTelemetry.collectAsState()
-    EcuScreenContent(telemetry)
+fun EcuScreen(viewModel: DeviceViewModel) {
+    val telemetry by viewModel.telemetry.collectAsState()
+    EcuScreenContent(telemetry.ecu)
 }
 
 @Composable

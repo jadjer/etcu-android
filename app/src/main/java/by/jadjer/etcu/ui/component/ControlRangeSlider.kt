@@ -7,7 +7,7 @@ import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import by.jadjer.etcu.ui.screen.LocalPagerScrollEnabled
+import by.jadjer.etcu.ui.features.main.LocalPagerScrollEnabled
 
 @Composable
 fun ControlRangeSlider(

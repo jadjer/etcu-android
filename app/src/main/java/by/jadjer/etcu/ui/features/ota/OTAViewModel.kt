@@ -1,10 +1,7 @@
-package by.jadjer.etcu.ui.screen.ota
+package by.jadjer.etcu.ui.features.ota
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import by.jadjer.etcu.ETCUApplication
 import by.jadjer.etcu.data.ble.BLEConstants
 import by.jadjer.etcu.domain.model.OTAChunk
 import by.jadjer.etcu.domain.model.OTAStatus
@@ -48,7 +45,6 @@ class OtaViewModel(
 
         bleRepository.otaFeedback
             .onEach { handleFeedback(it) }
-
             .launchIn(viewModelScope)
 
         bleRepository.connectionState
@@ -124,8 +120,7 @@ class OtaViewModel(
                         }
                         _state.value = OTAState.Downloading(1f)
                         firmwareData = downloadedData
-                        val payloadSize = BLEConstants.MAX_OTA_PAYLOAD_SIZE
-                        totalChunks = (downloadedData.size + payloadSize - 1) / payloadSize
+                        totalChunks = (downloadedData.size + BLEConstants.OTA_PAYLOAD_SIZE - 1) / BLEConstants.OTA_PAYLOAD_SIZE
                         sendNextChunk(0)
                     }
                     is Resource.Error -> _state.value = OTAState.Error(result.message)
@@ -141,14 +136,12 @@ class OtaViewModel(
         if (index >= totalChunks) return
 
         currentChunkIndex = index
-        val payloadSize = BLEConstants.MAX_OTA_PAYLOAD_SIZE
-        val start = index * payloadSize
-        val end = minOf(start + payloadSize, data.size)
+        val start = index * BLEConstants.OTA_PAYLOAD_SIZE
+        val end = minOf(start + BLEConstants.OTA_PAYLOAD_SIZE, data.size)
 
         if (start >= data.size) return
 
         val payload = data.sliceArray(start until end)
-        val uploadProgress = (index + 1).toFloat() / totalChunks
 
         bleRepository.sendOtaChunk(
             OTAChunk(
@@ -159,19 +152,14 @@ class OtaViewModel(
             )
         )
 
+        val showIndex = index + 1
+        val uploadProgress = showIndex.toFloat() / totalChunks
+
         _state.value = OTAState.Uploading(
             progress = uploadProgress,
-            currentChunk = index + 1,
+            currentChunk = showIndex,
             totalChunks = totalChunks,
             firmwareSize = data.size.toLong()
         )
-    }
-
-    companion object {
-        fun Factory(app: ETCUApplication) = viewModelFactory {
-            initializer {
-                OtaViewModel(app.container.bleRepository, app.container.otaRepository)
-            }
-        }
     }
 }

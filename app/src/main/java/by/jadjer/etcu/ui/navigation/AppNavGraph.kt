@@ -8,8 +8,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import by.jadjer.etcu.ETCUApplication
-import by.jadjer.etcu.ui.screen.MainScreen
-import by.jadjer.etcu.ui.screen.MainViewModel
+import by.jadjer.etcu.ui.features.main.MainScreen
+import by.jadjer.etcu.ui.features.main.MainViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -38,7 +38,7 @@ fun AppNavGraph() {
         startDestination = NavRoutes.MAIN
     ) {
         composable(NavRoutes.MAIN) {
-            MainScreen(viewModel = viewModel(factory = MainViewModel.Factory(app)))
+            MainScreen(viewModel = viewModel(factory = MainViewModel.Factory))
         }
     }
 }

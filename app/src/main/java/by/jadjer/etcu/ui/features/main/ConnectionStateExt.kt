@@ -1,4 +1,4 @@
-package by.jadjer.etcu.ui.screen
+package by.jadjer.etcu.ui.features.main
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource

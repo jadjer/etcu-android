@@ -1,4 +1,4 @@
-package by.jadjer.etcu.ui.screen.settings
+package by.jadjer.etcu.ui.features.device
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,7 +29,7 @@ import by.jadjer.etcu.ui.component.TelemetryRow
 
 @Composable
 fun SettingsScreen(
-    viewModel: SettingsViewModel,
+    viewModel: DeviceViewModel,
     onOtaClick: () -> Unit
 ) {
     val controlData by viewModel.controlData.collectAsState()

@@ -31,6 +31,13 @@ class AppContainer(context: Context) {
         }
         val client = OkHttpClient.Builder()
             .addInterceptor(logging)
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .header("User-Agent", "ETCU-Android-App")
+                    .header("Accept", "application/vnd.github+json")
+                    .build()
+                chain.proceed(request)
+            }
             .build()
 
         Retrofit.Builder()

@@ -1,16 +1,39 @@
 package by.jadjer.etcu.data.ble
 
 import android.annotation.SuppressLint
-import android.bluetooth.*
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.le.ScanResult
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import by.jadjer.etcu.data.local.BLEPreferenceManager
-import by.jadjer.etcu.domain.model.*
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.util.UUID
+import by.jadjer.etcu.domain.model.ControlData
+import by.jadjer.etcu.domain.model.OTAChunk
+import by.jadjer.etcu.domain.model.OTAStatus
+import by.jadjer.etcu.domain.model.SystemInfo
+import by.jadjer.etcu.domain.model.SystemTelemetry
+import com.welie.blessed.BluetoothCentralManager
+import com.welie.blessed.BluetoothCentralManagerCallback
+import com.welie.blessed.BluetoothPeripheral
+import com.welie.blessed.BluetoothPeripheralCallback
+import com.welie.blessed.GattStatus
+import com.welie.blessed.HciStatus
+import com.welie.blessed.WriteType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import kotlin.time.Duration.Companion.milliseconds
+import by.jadjer.etcu.domain.model.ConnectionState as AppConnectionState
 
 @SuppressLint("MissingPermission")
 class BLEManager(
@@ -18,14 +41,9 @@ class BLEManager(
     private val preferenceManager: BLEPreferenceManager,
 ) {
     private val appContext = context.applicationContext
-    private val bluetoothAdapter: BluetoothAdapter? =
-        (appContext.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager)?.adapter
-
     private val dataParser = BLEDataParser()
-    val scanner = BLEScanner(bluetoothAdapter)
-    private var bluetoothGatt: BluetoothGatt? = null
 
-    private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
+    private val _connectionState = MutableStateFlow(AppConnectionState.DISCONNECTED)
     val connectionState = _connectionState.asStateFlow()
 
     private val _controlData = MutableStateFlow(ControlData())
@@ -47,66 +65,147 @@ class BLEManager(
     private var isManualDisconnect = false
     private var reconnectJob: Job? = null
     private var autoConnectJob: Job? = null
-    private var negotiatedMtu = 23
+    private var negotiatedMTU = BLEConstants.DEFAULT_MTU
 
-    private val gattCallback = BLEConnectionHandler(
-        dataParser = dataParser,
-        onConnectionStateChange = { state ->
-            updateConnectionState(state)
-        },
-        onControlDataUpdate = { _controlData.value = it },
-        onTelemetryUpdate = { _telemetry.value = it },
-        onSystemInfoUpdate = { _systemInfo.value = it },
-        onOtaFeedback = { status -> status?.let { _otaFeedback.tryEmit(it) } },
-        onServicesDiscovered = { gatt -> handleServicesDiscovered(gatt) },
-        onMtuUpdate = { gatt, mtu ->
-            bluetoothGatt = gatt
-            negotiatedMtu = mtu
+    private val central: BluetoothCentralManager
+    val scanner: BLEScanner
+    private var activePeripheral: BluetoothPeripheral? = null
+
+    private val centralCallback = object : BluetoothCentralManagerCallback() {
+        override fun onDiscoveredPeripheral(peripheral: BluetoothPeripheral, scanResult: ScanResult) {
+            scanner.handleDiscoveredPeripheral(peripheral, scanResult)
         }
-    )
 
-    private fun updateConnectionState(state: ConnectionState) {
+        override fun onConnectedPeripheral(peripheral: BluetoothPeripheral) {
+            activePeripheral = peripheral
+            _connectionState.value = AppConnectionState.CONNECTED_DISCOVERING
+        }
+
+        override fun onConnectionFailed(peripheral: BluetoothPeripheral, status: HciStatus) {
+            activePeripheral = null
+            updateConnectionState(AppConnectionState.ERROR_CONNECTION)
+        }
+
+        override fun onDisconnectedPeripheral(peripheral: BluetoothPeripheral, status: HciStatus) {
+            activePeripheral = null
+            updateConnectionState(AppConnectionState.DISCONNECTED)
+        }
+
+        override fun onBluetoothAdapterStateChanged(state: Int) {
+            if (state == BluetoothAdapter.STATE_OFF) {
+                _connectionState.value = AppConnectionState.BLUETOOTH_OFF
+                stopAllJobs()
+            }
+        }
+    }
+
+    private val peripheralCallback = object : BluetoothPeripheralCallback() {
+        override fun onServicesDiscovered(peripheral: BluetoothPeripheral) {
+            _connectionState.value = AppConnectionState.SERVICES_DISCOVERED
+            preferenceManager.saveLastMac(peripheral.address)
+            _savedMac.value = peripheral.address
+            peripheral.requestMtu(BLEConstants.REQUESTED_MTU)
+        }
+
+        override fun onMtuChanged(peripheral: BluetoothPeripheral, mtu: Int, status: GattStatus) {
+            if (status == GattStatus.SUCCESS) {
+                negotiatedMTU = mtu
+                _connectionState.value = AppConnectionState.OTA_SETUP
+                peripheral.setNotify(BLEConstants.SERVICE_UUID, BLEConstants.TELEMETRY_UUID, true)
+                peripheral.setNotify(BLEConstants.SERVICE_UUID, BLEConstants.OTA_UUID, true)
+            } else {
+                _connectionState.value = AppConnectionState.ERROR_MTU
+            }
+        }
+
+        override fun onNotificationStateUpdate(
+            peripheral: BluetoothPeripheral,
+            characteristic: BluetoothGattCharacteristic,
+            status: GattStatus
+        ) {
+            if (status == GattStatus.SUCCESS && characteristic.uuid == BLEConstants.OTA_UUID) {
+                _connectionState.value = AppConnectionState.READING_INFO
+                peripheral.readCharacteristic(BLEConstants.SERVICE_UUID, BLEConstants.SYSTEM_INFO_UUID)
+            } else if (status != GattStatus.SUCCESS) {
+                _connectionState.value = AppConnectionState.ERROR_DESCRIPTOR_WRITE
+            }
+        }
+
+        override fun onCharacteristicUpdate(
+            peripheral: BluetoothPeripheral,
+            value: ByteArray,
+            characteristic: BluetoothGattCharacteristic,
+            status: GattStatus
+        ) {
+            if (status != GattStatus.SUCCESS) {
+                _connectionState.value = AppConnectionState.ERROR_READ_CHAR
+                return
+            }
+
+            when (characteristic.uuid) {
+                BLEConstants.SYSTEM_INFO_UUID -> {
+                    _systemInfo.value = dataParser.parseSystemInfo(value)
+                    _connectionState.value = AppConnectionState.READING_SETTINGS
+                    peripheral.readCharacteristic(BLEConstants.SERVICE_UUID, BLEConstants.CONTROL_UUID)
+                }
+                BLEConstants.CONTROL_UUID -> {
+                    _controlData.value = dataParser.parseControlData(value)
+                    _connectionState.value = AppConnectionState.READY
+                }
+                BLEConstants.TELEMETRY_UUID -> _telemetry.value = dataParser.parseSystemTelemetry(value)
+                BLEConstants.OTA_UUID -> _otaFeedback.tryEmit(dataParser.parseOtaFeedback(value))
+            }
+        }
+
+        override fun onCharacteristicWrite(
+            peripheral: BluetoothPeripheral,
+            value: ByteArray,
+            characteristic: BluetoothGattCharacteristic,
+            status: GattStatus
+        ) {
+            if (status != GattStatus.SUCCESS) {
+                _connectionState.value = AppConnectionState.ERROR_WRITE_CHAR
+            } else if (_connectionState.value != AppConnectionState.READY) {
+                _connectionState.value = AppConnectionState.READY
+            }
+        }
+    }
+
+    init {
+        central = BluetoothCentralManager(appContext, centralCallback, Handler(Looper.getMainLooper()))
+        scanner = BLEScanner(central)
+    }
+
+    private fun updateConnectionState(state: AppConnectionState) {
         _connectionState.value = state
-        
         if (!state.isActive) {
-            closeGatt()
+            activePeripheral = null
             if (!isManualDisconnect) startAutoReconnect()
         }
     }
 
-    private fun handleServicesDiscovered(gatt: BluetoothGatt) {
-        bluetoothGatt = gatt
-        _connectionState.value = ConnectionState.SERVICES_DISCOVERED
-        val mac = gatt.device.address
-        preferenceManager.saveLastMac(mac)
-        _savedMac.value = mac
-        gatt.requestMtu(BLEConstants.REQUESTED_MTU)
-    }
-
-    @Suppress("Deprecation")
     fun connect(macAddress: String) {
-        if (bluetoothAdapter?.isEnabled != true) {
-            _connectionState.value = ConnectionState.BLUETOOTH_OFF
+        if (!central.isBluetoothEnabled) {
+            _connectionState.value = AppConnectionState.BLUETOOTH_OFF
             return
         }
-        
+
         stopAllJobs()
         isManualDisconnect = false
-        closeGatt()
-
+        _connectionState.value = AppConnectionState.CONNECTING
+        
         runCatching {
-            _connectionState.value = ConnectionState.CONNECTING
-            val device = bluetoothAdapter?.getRemoteDevice(macAddress)
-            bluetoothGatt = device?.connectGatt(appContext, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
+            val peripheral = central.getPeripheral(macAddress)
+            central.connectPeripheral(peripheral, peripheralCallback)
         }.onFailure {
-            _connectionState.value = ConnectionState.INVALID_MAC
+            _connectionState.value = AppConnectionState.INVALID_MAC
         }
     }
 
     fun disconnect() {
         isManualDisconnect = true
         stopAllJobs()
-        bluetoothGatt?.disconnect()
+        activePeripheral?.let { central.cancelConnection(it) }
     }
 
     private fun startAutoReconnect() {
@@ -120,18 +219,18 @@ class BLEManager(
 
     fun autoConnect() {
         val mac = preferenceManager.getLastMac() ?: return
-        if (bluetoothAdapter?.isEnabled != true) {
-            _connectionState.value = ConnectionState.BLUETOOTH_OFF
+        if (!central.isBluetoothEnabled) {
+            _connectionState.value = AppConnectionState.BLUETOOTH_OFF
             return
         }
 
-        if (_connectionState.value.isActive || _connectionState.value == ConnectionState.CONNECTING) return
+        if (_connectionState.value.isActive || _connectionState.value == AppConnectionState.CONNECTING) return
 
         autoConnectJob?.cancel()
         autoConnectJob = managerScope.launch {
-            _connectionState.value = ConnectionState.SCANNING
+            _connectionState.value = AppConnectionState.SCANNING
             scanner.startScan()
-            
+
             runCatching {
                 withTimeout(15000.milliseconds) {
                     scanner.discoveredDevices
@@ -143,8 +242,8 @@ class BLEManager(
                 }
             }.onFailure {
                 scanner.stopScan()
-                if (_connectionState.value == ConnectionState.SCANNING) {
-                    _connectionState.value = ConnectionState.DISCONNECTED
+                if (_connectionState.value == AppConnectionState.SCANNING) {
+                    _connectionState.value = AppConnectionState.DISCONNECTED
                     if (!isManualDisconnect) startAutoReconnect()
                 }
             }
@@ -152,55 +251,34 @@ class BLEManager(
     }
 
     fun writeControlData(data: ControlData) {
-        val gatt = bluetoothGatt ?: return
-        val characteristic = getCharacteristic(BLEConstants.CONTROL_UUID) ?: return
-
-        val bytes = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN)
-            .putShort(data.accMin.toShort()).putShort(data.accMax.toShort())
-            .putShort(data.servoMin.toShort()).putShort(data.servoMax.toShort())
-            .array()
-
-        writeCharacteristic(gatt, characteristic, bytes)
+        activePeripheral?.writeCharacteristic(
+            BLEConstants.SERVICE_UUID,
+            BLEConstants.CONTROL_UUID,
+            dataParser.serializeControlData(data),
+            WriteType.WITH_RESPONSE
+        )
     }
 
     fun writeOtaChunk(chunk: OTAChunk) {
-        val gatt = bluetoothGatt ?: return
-        val characteristic = getCharacteristic(BLEConstants.OTA_UUID) ?: return
-
-        val packetSize = BLEConstants.OTA_HEADER_SIZE + chunk.data.size
-        if (packetSize > negotiatedMtu - 3) {
-            _connectionState.value = ConnectionState.ERROR_MTU
+        val peripheral = activePeripheral ?: return
+        
+        if (BLEConstants.OTA_PACKAGE_SIZE > (negotiatedMTU - BLEConstants.BLE_HEADER_SIZE)) {
+            _connectionState.value = AppConnectionState.ERROR_MTU
             return
         }
 
-        val bytes = ByteBuffer.allocate(packetSize).order(ByteOrder.LITTLE_ENDIAN)
-            .putInt(chunk.firmwareSize.toInt())
-            .putShort(chunk.totalChunks.toShort())
-            .putShort(chunk.chunkNumber.toShort())
-            .put(chunk.data)
-            .array()
-
-        writeCharacteristic(gatt, characteristic, bytes)
+        peripheral.writeCharacteristic(
+            BLEConstants.SERVICE_UUID,
+            BLEConstants.OTA_UUID,
+            dataParser.serializeOtaChunk(chunk),
+            WriteType.WITH_RESPONSE
+        )
     }
-
-    private fun writeCharacteristic(gatt: BluetoothGatt, char: BluetoothGattCharacteristic, data: ByteArray) {
-        runCatching {
-            val status = gatt.writeCharacteristic(char, data, BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
-            if (status != BluetoothStatusCodes.SUCCESS) {
-                _connectionState.value = ConnectionState.ERROR_WRITE_CHAR
-            }
-        }.onFailure {
-            _connectionState.value = ConnectionState.ERROR_WRITE_CHAR
-        }
-    }
-
-    private fun getCharacteristic(uuid: UUID): BluetoothGattCharacteristic? =
-        bluetoothGatt?.services?.firstNotNullOfOrNull { it.getCharacteristic(uuid) }
 
     fun clearLastMac() {
         isManualDisconnect = true
         stopAllJobs()
-        bluetoothGatt?.disconnect()
+        activePeripheral?.let { central.cancelConnection(it) }
         preferenceManager.clearLastMac()
         _savedMac.value = null
     }
@@ -209,10 +287,5 @@ class BLEManager(
         reconnectJob?.cancel()
         autoConnectJob?.cancel()
         scanner.stopScan()
-    }
-
-    private fun closeGatt() {
-        bluetoothGatt?.close()
-        bluetoothGatt = null
     }
 }

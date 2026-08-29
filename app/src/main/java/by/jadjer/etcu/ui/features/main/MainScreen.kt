@@ -1,7 +1,6 @@
-package by.jadjer.etcu.ui.screen
+package by.jadjer.etcu.ui.features.main
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
@@ -9,10 +8,31 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -22,27 +42,21 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import by.jadjer.etcu.ETCUApplication
-import kotlinx.coroutines.launch
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.ECUTelemetry
 import by.jadjer.etcu.domain.model.SystemError
 import by.jadjer.etcu.ui.component.ErrorsBlock
+import by.jadjer.etcu.ui.features.device.DeviceViewModel
+import by.jadjer.etcu.ui.features.device.EcuScreen
+import by.jadjer.etcu.ui.features.device.EcuScreenContent
+import by.jadjer.etcu.ui.features.device.ServoScreen
+import by.jadjer.etcu.ui.features.device.SettingsScreen
+import by.jadjer.etcu.ui.features.device.SystemScreen
+import by.jadjer.etcu.ui.features.ota.OtaScreen
+import by.jadjer.etcu.ui.features.scan.ScanScreen
 import by.jadjer.etcu.ui.navigation.NavRoutes
 import by.jadjer.etcu.ui.navigation.ScreenItem
-import by.jadjer.etcu.ui.screen.ecu.EcuScreen
-import by.jadjer.etcu.ui.screen.ecu.EcuScreenContent
-import by.jadjer.etcu.ui.screen.ecu.ECUViewModel
-import by.jadjer.etcu.ui.screen.ota.OtaScreen
-import by.jadjer.etcu.ui.screen.ota.OtaViewModel
-import by.jadjer.etcu.ui.screen.scan.ScanScreen
-import by.jadjer.etcu.ui.screen.scan.ScanViewModel
-import by.jadjer.etcu.ui.screen.servo.ServoScreen
-import by.jadjer.etcu.ui.screen.servo.ServoViewModel
-import by.jadjer.etcu.ui.screen.settings.SettingsScreen
-import by.jadjer.etcu.ui.screen.settings.SettingsViewModel
-import by.jadjer.etcu.ui.screen.system.SystemScreen
-import by.jadjer.etcu.ui.screen.system.SystemViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(viewModel: MainViewModel) {
@@ -51,34 +65,32 @@ fun MainScreen(viewModel: MainViewModel) {
     
     val connectionStatus = connectionState.toDisplayString(savedMac ?: "")
 
-    if (!connectionState.isActive) {
-        if (savedMac != null) {
+    when {
+        !connectionState.isActive && savedMac != null -> {
             ConnectingStubScreen(
                 connectionStatus = connectionStatus,
                 connectionState = connectionState,
-                onRetryClick = { viewModel.retryConnection() },
-                onResetClick = { viewModel.clearLastMac() }
+                onRetryClick = viewModel::retryConnection,
+                onResetClick = viewModel::clearLastMac
             )
         }
- else {
-            val context = LocalContext.current
-            val app = context.applicationContext as ETCUApplication
-            ScanScreen(
-                viewModel = viewModel(factory = ScanViewModel.Factory(app))
+        !connectionState.isActive -> {
+            ScanScreen(viewModel = viewModel(factory = MainViewModel.Factory))
+        }
+        else -> {
+            val deviceViewModel: DeviceViewModel = viewModel(factory = MainViewModel.Factory)
+            MainScreenContent(
+                deviceViewModel = deviceViewModel,
+                connectionStatus = connectionStatus
             )
         }
-    } else {
-        MainScreenContent(
-            viewModel = viewModel,
-            connectionStatus = connectionStatus
-        )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MainScreenContent(
-    viewModel: MainViewModel,
+    deviceViewModel: DeviceViewModel,
     connectionStatus: String
 ) {
     val navController = rememberNavController()
@@ -87,36 +99,47 @@ private fun MainScreenContent(
     val currentScreen = ScreenItem.fromRoute(currentRoute)
     
     val coroutineScope = rememberCoroutineScope()
-    val telemetry by viewModel.telemetry.collectAsState()
+    val telemetry by deviceViewModel.telemetry.collectAsState()
     val activeErrors = telemetry.activeErrors
     
     val navItems = ScreenItem.mainItems
     val pagerState = rememberPagerState(pageCount = { navItems.size })
 
     var showErrorsSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
 
     CompositionLocalProvider(LocalNavController provides navController) {
-        MainScaffold(
-            connectionStatus = connectionStatus,
-            currentScreen = currentScreen,
-            activeErrors = activeErrors,
-            navItems = navItems,
-            pagerState = pagerState,
-            onShowErrors = { showErrorsSheet = true },
-            onTabSelected = { screen ->
-                val index = navItems.indexOf(screen)
-                if (index != -1) {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(index)
-                    }
+        Scaffold(
+            topBar = {
+                MainTopAppBar(connectionStatus = connectionStatus)
+            },
+            bottomBar = {
+                if (currentScreen != ScreenItem.Ota) {
+                    MainNavigationBar(
+                        pagerState = pagerState,
+                        navItems = navItems,
+                        onScreenSelected = { screen ->
+                            val index = navItems.indexOf(screen)
+                            if (index != -1) {
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(index)
+                                }
+                            }
+                        }
+                    )
+                }
+            },
+            floatingActionButton = {
+                if (activeErrors.isNotEmpty()) {
+                    ErrorFab(
+                        errorCount = activeErrors.size,
+                        onClick = { showErrorsSheet = true }
+                    )
                 }
             }
-        ) {
+        ) { innerPadding ->
             if (showErrorsSheet) {
                 ErrorsBottomSheet(
                     activeErrors = activeErrors,
-                    sheetState = sheetState,
                     onDismiss = { showErrorsSheet = false }
                 )
             }
@@ -125,47 +148,11 @@ private fun MainScreenContent(
                 navController = navController,
                 navItems = navItems,
                 pagerState = pagerState,
-                modifier = Modifier.padding(it)
+                deviceViewModel = deviceViewModel,
+                modifier = Modifier.padding(innerPadding)
             )
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun MainScaffold(
-    connectionStatus: String,
-    currentScreen: ScreenItem?,
-    activeErrors: List<SystemError>,
-    navItems: List<ScreenItem>,
-    pagerState: PagerState,
-    onShowErrors: () -> Unit,
-    onTabSelected: (ScreenItem) -> Unit,
-    content: @Composable (PaddingValues) -> Unit
-) {
-    Scaffold(
-        topBar = {
-            MainTopAppBar(connectionStatus = connectionStatus)
-        },
-        bottomBar = {
-            if (currentScreen != ScreenItem.Ota) {
-                MainNavigationBar(
-                    pagerState = pagerState,
-                    navItems = navItems,
-                    onScreenSelected = onTabSelected
-                )
-            }
-        },
-        floatingActionButton = {
-            if (activeErrors.isNotEmpty()) {
-                ErrorFab(
-                    errorCount = activeErrors.size,
-                    onClick = onShowErrors
-                )
-            }
-        },
-        content = content
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -207,12 +194,11 @@ private fun ErrorFab(errorCount: Int, onClick: () -> Unit) {
 @Composable
 private fun ErrorsBottomSheet(
     activeErrors: List<SystemError>,
-    sheetState: SheetState,
     onDismiss: () -> Unit
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = sheetState
+        sheetState = rememberModalBottomSheetState()
     ) {
         Box(modifier = Modifier.padding(16.dp).padding(bottom = 32.dp)) {
             ErrorsBlock(activeErrors = activeErrors)
@@ -226,11 +212,9 @@ private fun MainNavigationHost(
     navController: NavHostController,
     navItems: List<ScreenItem>,
     pagerState: PagerState,
+    deviceViewModel: DeviceViewModel,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val app = context.applicationContext as ETCUApplication
-
     Box(modifier = modifier.fillMaxSize()) {
         NavHost(
             navController = navController,
@@ -244,27 +228,27 @@ private fun MainNavigationHost(
                         modifier = Modifier.fillMaxSize(),
                         userScrollEnabled = pagerScrollEnabled.value
                     ) { page ->
-                        MainTabContent(navItems[page], app)
+                        MainTabContent(navItems[page], deviceViewModel)
                     }
                 }
             }
             composable(ScreenItem.Ota.route) {
-                OtaScreen(viewModel(factory = OtaViewModel.Factory(app)))
+                OtaScreen(viewModel(factory = MainViewModel.Factory))
             }
         }
     }
 }
 
 @Composable
-private fun MainTabContent(item: ScreenItem, app: ETCUApplication) {
+private fun MainTabContent(item: ScreenItem, deviceViewModel: DeviceViewModel) {
     when (item) {
-        ScreenItem.Ecu -> EcuScreen(viewModel(factory = ECUViewModel.Factory(app)))
-        ScreenItem.Servo -> ServoScreen(viewModel(factory = ServoViewModel.Factory(app)))
-        ScreenItem.System -> SystemScreen(viewModel(factory = SystemViewModel.Factory(app)))
+        ScreenItem.Ecu -> EcuScreen(deviceViewModel)
+        ScreenItem.Servo -> ServoScreen(deviceViewModel)
+        ScreenItem.System -> SystemScreen(deviceViewModel)
         ScreenItem.Settings -> {
             val navController = LocalNavController.current
             SettingsScreen(
-                viewModel = viewModel(factory = SettingsViewModel.Factory(app)),
+                viewModel = deviceViewModel,
                 onOtaClick = { navController.navigate(ScreenItem.Ota.route) }
             )
         }
