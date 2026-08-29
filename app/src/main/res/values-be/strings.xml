@@ -54,14 +54,17 @@
     <string name="ecu_engine_status">Рухавік запушчаны</string>
     <string name="ecu_engine_started">Запушчаны</string>
     <string name="ecu_engine_stopped">Спынены</string>
-    <string name="ecu_clutch_status">Статус счэпленага (ECU)</string>
+    <string name="ecu_clutch_status">Статус счэплення (ECU)</string>
     <string name="ecu_clutch_pressed">Націснута</string>
     <string name="ecu_clutch_released">Адпушчана</string>
 
     <!-- Servo Screen -->
     <string name="servo_conn_status">Сувязь з прывадам</string>
+    <string name="servo_enable_status">Прывад уключаны</string>
     <string name="servo_connected">Ёсць сувязь</string>
     <string name="servo_disconnected">Няма сувязі</string>
+    <string name="servo_enabled">Уключаны</string>
+    <string name="servo_disabled">Адключаны</string>
     <string name="servo_position">Пазіцыя</string>
     <string name="servo_current">Ток</string>
     <string name="servo_voltage">Напружанне</string>
@@ -73,7 +76,7 @@
     <!-- System Screen -->
     <string name="system_telemetry_title">Бягучая тэлеметрыя</string>
     <string name="system_mode">Рэжым сістэмы</string>
-    <string name="system_accel">Акселератара</string>
+    <string name="system_accel">Акселератар</string>
     <string name="system_throttle_target">Дросель (мэта)</string>
     <string name="system_guard">Абарона (Guard)</string>
     <string name="system_brake">Тормаз</string>

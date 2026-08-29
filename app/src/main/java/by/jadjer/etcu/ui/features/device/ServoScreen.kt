@@ -1,12 +1,16 @@
 package by.jadjer.etcu.ui.features.device
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.DeviceThermostat
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material.icons.filled.LocationSearching
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,33 +43,42 @@ fun ServoScreenContent(telemetry: ServoTelemetry) {
             activeText = stringResource(R.string.servo_connected),
             inactiveText = stringResource(R.string.servo_disconnected)
         )
-        
+
+        StatusIndicator(
+            label = stringResource(R.string.servo_enable_status),
+            isActive = telemetry.isEnabled,
+            activeText = stringResource(R.string.servo_enabled),
+            inactiveText = stringResource(R.string.servo_disabled)
+        )
+
         TelemetryRow(
             label = stringResource(R.string.servo_position),
             value = telemetry.position.toString(),
-            unit = stringResource(R.string.unit_raw_1024)
+            unit = stringResource(R.string.unit_raw_1024),
+            icon = Icons.Default.LocationSearching,
         )
-        
+
         TelemetryRow(
             label = stringResource(R.string.servo_current),
             value = telemetry.current.toString(),
             unit = stringResource(R.string.unit_ma),
-            icon = Icons.Default.Bolt
+            icon = Icons.Default.Bolt,
         )
         
         TelemetryRow(
             label = stringResource(R.string.servo_voltage),
             value = telemetry.voltage.toString(),
-            unit = stringResource(R.string.unit_v)
+            unit = stringResource(R.string.unit_v),
+            icon = Icons.Default.FlashOn,
         )
         
         TelemetryRow(
             label = stringResource(R.string.servo_temp),
             value = telemetry.temperature.toString(),
             unit = stringResource(R.string.unit_celsius),
-            icon = Icons.Default.DeviceThermostat
+            icon = Icons.Default.DeviceThermostat,
         )
-        
+
         StatusIndicator(
             label = stringResource(R.string.servo_motion_status),
             isActive = telemetry.isMoved,

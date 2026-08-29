@@ -21,4 +21,9 @@ object BLEConstants {
     // SharedPreferences
     const val PREFS_NAME = "ble_prefs"
     const val KEY_LAST_MAC = "last_mac"
+
+    const val CONTROL_DATA_SIZE = 8
+    const val SYSTEM_INFO_SIZE = 48
+    const val TELEMETRY_SIZE = 29
+    const val INFO_STR_LEN = 16
 }

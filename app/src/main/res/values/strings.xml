@@ -60,8 +60,11 @@
 
     <!-- Servo Screen -->
     <string name="servo_conn_status">Servo Communication</string>
+    <string name="servo_enable_status">Servo Enabled</string>
     <string name="servo_connected">Connected</string>
     <string name="servo_disconnected">Disconnected</string>
+    <string name="servo_enabled">Enabled</string>
+    <string name="servo_disabled">Disabled</string>
     <string name="servo_position">Position</string>
     <string name="servo_current">Current</string>
     <string name="servo_voltage">Voltage</string>
@@ -97,6 +100,7 @@
     <string name="unit_raw_1000">/ 1000</string>
     <string name="unit_raw_1024">/ 1024</string>
     <string name="unit_meters">m</string>
+    <string name="unit_percent" translatable="false">%</string>
 
     <!-- Settings Screen -->
     <string name="settings_device_info">Device Information</string>

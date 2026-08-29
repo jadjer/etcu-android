@@ -1,5 +1,9 @@
 package by.jadjer.etcu.data.ble
 
+import by.jadjer.etcu.data.ble.BLEConstants.CONTROL_DATA_SIZE
+import by.jadjer.etcu.data.ble.BLEConstants.INFO_STR_LEN
+import by.jadjer.etcu.data.ble.BLEConstants.SYSTEM_INFO_SIZE
+import by.jadjer.etcu.data.ble.BLEConstants.TELEMETRY_SIZE
 import by.jadjer.etcu.domain.model.ControlData
 import by.jadjer.etcu.domain.model.ECUTelemetry
 import by.jadjer.etcu.domain.model.OTAChunk
@@ -13,16 +17,8 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 class BLEDataParser {
-
-    companion object {
-        private const val MIN_CONTROL_DATA_SIZE = 8
-        private const val SYSTEM_INFO_SIZE = 48
-        private const val MIN_TELEMETRY_SIZE = 30
-        private const val INFO_STR_LEN = 16
-    }
-
     fun parseControlData(bytes: ByteArray): ControlData {
-        if (bytes.size < MIN_CONTROL_DATA_SIZE) return ControlData()
+        if (bytes.size < CONTROL_DATA_SIZE) return ControlData()
 
         return try {
             val buffer = bytes.toLittleEndianBuffer()
@@ -56,7 +52,7 @@ class BLEDataParser {
     }
 
     fun parseSystemTelemetry(bytes: ByteArray): SystemTelemetry {
-        if (bytes.size < MIN_TELEMETRY_SIZE) return SystemTelemetry()
+        if (bytes.size < TELEMETRY_SIZE) return SystemTelemetry()
 
         return try {
             val buffer = bytes.toLittleEndianBuffer()
@@ -90,7 +86,6 @@ class BLEDataParser {
         isConnected = bool,
         isEnabled = bool,
         isMoved = bool,
-        speed = uByte,
         voltage = uByte,
         current = uShort,
         position = uShort,
@@ -98,16 +93,12 @@ class BLEDataParser {
     )
 
     fun parseOtaFeedback(bytes: ByteArray): OTAStatus {
-        if (bytes.isEmpty()) return OTAStatus.ERROR
-        return try {
-            OTAStatus.fromByte(bytes[0])
-        } catch (_: Exception) {
-            OTAStatus.ERROR
-        }
+        val firstByte = bytes.getOrNull(0) ?: return OTAStatus.ERROR
+        return runCatching { OTAStatus.fromByte(firstByte) }.getOrDefault(OTAStatus.ERROR)
     }
 
     fun serializeControlData(data: ControlData): ByteArray {
-        return ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN)
+        return ByteBuffer.allocate(CONTROL_DATA_SIZE).order(ByteOrder.LITTLE_ENDIAN)
             .putShort(data.accMin.toShort())
             .putShort(data.accMax.toShort())
             .putShort(data.servoMin.toShort())
@@ -125,9 +116,10 @@ class BLEDataParser {
     }
 
     // Helper Extensions
-    private fun ByteArray.toLittleEndianBuffer() = ByteBuffer.wrap(this).order(ByteOrder.LITTLE_ENDIAN)
-    
-    private fun ByteArray.readString(offset: Int, length: Int) = 
+    private fun ByteArray.toLittleEndianBuffer() =
+        ByteBuffer.wrap(this).order(ByteOrder.LITTLE_ENDIAN)
+
+    private fun ByteArray.readString(offset: Int, length: Int) =
         String(this, offset, length, Charsets.UTF_8).trim { it <= '\u0000' }
 
     private val ByteBuffer.bool get() = get().toInt() != 0

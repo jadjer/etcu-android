@@ -60,8 +60,11 @@
 
     <!-- Servo Screen -->
     <string name="servo_conn_status">Связь с приводом</string>
+    <string name="servo_enable_status">Привод включен</string>
     <string name="servo_connected">Есть связь</string>
     <string name="servo_disconnected">Нет связи</string>
+    <string name="servo_enabled">Включен</string>
+    <string name="servo_disabled">Отключен</string>
     <string name="servo_position">Позиция</string>
     <string name="servo_current">Ток</string>
     <string name="servo_voltage">Напряжение</string>
