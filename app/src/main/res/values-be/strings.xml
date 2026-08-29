@@ -1,11 +1,11 @@
 <resources>
-    <string name="app_name">ETCU</string>
+
 
     <!-- Navigation -->
     <string name="nav_ecu">ЭБУ</string>
     <string name="nav_servo">Прывад</string>
     <string name="nav_system">Сістэма</string>
-    <string name="nav_ota">OTA</string>
+
     <string name="nav_settings">Налады</string>
 
     <!-- BLE Connection States -->
@@ -77,8 +77,8 @@
     <string name="system_telemetry_title">Бягучая тэлеметрыя</string>
     <string name="system_mode">Рэжым сістэмы</string>
     <string name="system_accel">Акселератар</string>
-    <string name="system_throttle_target">Дросель (мэта)</string>
-    <string name="system_guard">Абарона (Guard)</string>
+    <string name="system_throttle_target">Дросель</string>
+    <string name="system_guard">Абарона</string>
     <string name="system_brake">Тормаз</string>
 
     <!-- System States -->
@@ -96,9 +96,6 @@
     <string name="unit_kmh">км/г</string>
     <string name="unit_ma">мА</string>
     <string name="unit_v">В</string>
-    <string name="unit_celsius">°C</string>
-    <string name="unit_raw_1000">/ 1000</string>
-    <string name="unit_raw_1024">/ 1024</string>
     <string name="unit_meters">м</string>
 
     <!-- Settings Screen -->

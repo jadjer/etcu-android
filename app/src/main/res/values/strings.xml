@@ -1,11 +1,11 @@
 <resources>
-    <string name="app_name">ETCU</string>
+    <string name="app_name" translatable="false">ETCU</string>
 
     <!-- Navigation -->
     <string name="nav_ecu">ECU</string>
     <string name="nav_servo">Servo</string>
     <string name="nav_system">System</string>
-    <string name="nav_ota">OTA</string>
+    <string name="nav_ota" translatable="false">OTA</string>
     <string name="nav_settings">Settings</string>
 
     <!-- BLE Connection States -->
@@ -77,8 +77,8 @@
     <string name="system_telemetry_title">Current Telemetry</string>
     <string name="system_mode">System Mode</string>
     <string name="system_accel">Accelerator</string>
-    <string name="system_throttle_target">Throttle (Target)</string>
-    <string name="system_guard">Guard Mode</string>
+    <string name="system_throttle_target">Throttle</string>
+    <string name="system_guard">Guard</string>
     <string name="system_brake">Brake</string>
 
     <!-- System States -->
@@ -96,9 +96,9 @@
     <string name="unit_kmh">km/h</string>
     <string name="unit_ma">mA</string>
     <string name="unit_v">V</string>
-    <string name="unit_celsius">°C</string>
-    <string name="unit_raw_1000">/ 1000</string>
-    <string name="unit_raw_1024">/ 1024</string>
+    <string name="unit_celsius" translatable="false">°C</string>
+    <string name="unit_raw_1000" translatable="false">/ 1000</string>
+    <string name="unit_raw_1024" translatable="false">/ 1024</string>
     <string name="unit_meters">m</string>
     <string name="unit_percent" translatable="false">%</string>
 
