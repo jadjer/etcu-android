@@ -10,7 +10,6 @@ class BLERepositoryImpl(
     private val bleManager: BLEManager
 ) : BLERepository {
     override val connectionState: StateFlow<ConnectionState> = bleManager.connectionState
-    override val isConnected: StateFlow<Boolean> = bleManager.isConnected
     override val controlData: StateFlow<ControlData> = bleManager.controlData
     override val telemetry: StateFlow<SystemTelemetry> = bleManager.telemetry
     override val systemInfo: StateFlow<SystemInfo> = bleManager.systemInfo

@@ -9,21 +9,21 @@ import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.os.ParcelUuid
 import by.jadjer.etcu.domain.model.DiscoveredDevice
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlin.math.pow
+import kotlin.time.Duration.Companion.milliseconds
 
 @SuppressLint("MissingPermission")
 class BLEScanner(
     private val bluetoothAdapter: BluetoothAdapter?
 ) {
     private val scannerScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var scanJob: Job? = null
 
     private val _discoveredDevices = MutableStateFlow<Map<String, DiscoveredDevice>>(emptyMap())
     val discoveredDevices: StateFlow<List<DiscoveredDevice>> = _discoveredDevices
-        .map { it.values.toList() }
+        .map { it.values.sortedByDescending { device -> device.rssi }.toList() }
         .stateIn(
             scope = scannerScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -36,21 +36,24 @@ class BLEScanner(
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             val device = result.device
-            val name = device.name ?: return // Пропускаем устройства без имени атомарно
+            val name = device.name ?: return
 
             _discoveredDevices.update { currentMap ->
-                currentMap.toMutableMap().apply {
-                    put(
-                        device.address, DiscoveredDevice(
-                            name = name,
-                            macAddress = device.address,
-                            rssi = result.rssi,
-                            distance = calculateDistance(result.rssi),
-                            isPaired = device.bondState == BluetoothDevice.BOND_BONDED
-                        )
-                    )
-                }
+                val existing = currentMap[device.address]
+                if (existing != null && existing.rssi == result.rssi) return@update currentMap
+                
+                currentMap + (device.address to DiscoveredDevice(
+                    name = name,
+                    macAddress = device.address,
+                    rssi = result.rssi,
+                    distance = calculateDistance(result.rssi),
+                    isPaired = device.bondState == BluetoothDevice.BOND_BONDED
+                ))
             }
+        }
+
+        override fun onScanFailed(errorCode: Int) {
+            stopScan()
         }
     }
 
@@ -59,27 +62,39 @@ class BLEScanner(
         return 10.0.pow((-59 - rssi) / 20.0)
     }
 
-    fun startScan() {
+    fun startScan(timeout: Long = 15000L) {
         if (bluetoothAdapter?.isEnabled != true || _isScanning.value) return
 
         _discoveredDevices.value = emptyMap()
-        _isScanning.value = true
-
+        
+        val scanner = bluetoothAdapter.bluetoothLeScanner ?: return
+        
         val filter = ScanFilter.Builder()
             .setServiceUuid(ParcelUuid(BLEConstants.SERVICE_UUID))
             .build()
 
         val settings = ScanSettings.Builder()
             .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+            .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
             .build()
 
-        bluetoothAdapter.bluetoothLeScanner?.startScan(listOf(filter), settings, scanCallback)
+        _isScanning.value = true
+        scanner.startScan(listOf(filter), settings, scanCallback)
+
+        scanJob?.cancel()
+        scanJob = scannerScope.launch {
+            delay(timeout.milliseconds)
+            stopScan()
+        }
     }
 
     fun stopScan() {
         if (_isScanning.value) {
             _isScanning.value = false
-            bluetoothAdapter?.bluetoothLeScanner?.stopScan(scanCallback)
+            scanJob?.cancel()
+            runCatching {
+                bluetoothAdapter?.bluetoothLeScanner?.stopScan(scanCallback)
+            }
         }
     }
 }

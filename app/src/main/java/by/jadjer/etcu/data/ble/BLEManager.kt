@@ -1,31 +1,12 @@
 package by.jadjer.etcu.data.ble
 
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothGatt
-import android.bluetooth.BluetoothGattCharacteristic
-import android.bluetooth.BluetoothManager
+import android.bluetooth.*
 import android.content.Context
 import by.jadjer.etcu.data.local.BLEPreferenceManager
-import by.jadjer.etcu.domain.model.ConnectionState
-import by.jadjer.etcu.domain.model.ControlData
-import by.jadjer.etcu.domain.model.OTAChunk
-import by.jadjer.etcu.domain.model.OTAStatus
-import by.jadjer.etcu.domain.model.SystemInfo
-import by.jadjer.etcu.domain.model.SystemTelemetry
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
+import by.jadjer.etcu.domain.model.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
@@ -47,9 +28,6 @@ class BLEManager(
     private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
     val connectionState = _connectionState.asStateFlow()
 
-    private val _isConnected = MutableStateFlow(false)
-    val isConnected = _isConnected.asStateFlow()
-
     private val _controlData = MutableStateFlow(ControlData())
     val controlData = _controlData.asStateFlow()
 
@@ -68,29 +46,36 @@ class BLEManager(
     private val managerScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var isManualDisconnect = false
     private var reconnectJob: Job? = null
+    private var autoConnectJob: Job? = null
+    private var negotiatedMtu = 23
 
     private val gattCallback = BLEConnectionHandler(
         dataParser = dataParser,
-        onConnectionStateChange = { state, connected ->
-            _connectionState.value = state
-            _isConnected.value = connected
-            if (!connected) {
-                closeGatt()
-                if (state == ConnectionState.DISCONNECTED && !isManualDisconnect) startAutoReconnect()
-            }
+        onConnectionStateChange = { state ->
+            updateConnectionState(state)
         },
         onControlDataUpdate = { _controlData.value = it },
         onTelemetryUpdate = { _telemetry.value = it },
         onSystemInfoUpdate = { _systemInfo.value = it },
         onOtaFeedback = { status -> status?.let { _otaFeedback.tryEmit(it) } },
-        onServicesDiscovered = { gatt ->
+        onServicesDiscovered = { gatt -> handleServicesDiscovered(gatt) },
+        onMtuUpdate = { gatt, mtu ->
             bluetoothGatt = gatt
-            handleServicesDiscovered(gatt)
-        },
-        onMtuChanged = { gatt -> bluetoothGatt = gatt }
+            negotiatedMtu = mtu
+        }
     )
 
+    private fun updateConnectionState(state: ConnectionState) {
+        _connectionState.value = state
+        
+        if (!state.isActive) {
+            closeGatt()
+            if (!isManualDisconnect) startAutoReconnect()
+        }
+    }
+
     private fun handleServicesDiscovered(gatt: BluetoothGatt) {
+        bluetoothGatt = gatt
         _connectionState.value = ConnectionState.SERVICES_DISCOVERED
         val mac = gatt.device.address
         preferenceManager.saveLastMac(mac)
@@ -98,20 +83,21 @@ class BLEManager(
         gatt.requestMtu(BLEConstants.REQUESTED_MTU)
     }
 
+    @Suppress("Deprecation")
     fun connect(macAddress: String) {
         if (bluetoothAdapter?.isEnabled != true) {
             _connectionState.value = ConnectionState.BLUETOOTH_OFF
             return
         }
-        reconnectJob?.cancel()
+        
+        stopAllJobs()
         isManualDisconnect = false
         closeGatt()
 
         runCatching {
             _connectionState.value = ConnectionState.CONNECTING
-
-            bluetoothGatt = bluetoothAdapter?.getRemoteDevice(macAddress)
-                ?.connectGatt(appContext, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
+            val device = bluetoothAdapter?.getRemoteDevice(macAddress)
+            bluetoothGatt = device?.connectGatt(appContext, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
         }.onFailure {
             _connectionState.value = ConnectionState.INVALID_MAC
         }
@@ -119,7 +105,7 @@ class BLEManager(
 
     fun disconnect() {
         isManualDisconnect = true
-        reconnectJob?.cancel()
+        stopAllJobs()
         bluetoothGatt?.disconnect()
     }
 
@@ -128,7 +114,7 @@ class BLEManager(
         reconnectJob?.cancel()
         reconnectJob = managerScope.launch {
             delay(3000.milliseconds)
-            if (!_isConnected.value) autoConnect()
+            if (!_connectionState.value.isActive) autoConnect()
         }
     }
 
@@ -139,10 +125,15 @@ class BLEManager(
             return
         }
 
-        _connectionState.value = ConnectionState.SCANNING
-        managerScope.launch {
+        if (_connectionState.value.isActive || _connectionState.value == ConnectionState.CONNECTING) return
+
+        autoConnectJob?.cancel()
+        autoConnectJob = managerScope.launch {
+            _connectionState.value = ConnectionState.SCANNING
+            scanner.startScan()
+            
             runCatching {
-                withTimeout(7000.milliseconds) {
+                withTimeout(15000.milliseconds) {
                     scanner.discoveredDevices
                         .firstOrNull { list -> list.any { it.macAddress == mac } }
                         ?.let {
@@ -152,7 +143,10 @@ class BLEManager(
                 }
             }.onFailure {
                 scanner.stopScan()
-                _connectionState.value = ConnectionState.DISCONNECTED
+                if (_connectionState.value == ConnectionState.SCANNING) {
+                    _connectionState.value = ConnectionState.DISCONNECTED
+                    if (!isManualDisconnect) startAutoReconnect()
+                }
             }
         }
     }
@@ -166,43 +160,55 @@ class BLEManager(
             .putShort(data.servoMin.toShort()).putShort(data.servoMax.toShort())
             .array()
 
-        gatt.writeCharacteristic(
-            characteristic,
-            bytes,
-            BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-        )
+        writeCharacteristic(gatt, characteristic, bytes)
     }
 
     fun writeOtaChunk(chunk: OTAChunk) {
         val gatt = bluetoothGatt ?: return
         val characteristic = getCharacteristic(BLEConstants.OTA_UUID) ?: return
 
-        managerScope.launch {
-            runCatching {
-                val bytes = ByteBuffer.allocate(8 + chunk.data.size).order(ByteOrder.LITTLE_ENDIAN)
-                    .putInt(chunk.firmwareSize.toInt())
-                    .putShort(chunk.totalChunks.toShort())
-                    .putShort(chunk.chunkNumber.toShort())
-                    .put(chunk.data)
-                    .array()
+        val packetSize = BLEConstants.OTA_HEADER_SIZE + chunk.data.size
+        if (packetSize > negotiatedMtu - 3) {
+            _connectionState.value = ConnectionState.ERROR_MTU
+            return
+        }
 
-                gatt.writeCharacteristic(
-                    characteristic,
-                    bytes,
-                    BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-                )
-            }.onFailure {
+        val bytes = ByteBuffer.allocate(packetSize).order(ByteOrder.LITTLE_ENDIAN)
+            .putInt(chunk.firmwareSize.toInt())
+            .putShort(chunk.totalChunks.toShort())
+            .putShort(chunk.chunkNumber.toShort())
+            .put(chunk.data)
+            .array()
+
+        writeCharacteristic(gatt, characteristic, bytes)
+    }
+
+    private fun writeCharacteristic(gatt: BluetoothGatt, char: BluetoothGattCharacteristic, data: ByteArray) {
+        runCatching {
+            val status = gatt.writeCharacteristic(char, data, BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
+            if (status != BluetoothStatusCodes.SUCCESS) {
                 _connectionState.value = ConnectionState.ERROR_WRITE_CHAR
             }
+        }.onFailure {
+            _connectionState.value = ConnectionState.ERROR_WRITE_CHAR
         }
     }
 
-    private fun getCharacteristic(characteristicUUID: UUID): BluetoothGattCharacteristic? =
-        bluetoothGatt?.services?.firstNotNullOfOrNull { it.getCharacteristic(characteristicUUID) }
+    private fun getCharacteristic(uuid: UUID): BluetoothGattCharacteristic? =
+        bluetoothGatt?.services?.firstNotNullOfOrNull { it.getCharacteristic(uuid) }
 
     fun clearLastMac() {
+        isManualDisconnect = true
+        stopAllJobs()
+        bluetoothGatt?.disconnect()
         preferenceManager.clearLastMac()
         _savedMac.value = null
+    }
+
+    private fun stopAllJobs() {
+        reconnectJob?.cancel()
+        autoConnectJob?.cancel()
+        scanner.stopScan()
     }
 
     private fun closeGatt() {

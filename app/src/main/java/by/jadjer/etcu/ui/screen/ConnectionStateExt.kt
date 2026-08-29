@@ -26,6 +26,6 @@ fun ConnectionState.toDisplayString(param: String = ""): String {
         ConnectionState.ERROR_DESCRIPTOR_WRITE -> stringResource(R.string.ble_error_descriptor_write, 0)
         ConnectionState.ERROR_INFO_NOT_FOUND -> stringResource(R.string.ble_error_info_not_found)
         ConnectionState.ERROR_READ_CHAR -> stringResource(R.string.ble_error_read_char, param, 0)
-        ConnectionState.ERROR_WRITE_CHAR -> TODO()
+        ConnectionState.ERROR_WRITE_CHAR -> stringResource(R.string.ble_error_write_char, param, 0)
     }
 }

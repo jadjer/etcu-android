@@ -30,6 +30,7 @@
     <string name="ble_error_info_not_found">Характеристика SystemInfo не найдена</string>
     <string name="ble_error_descriptor_write">Ошибка записи дескриптора: %d</string>
     <string name="ble_error_read_char">Ошибка чтения %1$s: %2$d</string>
+    <string name="ble_error_write_char">Ошибка записи %1$s: %2$d</string>
 
     <!-- Connection Stub -->
     <string name="connecting_stub_message">Пытаемся восстановить связь с вашим устройством…</string>

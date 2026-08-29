@@ -12,7 +12,6 @@ class MainViewModel(
     private val bleRepository: BLERepository
 ) : ViewModel() {
 
-    val isConnected: StateFlow<Boolean> = bleRepository.isConnected
     val connectionState: StateFlow<ConnectionState> = bleRepository.connectionState
     val savedMac: StateFlow<String?> = bleRepository.savedMac
     val telemetry: StateFlow<SystemTelemetry> = bleRepository.telemetry

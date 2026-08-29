@@ -13,6 +13,7 @@ object BLEConstants {
 
     // Connection & OTA parameters
     const val REQUESTED_MTU = 517
+    const val OTA_HEADER_SIZE = 8
     const val MAX_OTA_PAYLOAD_SIZE = 244
 
     // SharedPreferences

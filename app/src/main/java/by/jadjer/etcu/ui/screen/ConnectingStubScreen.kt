@@ -1,6 +1,9 @@
 package by.jadjer.etcu.ui.screen
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BluetoothDisabled
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -10,10 +13,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
+import by.jadjer.etcu.domain.model.ConnectionState
 
 @Composable
 fun ConnectingStubScreen(
     connectionStatus: String,
+    connectionState: ConnectionState,
     onRetryClick: () -> Unit,
     onResetClick: () -> Unit
 ) {
@@ -25,50 +30,78 @@ fun ConnectingStubScreen(
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
         ) {
+            ConnectionIndicator(connectionState)
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = connectionStatus,
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center
+                )
+
+                Text(
+                    text = stringResource(R.string.connecting_stub_message),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = onRetryClick,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.btn_retry))
+                }
+
+                OutlinedButton(
+                    onClick = onResetClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text(stringResource(R.string.btn_reset_device))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ConnectionIndicator(state: ConnectionState) {
+    Box(
+        modifier = Modifier.size(64.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        if (state.isProcessing) {
             CircularProgressIndicator(
                 modifier = Modifier.size(48.dp),
-                color = MaterialTheme.colorScheme.primary
+                strokeWidth = 4.dp
             )
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            Text(
-                text = connectionStatus,
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            Text(
-                text = stringResource(R.string.connecting_stub_message),
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            Button(
-                onClick = onRetryClick,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.btn_retry))
+        } else {
+            val (icon, color) = when {
+                state.isError -> Icons.Default.ErrorOutline to MaterialTheme.colorScheme.error
+                else -> Icons.Default.BluetoothDisabled to MaterialTheme.colorScheme.secondary
             }
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            OutlinedButton(
-                onClick = onResetClick,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.error
-                )
-            ) {
-                Text(stringResource(R.string.btn_reset_device))
-            }
+
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(48.dp),
+                tint = color
+            )
         }
     }
 }
@@ -78,7 +111,8 @@ fun ConnectingStubScreen(
 fun ConnectingStubScreenPreview() {
     MaterialTheme {
         ConnectingStubScreen(
-            connectionStatus = "Соединение с AA:BB:CC:DD:EE:FF...",
+            connectionStatus = "Connecting to device...",
+            connectionState = ConnectionState.CONNECTING,
             onRetryClick = {},
             onResetClick = {}
         )

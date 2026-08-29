@@ -7,6 +7,7 @@ import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import by.jadjer.etcu.ui.screen.LocalPagerScrollEnabled
 
 @Composable
 fun ControlRangeSlider(
@@ -17,6 +18,8 @@ fun ControlRangeSlider(
     valueRange: ClosedFloatingPointRange<Float> = 0f..1000f,
     steps: Int = 100
 ) {
+    val pagerScrollEnabled = LocalPagerScrollEnabled.current
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = label,
@@ -26,7 +29,11 @@ fun ControlRangeSlider(
         RangeSlider(
             value = currentMin.toFloat()..currentMax.toFloat(),
             onValueChange = { range ->
+                pagerScrollEnabled.value = false
                 onRangeChange(range.start, range.endInclusive)
+            },
+            onValueChangeFinished = {
+                pagerScrollEnabled.value = true
             },
             valueRange = valueRange,
             steps = steps

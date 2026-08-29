@@ -11,14 +11,12 @@ import by.jadjer.etcu.domain.model.OTAStatus
 import by.jadjer.etcu.domain.repository.BLERepository
 import by.jadjer.etcu.domain.repository.OTARepository
 import by.jadjer.etcu.domain.util.Resource
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 sealed class OTAState {
     data object Idle : OTAState()
@@ -44,24 +42,25 @@ class OtaViewModel(
     private var hasCheckedUpdates = false
 
     init {
-        bleRepository.isConnected
-            .onEach { connected -> if (!connected) resetOtaState() }
+        bleRepository.connectionState
+            .onEach { state -> if (!state.isActive) resetOtaState() }
             .launchIn(viewModelScope)
 
         bleRepository.otaFeedback
             .onEach { handleFeedback(it) }
+
             .launchIn(viewModelScope)
 
         bleRepository.connectionState
             .onEach { connState ->
-                if (connState.name.startsWith("ERROR") && _state.value is OTAState.Uploading) {
+                if (connState.isError && _state.value is OTAState.Uploading) {
                     _state.value = OTAState.Error("Ошибка передачи данных: $connState")
                 }
             }
             .launchIn(viewModelScope)
 
-        combine(bleRepository.isConnected, bleRepository.systemInfo) { connected, info ->
-            if (connected && info.firmwareVersion != "0.0.0" && _state.value == OTAState.Idle && !hasCheckedUpdates) {
+        combine(bleRepository.connectionState, bleRepository.systemInfo) { state, info ->
+            if (state.isActive && info.firmwareVersion != "0.0.0" && _state.value == OTAState.Idle && !hasCheckedUpdates) {
                 hasCheckedUpdates = true
                 checkForUpdates(info.firmwareVersion)
             }
@@ -125,7 +124,8 @@ class OtaViewModel(
                         }
                         _state.value = OTAState.Downloading(1f)
                         firmwareData = downloadedData
-                        totalChunks = Math.ceilDiv(downloadedData.size, BLEConstants.MAX_OTA_PAYLOAD_SIZE)
+                        val payloadSize = BLEConstants.MAX_OTA_PAYLOAD_SIZE
+                        totalChunks = (downloadedData.size + payloadSize - 1) / payloadSize
                         sendNextChunk(0)
                     }
                     is Resource.Error -> _state.value = OTAState.Error(result.message)
@@ -143,30 +143,28 @@ class OtaViewModel(
         currentChunkIndex = index
         val payloadSize = BLEConstants.MAX_OTA_PAYLOAD_SIZE
         val start = index * payloadSize
-        if (start >= data.size) return
         val end = minOf(start + payloadSize, data.size)
 
-        viewModelScope.launch(Dispatchers.Default) {
-            val payload = data.sliceArray(start until end)
-            val uploadProgress = ((index + 1).toFloat() / totalChunks).coerceIn(0f, 1f)
+        if (start >= data.size) return
 
-            val otaChunk = OTAChunk(
+        val payload = data.sliceArray(start until end)
+        val uploadProgress = (index + 1).toFloat() / totalChunks
+
+        bleRepository.sendOtaChunk(
+            OTAChunk(
                 firmwareSize = data.size.toLong(),
                 totalChunks = totalChunks,
                 chunkNumber = index,
                 data = payload
             )
+        )
 
-            withContext(Dispatchers.Main) {
-                bleRepository.sendOtaChunk(otaChunk)
-                _state.value = OTAState.Uploading(
-                    progress = uploadProgress,
-                    currentChunk = index + 1,
-                    totalChunks = totalChunks,
-                    firmwareSize = data.size.toLong()
-                )
-            }
-        }
+        _state.value = OTAState.Uploading(
+            progress = uploadProgress,
+            currentChunk = index + 1,
+            totalChunks = totalChunks,
+            firmwareSize = data.size.toLong()
+        )
     }
 
     companion object {

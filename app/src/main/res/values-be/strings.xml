@@ -30,6 +30,7 @@
     <string name="ble_error_info_not_found">Характарыстыка SystemInfo не знойдзена</string>
     <string name="ble_error_descriptor_write">Памылка запісу дэскрыптара: %d</string>
     <string name="ble_error_read_char">Памылка чытання %1$s: %2$d</string>
+    <string name="ble_error_write_char">Памылка запісу %1$s: %2$d</string>
 
     <!-- Connection Stub -->
     <string name="connecting_stub_message">Спрабуем аднавіць сувязь з вашай прыладай…</string>

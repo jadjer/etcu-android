@@ -30,6 +30,7 @@
     <string name="ble_error_info_not_found">SystemInfo characteristic not found</string>
     <string name="ble_error_descriptor_write">Descriptor write error: %d</string>
     <string name="ble_error_read_char">Read error %1$s: %2$d</string>
+    <string name="ble_error_write_char">Write error %1$s: %2$d</string>
 
     <!-- Connection Stub -->
     <string name="connecting_stub_message">Attempting to restore connection with your device…</string>

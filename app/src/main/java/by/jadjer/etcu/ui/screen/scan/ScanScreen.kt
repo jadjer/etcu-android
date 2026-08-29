@@ -19,7 +19,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
-import by.jadjer.etcu.domain.model.ConnectionState
 import by.jadjer.etcu.domain.model.DiscoveredDevice
 import by.jadjer.etcu.ui.screen.toDisplayString
 
@@ -30,16 +29,18 @@ fun ScanScreen(viewModel: ScanViewModel) {
     val isScanning by viewModel.isScanning.collectAsState()
     
     val connectionStatus = connectionState.toDisplayString()
-    val isDisconnected = connectionState == ConnectionState.DISCONNECTED
 
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(Unit) {
+    DisposableEffect(Unit) {
         viewModel.startScanning()
+        onDispose {
+            viewModel.stopScanning()
+        }
     }
 
     LaunchedEffect(connectionState) {
-        if (!isDisconnected) {
+        if (connectionState.isError) {
             snackbarHostState.showSnackbar(
                 message = connectionStatus,
                 duration = SnackbarDuration.Short

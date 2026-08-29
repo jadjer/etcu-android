@@ -37,7 +37,7 @@ class OTARepositoryImpl(
                 Resource.Error(context.getString(R.string.ota_error_server, response.code()))
             }
         } catch (e: Exception) {
-            Resource.Error(context.getString(R.string.ota_error_network, e.message ?: ""))
+            Resource.Error(context.getString(R.string.ota_error_network, e.message ?: ""), e)
         }
     }
 
@@ -51,8 +51,7 @@ class OTARepositoryImpl(
             if (response.isSuccessful) {
                 val body = response.body() ?: return@withContext Resource.Error(context.getString(R.string.ota_error_empty))
                 
-                // Используем размер из заголовка, если он есть, иначе берем переданный ожидаемый размер
-                val contentLength = if (body.contentLength() > 0) body.contentLength() else expectedSize
+                val contentLength = if (body.contentLength() > 0L) body.contentLength() else expectedSize
                 
                 val inputStream = body.byteStream()
                 val outputStream = ByteArrayOutputStream()
@@ -60,12 +59,14 @@ class OTARepositoryImpl(
                 var bytesRead: Int
                 var totalBytesRead: Long = 0
 
-                while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                    outputStream.write(buffer, 0, bytesRead)
-                    totalBytesRead += bytesRead
-                    
-                    if (contentLength > 0) {
-                        onProgress(totalBytesRead.toFloat() / contentLength)
+                inputStream.use { input ->
+                    while (input.read(buffer).also { bytesRead = it } != -1) {
+                        outputStream.write(buffer, 0, bytesRead)
+                        totalBytesRead += bytesRead
+                        
+                        if (contentLength > 0) {
+                            onProgress(totalBytesRead.toFloat() / contentLength)
+                        }
                     }
                 }
 
@@ -74,7 +75,7 @@ class OTARepositoryImpl(
                 Resource.Error(context.getString(R.string.ota_error_server, response.code()))
             }
         } catch (e: Exception) {
-            Resource.Error(context.getString(R.string.ota_error_network, e.message ?: ""))
+            Resource.Error(context.getString(R.string.ota_error_network, e.message ?: ""), e)
         }
     }
 }

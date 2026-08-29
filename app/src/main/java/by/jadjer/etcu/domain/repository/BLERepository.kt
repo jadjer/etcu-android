@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface BLERepository {
     val connectionState: StateFlow<ConnectionState>
-    val isConnected: StateFlow<Boolean>
     val controlData: StateFlow<ControlData>
     val telemetry: StateFlow<SystemTelemetry>
     val systemInfo: StateFlow<SystemInfo>
