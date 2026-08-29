@@ -1,6 +1,8 @@
 package by.jadjer.etcu.ui.features.ota
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -52,10 +54,36 @@ fun OtaScreenContent(
                 Text(stringResource(R.string.ota_searching))
             }
             is OTAState.UpdateAvailable -> {
-                Text(stringResource(R.string.ota_update_available, state.version))
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = { onStartUpdate(state.downloadUrl, state.size) }) {
+                Text(
+                    text = stringResource(R.string.ota_current_version, state.currentVersion),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(R.string.ota_update_available, state.latestVersion),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(
+                    onClick = { onStartUpdate(state.downloadUrl, state.size) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text(stringResource(R.string.btn_download_install))
+                }
+            }
+            OTAState.UpToDate -> {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(64.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(stringResource(R.string.ota_up_to_date), style = MaterialTheme.typography.headlineSmall)
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(onClick = onCheckUpdates) {
+                    Text(stringResource(R.string.btn_retry))
                 }
             }
             is OTAState.Downloading -> {

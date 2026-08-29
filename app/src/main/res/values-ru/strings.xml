@@ -148,7 +148,9 @@
     <string name="ota_title">Обновление прошивки</string>
     <string name="btn_check_updates">Проверить обновления</string>
     <string name="ota_searching">Поиск новой версии…</string>
+    <string name="ota_current_version">Текущая версия: %s</string>
     <string name="ota_update_available">Доступна новая версия: %s</string>
+    <string name="ota_up_to_date">Прошивка актуальна</string>
     <string name="btn_download_install">Скачать и установить</string>
     <string name="ota_downloading_progress">Скачивание прошивки: %d%%</string>
     <string name="ota_uploading_progress">Передача прошивки: %d%%</string>

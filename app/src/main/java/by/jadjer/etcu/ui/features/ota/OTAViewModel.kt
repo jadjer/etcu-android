@@ -18,7 +18,13 @@ import kotlinx.coroutines.launch
 sealed class OTAState {
     data object Idle : OTAState()
     data object CheckingUpdates : OTAState()
-    data class UpdateAvailable(val version: String, val downloadUrl: String, val size: Long) : OTAState()
+    data class UpdateAvailable(
+        val currentVersion: String,
+        val latestVersion: String,
+        val downloadUrl: String,
+        val size: Long
+    ) : OTAState()
+    data object UpToDate : OTAState()
     data class Downloading(val progress: Float) : OTAState()
     data class Uploading(val progress: Float, val currentChunk: Int, val totalChunks: Int, val firmwareSize: Long) : OTAState()
     data object Success : OTAState()
@@ -86,21 +92,43 @@ class OtaViewModel(
     fun checkForUpdates(currentVersion: String? = null) {
         viewModelScope.launch {
             _state.value = OTAState.CheckingUpdates
+            val current = currentVersion ?: bleRepository.systemInfo.value.firmwareVersion
+            
             when (val result = otaRepository.getLatestRelease()) {
                 is Resource.Success -> {
                     val release = result.data
                     val cleanRelease = release.version.removePrefix("v")
-                    val cleanCurrent = currentVersion?.removePrefix("v").orEmpty()
+                    val cleanCurrent = current.removePrefix("v").ifEmpty { "0.0.0" }
 
-                    if (cleanRelease != cleanCurrent) {
-                        _state.value = OTAState.UpdateAvailable(release.version, release.downloadUrl, release.size)
+                    if (isNewer(cleanRelease, cleanCurrent)) {
+                        _state.value = OTAState.UpdateAvailable(
+                            currentVersion = current,
+                            latestVersion = release.version,
+                            downloadUrl = release.downloadUrl,
+                            size = release.size
+                        )
                     } else {
-                        _state.value = OTAState.Idle
+                        _state.value = OTAState.UpToDate
                     }
                 }
                 is Resource.Error -> _state.value = OTAState.Error(result.message)
             }
         }
+    }
+
+    private fun isNewer(latest: String, current: String): Boolean {
+        if (current == "0.0.0") return true
+        val latestParts = latest.split('.').mapNotNull { it.toIntOrNull() }
+        val currentParts = current.split('.').mapNotNull { it.toIntOrNull() }
+
+        val length = maxOf(latestParts.size, currentParts.size)
+        for (i in 0 until length) {
+            val l = latestParts.getOrNull(i) ?: 0
+            val c = currentParts.getOrNull(i) ?: 0
+            if (l > c) return true
+            if (l < c) return false
+        }
+        return false
     }
 
     fun startUpdate(url: String, size: Long) {

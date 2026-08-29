@@ -148,7 +148,9 @@
     <string name="ota_title">Абнаўленне прашыўкі</string>
     <string name="btn_check_updates">Праверыць абнаўленні</string>
     <string name="ota_searching">Пошук новай версіі…</string>
+    <string name="ota_current_version">Бягучая версія: %s</string>
     <string name="ota_update_available">Даступная новая версія: %s</string>
+    <string name="ota_up_to_date">Прашыўка актуальная</string>
     <string name="btn_download_install">Спампаваць і ўсталяваць</string>
     <string name="ota_downloading_progress">Спампоўка прашыўкі: %d%%</string>
     <string name="ota_uploading_progress">Перадача прашыўкі: %d%%</string>

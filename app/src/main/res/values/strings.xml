@@ -149,7 +149,9 @@
     <string name="ota_title">Firmware Update</string>
     <string name="btn_check_updates">Check for Updates</string>
     <string name="ota_searching">Searching for new version…</string>
+    <string name="ota_current_version">Current version: %s</string>
     <string name="ota_update_available">New version available: %s</string>
+    <string name="ota_up_to_date">Firmware is up to date</string>
     <string name="btn_download_install">Download and Install</string>
     <string name="ota_downloading_progress">Downloading firmware: %d%%</string>
     <string name="ota_uploading_progress">Uploading firmware: %d%%</string>
