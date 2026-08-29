@@ -5,5 +5,4 @@ data class DiscoveredDevice(
     val name: String,
     val macAddress: String,
     val rssi: Int = 0,
-    val distance: Double = 0.0
 )

@@ -42,7 +42,7 @@
     <string name="scan_controllers_detected">Выяўленыя кантролеры</string>
     <string name="scan_not_found">Кантролеры не знойдзены. Пераканайцеся, што прылада ўключана.</string>
     <string name="btn_bluetooth_settings">Налады Bluetooth</string>
-    <string name="scan_signal_info">Сігнал: %1$d dBm (≈%2$.1f м)</string>
+    <string name="scan_signal_info">Сігнал: %1$d dBm</string>
 
     <!-- ECU Screen -->
     <string name="ecu_conn_status">Сувязь з ЭБУ</string>

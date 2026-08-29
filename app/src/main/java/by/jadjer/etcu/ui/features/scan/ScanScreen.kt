@@ -150,7 +150,7 @@ private fun DeviceItem(device: DiscoveredDevice, onClick: () -> Unit) {
                 Text(device.macAddress)
                 if (device.rssi != 0) {
                     Text(
-                        text = stringResource(R.string.scan_signal_info, device.rssi, device.distance),
+                        text = stringResource(R.string.scan_signal_info, device.rssi),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -194,14 +194,12 @@ fun ScanScreenPreview() {
                     name = "ETCU-New-Device",
                     macAddress = "11:22:33:44:55:66",
                     rssi = -55,
-                    distance = 1.2
                 ),
                 DiscoveredDevice(
                     isPaired = false,
                     name = "Unknown",
                     macAddress = "77:88:99:00:11:22",
                     rssi = -85,
-                    distance = 15.5
                 )
             ),
             isScanning = false,

@@ -6,9 +6,19 @@ import by.jadjer.etcu.domain.model.DiscoveredDevice
 import com.welie.blessed.BluetoothCentralManager
 import com.welie.blessed.BluetoothPeripheral
 import com.welie.blessed.BondState
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
-import kotlin.math.pow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 @SuppressLint("MissingPermission")
@@ -41,15 +51,9 @@ class BLEScanner(
                 name = name,
                 macAddress = peripheral.address,
                 rssi = scanResult.rssi,
-                distance = calculateDistance(scanResult.rssi),
                 isPaired = peripheral.bondState == BondState.BONDED
             ))
         }
-    }
-
-    private fun calculateDistance(rssi: Int): Double {
-        if (rssi == 0) return -1.0
-        return 10.0.pow((-59 - rssi) / 20.0)
     }
 
     fun startScan(timeout: Long = 15000L) {

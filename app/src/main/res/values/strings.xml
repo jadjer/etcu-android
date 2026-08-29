@@ -42,7 +42,7 @@
     <string name="scan_controllers_detected">Discovered Controllers</string>
     <string name="scan_not_found">No controllers found. Make sure the device is powered on.</string>
     <string name="btn_bluetooth_settings">Bluetooth Settings</string>
-    <string name="scan_signal_info">Signal: %1$d dBm (≈%2$.1f m)</string>
+    <string name="scan_signal_info">Signal: %1$d dBm</string>
 
     <!-- ECU Screen -->
     <string name="ecu_conn_status">ECU Communication</string>
