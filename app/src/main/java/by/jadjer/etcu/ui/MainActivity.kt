@@ -13,6 +13,7 @@ import by.jadjer.etcu.ui.navigation.AppNavGraph
 import by.jadjer.etcu.ui.theme.ETCUTheme
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
 

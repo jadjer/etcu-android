@@ -40,7 +40,7 @@ class MainViewModel(
                     modelClass.isAssignableFrom(MainViewModel::class.java) -> MainViewModel(bleRepository) as T
                     modelClass.isAssignableFrom(DeviceViewModel::class.java) -> DeviceViewModel(bleRepository) as T
                     modelClass.isAssignableFrom(ScanViewModel::class.java) -> ScanViewModel(bleRepository) as T
-                    modelClass.isAssignableFrom(OtaViewModel::class.java) -> OtaViewModel(bleRepository, otaRepository) as T
+                    modelClass.isAssignableFrom(OtaViewModel::class.java) -> OtaViewModel(bleRepository, otaRepository, application.applicationContext) as T
                     else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
                 }
             }

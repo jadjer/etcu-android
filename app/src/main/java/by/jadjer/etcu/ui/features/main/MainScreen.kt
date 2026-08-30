@@ -34,7 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -43,18 +42,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import by.jadjer.etcu.R
-import by.jadjer.etcu.domain.model.ECUTelemetry
 import by.jadjer.etcu.domain.model.SystemError
 import by.jadjer.etcu.ui.component.ErrorsBlock
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
 import by.jadjer.etcu.ui.features.device.EcuScreen
-import by.jadjer.etcu.ui.features.device.EcuScreenContent
 import by.jadjer.etcu.ui.features.device.ServoScreen
 import by.jadjer.etcu.ui.features.device.SettingsScreen
 import by.jadjer.etcu.ui.features.device.SystemScreen
 import by.jadjer.etcu.ui.features.ota.OtaScreen
+import by.jadjer.etcu.ui.features.ota.OtaViewModel
 import by.jadjer.etcu.ui.features.scan.ScanScreen
-import by.jadjer.etcu.ui.navigation.NavRoutes
+import by.jadjer.etcu.ui.features.scan.ScanViewModel
 import by.jadjer.etcu.ui.navigation.ScreenItem
 import kotlinx.coroutines.launch
 
@@ -62,7 +60,7 @@ import kotlinx.coroutines.launch
 fun MainScreen(viewModel: MainViewModel) {
     val connectionState by viewModel.connectionState.collectAsState()
     val savedMac by viewModel.savedMac.collectAsState()
-    
+
     val connectionStatus = connectionState.toDisplayString(savedMac ?: "")
 
     when {
@@ -74,10 +72,15 @@ fun MainScreen(viewModel: MainViewModel) {
                 onResetClick = viewModel::clearLastMac
             )
         }
+
         !connectionState.isActive -> {
-            ScanScreen(viewModel = viewModel(factory = MainViewModel.Factory))
+            // Запрашиваем из общей Фабрики именно ScanViewModel
+            val scanViewModel: ScanViewModel = viewModel(factory = MainViewModel.Factory)
+            ScanScreen(viewModel = scanViewModel)
         }
+
         else -> {
+            // Запрашиваем из общей Фабрики именно DeviceViewModel
             val deviceViewModel: DeviceViewModel = viewModel(factory = MainViewModel.Factory)
             MainScreenContent(
                 deviceViewModel = deviceViewModel,
@@ -96,12 +99,14 @@ private fun MainScreenContent(
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    // Безопасно определяем текущий экран на основе роутов навигации (Routes)
     val currentScreen = ScreenItem.fromRoute(currentRoute)
-    
+
     val coroutineScope = rememberCoroutineScope()
     val telemetry by deviceViewModel.telemetry.collectAsState()
     val activeErrors = telemetry.activeErrors
-    
+
     val navItems = ScreenItem.mainItems
     val pagerState = rememberPagerState(pageCount = { navItems.size })
 
@@ -113,7 +118,8 @@ private fun MainScreenContent(
                 MainTopAppBar(connectionStatus = connectionStatus)
             },
             bottomBar = {
-                if (currentScreen != ScreenItem.Ota) {
+                // Скрываем нижнее меню, если мы провалились на экран OTA
+                if (currentScreen != ScreenItem.OTA) {
                     MainNavigationBar(
                         pagerState = pagerState,
                         navItems = navItems,
@@ -129,7 +135,8 @@ private fun MainScreenContent(
                 }
             },
             floatingActionButton = {
-                if (activeErrors.isNotEmpty()) {
+                // Прячем FAB с ошибками проприетарного протокола во время OTA прошивки
+                if (activeErrors.isNotEmpty() && currentScreen != ScreenItem.OTA) {
                     ErrorFab(
                         errorCount = activeErrors.size,
                         onClick = { showErrorsSheet = true }
@@ -185,7 +192,7 @@ private fun ErrorFab(errorCount: Int, onClick: () -> Unit) {
                 Badge { Text(errorCount.toString()) }
             }
         ) {
-            Icon(Icons.Default.Warning, contentDescription = "Errors")
+            Icon(Icons.Default.Warning, contentDescription = stringResource(R.string.common_errors))
         }
     }
 }
@@ -200,13 +207,14 @@ private fun ErrorsBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState()
     ) {
-        Box(modifier = Modifier.padding(16.dp).padding(bottom = 32.dp)) {
+        Box(modifier = Modifier
+            .padding(16.dp)
+            .padding(bottom = 32.dp)) {
             ErrorsBlock(activeErrors = activeErrors)
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MainNavigationHost(
     navController: NavHostController,
@@ -218,9 +226,10 @@ private fun MainNavigationHost(
     Box(modifier = modifier.fillMaxSize()) {
         NavHost(
             navController = navController,
-            startDestination = NavRoutes.MAIN
+            startDestination = MainNavRoutes.Routes.ROOT
         ) {
-            composable(NavRoutes.MAIN) {
+            // Локальный маршрут №1: Корневой экран, содержащий HorizontalPager с вкладками
+            composable(MainNavRoutes.Routes.ROOT) {
                 val pagerScrollEnabled = remember { mutableStateOf(true) }
                 CompositionLocalProvider(LocalPagerScrollEnabled provides pagerScrollEnabled) {
                     HorizontalPager(
@@ -232,8 +241,11 @@ private fun MainNavigationHost(
                     }
                 }
             }
-            composable(ScreenItem.Ota.route) {
-                OtaScreen(viewModel(factory = MainViewModel.Factory))
+
+            // Локальный маршрут №2: Экран OTA прошивки, создающийся со своей OtaViewModel
+            composable(MainNavRoutes.Routes.OTA) {
+                val otaViewModel: OtaViewModel = viewModel(factory = MainViewModel.Factory)
+                OtaScreen(viewModel = otaViewModel)
             }
         }
     }
@@ -241,18 +253,17 @@ private fun MainNavigationHost(
 
 @Composable
 private fun MainTabContent(item: ScreenItem, deviceViewModel: DeviceViewModel) {
-    when (item) {
-        ScreenItem.Ecu -> EcuScreen(deviceViewModel)
-        ScreenItem.Servo -> ServoScreen(deviceViewModel)
-        ScreenItem.System -> SystemScreen(deviceViewModel)
-        ScreenItem.Settings -> {
+    when (item.route) {
+        MainNavRoutes.Tabs.ECU -> EcuScreen(deviceViewModel)
+        MainNavRoutes.Tabs.SERVO -> ServoScreen(deviceViewModel)
+        MainNavRoutes.Tabs.SYSTEM -> SystemScreen(deviceViewModel)
+        MainNavRoutes.Tabs.SETTINGS -> {
             val navController = LocalNavController.current
             SettingsScreen(
                 viewModel = deviceViewModel,
-                onOtaClick = { navController.navigate(ScreenItem.Ota.route) }
+                onOtaClick = { navController.navigate(MainNavRoutes.Routes.OTA) }
             )
         }
-        else -> {}
     }
 }
 
@@ -279,31 +290,6 @@ private fun MainNavigationBar(
                 selected = pagerState.currentPage == index,
                 onClick = { onScreenSelected(screen) }
             )
-        }
-    }
-}
-
-@Preview(showSystemUi = true)
-@Composable
-fun MainScreenPreview() {
-    val navItems = ScreenItem.mainItems
-    val pagerState = rememberPagerState(pageCount = { navItems.size })
-
-    MaterialTheme {
-        Scaffold(
-            bottomBar = {
-                MainNavigationBar(
-                    pagerState = pagerState,
-                    navItems = navItems,
-                    onScreenSelected = {}
-                )
-            }
-        ) { padding ->
-            Box(Modifier.padding(padding)) {
-                EcuScreenContent(
-                    telemetry = ECUTelemetry(isConnected = true, rpm = 1200, isStarted = true)
-                )
-            }
         }
     }
 }

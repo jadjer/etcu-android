@@ -81,6 +81,12 @@
     <string name="system_guard">Guard</string>
     <string name="system_brake">Brake</string>
 
+    <!-- Common -->
+    <string name="common_refresh">Refresh</string>
+    <string name="common_errors">Errors</string>
+    <string name="common_active">Active</string>
+    <string name="common_inactive">Inactive</string>
+
     <!-- System States -->
     <string name="sys_state_off">Off</string>
     <string name="sys_state_normal">Normal</string>
@@ -90,17 +96,19 @@
     <!-- Diagnostics -->
     <string name="diag_title">Diagnostic Status:</string>
     <string name="diag_no_errors">✅ No errors detected</string>
+    <string name="diag_error_item">⚠️ %s</string>
 
     <!-- Units -->
-    <string name="unit_rpm">RPM</string>
-    <string name="unit_kmh">km/h</string>
-    <string name="unit_ma">mA</string>
-    <string name="unit_v">V</string>
-    <string name="unit_celsius" translatable="false">°C</string>
-    <string name="unit_raw_1000" translatable="false">/ 1000</string>
-    <string name="unit_raw_1024" translatable="false">/ 1024</string>
-    <string name="unit_meters">m</string>
-    <string name="unit_percent" translatable="false">%</string>
+    <string name="unit_rpm">" RPM"</string>
+    <string name="unit_kmh">" km/h"</string>
+    <string name="unit_ma">" mA"</string>
+    <string name="unit_v">" V"</string>
+    <string name="unit_celsius" translatable="false">" °C"</string>
+    <string name="unit_raw_1000" translatable="false">" / 1000"</string>
+    <string name="unit_raw_1024" translatable="false">" / 1024"</string>
+    <string name="unit_meters">" m"</string>
+    <string name="unit_percent" translatable="false">" %"</string>
+    <string name="unit_format" translatable="false"> %s</string>
 
     <!-- Settings Screen -->
     <string name="settings_device_info">Device Information</string>
@@ -169,6 +177,13 @@
     <string name="ota_error_server">Server error: %d</string>
     <string name="ota_error_network">Network error: %s</string>
     <string name="ota_error_empty">Empty response from server</string>
+    <string name="ota_error_transmission">Data transmission error: %s</string>
+    <string name="ota_error_device_firmware">Firmware error on device</string>
+    <string name="ota_error_empty_file">Firmware file is empty</string>
+    <string name="ota_error_system">System error: %s</string>
+    <string name="ota_error_github_rate_limit">GitHub API rate limit exceeded. Try again later.</string>
+    <string name="ota_error_github_generic">GitHub API Error %1$d: %2$s</string>
+    <string name="ota_error_download_generic">Download Error %1$d: %2$s</string>
 
     <!-- Misc -->
     <string name="unknown">Unknown</string>

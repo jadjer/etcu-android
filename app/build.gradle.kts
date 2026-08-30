@@ -5,16 +5,14 @@ plugins {
 
 android {
     namespace = "by.jadjer.etcu"
-    compileSdk {
-        version = release(37)
-    }
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "by.jadjer.etcu"
-        minSdk = 36
+        minSdk = 35
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

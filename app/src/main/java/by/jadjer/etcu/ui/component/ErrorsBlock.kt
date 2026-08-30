@@ -45,7 +45,7 @@ fun ErrorsBlock(activeErrors: List<SystemError>) {
                         .padding(12.dp)
                 ) {
                     Text(
-                        text = "⚠️ ${stringResource(id = error.resId)}",
+                        text = stringResource(R.string.diag_error_item, stringResource(id = error.resId)),
                         color = Color(0xFFC62828),
                         style = MaterialTheme.typography.bodyMedium
                     )

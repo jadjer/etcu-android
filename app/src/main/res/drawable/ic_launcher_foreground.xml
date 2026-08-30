@@ -7,32 +7,18 @@
     <group
         android:translateX="0"
         android:translateY="0">
-        <!-- Background Circle (Minimalist Outline) -->
+        <!-- Minimalist Housing Circle (Radius 32dp fits in 33dp safe zone) -->
         <path
-            android:pathData="M54,54m-35,0a35,35 0,1 1,70 0a35,35 0,1 1,-70 0"
+            android:pathData="M54,54m-32,0a32,32 0,1 1,64 0a32,32 0,1 1,-64 0"
             android:strokeWidth="3"
-            android:strokeColor="#6200EE" />
+            android:strokeColor="#FFFFFF" />
 
-        <!-- Butterfly Valve (Slanted Line) -->
+        <!-- Butterfly Valve Plate (Width 44dp) -->
         <path
-            android:pathData="M30,65 L78,43"
-            android:strokeWidth="5"
+            android:pathData="M32,54 L76,54"
+            android:strokeWidth="8"
             android:strokeLineCap="round"
-            android:strokeColor="#6200EE" />
-
-        <!-- Center Shaft -->
-        <path
-            android:pathData="M54,34 L54,74"
-            android:strokeWidth="1.5"
-            android:strokeColor="#BB86FC" />
-
-        <!-- Pivot Points -->
-        <path
-            android:fillColor="#6200EE"
-            android:pathData="M54,34m-2.5,0a2.5,2.5 0,1 1,5 0a2.5,2.5 0,1 1,-5 0" />
-        <path
-            android:fillColor="#6200EE"
-            android:pathData="M54,74m-2.5,0a2.5,2.5 0,1 1,5 0a2.5,2.5 0,1 1,-5 0" />
+            android:strokeColor="#FFFFFF" />
     </group>
 
 </vector>

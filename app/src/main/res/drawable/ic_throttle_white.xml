@@ -4,23 +4,20 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Minimalist Housing Circle (Radius 32dp) -->
     <path
         android:pathData="M54,54m-32,0a32,32 0,1 1,64 0a32,32 0,1 1,-64 0"
         android:strokeWidth="3"
-        android:strokeColor="#6200EE" />
+        android:strokeColor="#FFFFFF" />
 
     <group
         android:name="butterfly_group"
         android:pivotX="54"
         android:pivotY="54">
-        <!-- Butterfly Valve Plate (Width 44dp) -->
         <path
             android:name="butterfly_path"
             android:pathData="M32,54 L76,54"
             android:strokeWidth="8"
             android:strokeLineCap="round"
-            android:strokeColor="#6200EE" />
+            android:strokeColor="#FFFFFF" />
     </group>
-
 </vector>

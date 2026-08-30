@@ -2,6 +2,8 @@ package by.jadjer.etcu.ui.features.ota
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.content.Context
+import by.jadjer.etcu.R
 import by.jadjer.etcu.data.ble.BLEConstants
 import by.jadjer.etcu.domain.model.OTAChunk
 import by.jadjer.etcu.domain.model.OTAStatus
@@ -33,7 +35,8 @@ sealed class OTAState {
 
 class OtaViewModel(
     private val bleRepository: BLERepository,
-    private val otaRepository: OTARepository
+    private val otaRepository: OTARepository,
+    private val context: Context
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<OTAState>(OTAState.Idle)
@@ -56,7 +59,7 @@ class OtaViewModel(
         bleRepository.connectionState
             .onEach { connState ->
                 if (connState.isError && _state.value is OTAState.Uploading) {
-                    _state.value = OTAState.Error("Ошибка передачи данных: $connState")
+                    _state.value = OTAState.Error(context.getString(R.string.ota_error_transmission, connState.toString()))
                 }
             }
             .launchIn(viewModelScope)
@@ -77,7 +80,7 @@ class OtaViewModel(
                 if (nextIndex < totalChunks) sendNextChunk(nextIndex)
             }
             OTAStatus.COMPLETED -> _state.value = OTAState.Success
-            OTAStatus.ERROR -> _state.value = OTAState.Error("Ошибка прошивки на устройстве")
+            OTAStatus.ERROR -> _state.value = OTAState.Error(context.getString(R.string.ota_error_device_firmware))
             else -> {}
         }
     }
@@ -143,7 +146,7 @@ class OtaViewModel(
                     is Resource.Success -> {
                         val downloadedData = result.data
                         if (downloadedData.isEmpty()) {
-                            _state.value = OTAState.Error("Файл прошивки пуст")
+                            _state.value = OTAState.Error(context.getString(R.string.ota_error_empty_file))
                             return@launch
                         }
                         _state.value = OTAState.Downloading(1f)
@@ -154,7 +157,7 @@ class OtaViewModel(
                     is Resource.Error -> _state.value = OTAState.Error(result.message)
                 }
             }.onFailure { e ->
-                _state.value = OTAState.Error("Системная ошибка: ${e.localizedMessage}")
+                _state.value = OTAState.Error(context.getString(R.string.ota_error_system, e.localizedMessage ?: ""))
             }
         }
     }

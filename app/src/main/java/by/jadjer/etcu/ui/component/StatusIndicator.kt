@@ -17,15 +17,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import by.jadjer.etcu.R
 
 @Composable
 fun StatusIndicator(
     label: String,
     isActive: Boolean,
-    activeText: String = "Активно",
-    inactiveText: String = "Неактивно",
+    activeText: String = stringResource(R.string.common_active),
+    inactiveText: String = stringResource(R.string.common_inactive),
     icon: ImageVector? = null
 ) {
     Card(

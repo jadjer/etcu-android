@@ -77,7 +77,7 @@ fun ScanScreenContent(
                 title = { Text(stringResource(R.string.scan_title)) },
                 actions = {
                     IconButton(onClick = onRefreshClick) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                        Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.common_refresh))
                     }
                 }
             )

@@ -1,6 +1,8 @@
 <resources>
 
 
+
+
     <!-- Navigation -->
     <string name="nav_ecu">ЭБУ</string>
     <string name="nav_servo">Прывад</string>
@@ -81,6 +83,12 @@
     <string name="system_guard">Абарона</string>
     <string name="system_brake">Тормаз</string>
 
+    <!-- Common -->
+    <string name="common_refresh">Абнавіць</string>
+    <string name="common_errors">Памылкі</string>
+    <string name="common_active">Актыўна</string>
+    <string name="common_inactive">Неактыўна</string>
+
     <!-- System States -->
     <string name="sys_state_off">Выключаны</string>
     <string name="sys_state_normal">Нармальны</string>
@@ -90,13 +98,15 @@
     <!-- Diagnostics -->
     <string name="diag_title">Статус дыягностыкі:</string>
     <string name="diag_no_errors">✅ Памылак не выяўлена</string>
+    <string name="diag_error_item">⚠️ %s</string>
 
     <!-- Units -->
-    <string name="unit_rpm">аб/мін</string>
-    <string name="unit_kmh">км/г</string>
-    <string name="unit_ma">мА</string>
-    <string name="unit_v">В</string>
-    <string name="unit_meters">м</string>
+    <string name="unit_rpm">" аб/мін"</string>
+    <string name="unit_kmh">" км/г"</string>
+    <string name="unit_ma">" мА"</string>
+    <string name="unit_v">" В"</string>
+    <string name="unit_meters">" м"</string>
+
 
     <!-- Settings Screen -->
     <string name="settings_device_info">Інфармацыя аб прыладзе</string>
@@ -165,6 +175,13 @@
     <string name="ota_error_server">Памылка сервера: %d</string>
     <string name="ota_error_network">Памылка сеткі: %s</string>
     <string name="ota_error_empty">Пусты адказ ад сервера</string>
+    <string name="ota_error_transmission">Памылка перадачы дадзеных: %s</string>
+    <string name="ota_error_device_firmware">Памылка прашыўкі на прыладзе</string>
+    <string name="ota_error_empty_file">Файл прашыўкі пусты</string>
+    <string name="ota_error_system">Сістэмная памылка: %s</string>
+    <string name="ota_error_github_rate_limit">Перавышаны ліміт запытаў GitHub API. Паспрабуйце пазней.</string>
+    <string name="ota_error_github_generic">Памылка GitHub API %1$d: %2$s</string>
+    <string name="ota_error_download_generic">Памылка загрузкі %1$d: %2$s</string>
 
     <!-- Misc -->
     <string name="unknown">Невядома</string>

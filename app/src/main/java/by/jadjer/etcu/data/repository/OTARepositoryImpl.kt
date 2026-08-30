@@ -39,9 +39,9 @@ class OTARepositoryImpl(
                 val rateRemaining = response.headers()["X-RateLimit-Remaining"]
                 
                 val message = if (code == 403 && rateRemaining == "0") {
-                    "GitHub API rate limit exceeded (60 req/hour). Try again later."
+                    context.getString(R.string.ota_error_github_rate_limit)
                 } else {
-                    "GitHub API Error $code: $errorBody"
+                    context.getString(R.string.ota_error_github_generic, code, errorBody)
                 }
                 Resource.Error(message)
             }
@@ -83,7 +83,7 @@ class OTARepositoryImpl(
             } else {
                 val code = response.code()
                 val errorBody = response.errorBody()?.string() ?: ""
-                Resource.Error("Download Error $code: $errorBody")
+                Resource.Error(context.getString(R.string.ota_error_download_generic, code, errorBody))
             }
         } catch (e: Exception) {
             Resource.Error(context.getString(R.string.ota_error_network, e.message ?: ""), e)
