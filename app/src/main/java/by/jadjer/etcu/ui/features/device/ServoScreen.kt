@@ -54,7 +54,7 @@ fun ServoScreenContent(telemetry: ServoTelemetry) {
         TelemetryRow(
             label = stringResource(R.string.servo_position),
             value = telemetry.position.toString(),
-            unit = stringResource(R.string.unit_raw_1024),
+            unit = stringResource(R.string.unit_raw_4095),
             icon = Icons.Default.LocationSearching,
         )
 

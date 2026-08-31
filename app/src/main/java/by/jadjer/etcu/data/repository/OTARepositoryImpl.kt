@@ -1,6 +1,6 @@
 package by.jadjer.etcu.data.repository
 
-import android.content.Context
+import android.app.Application
 import by.jadjer.etcu.R
 import by.jadjer.etcu.data.network.GitHubService
 import by.jadjer.etcu.data.network.NetworkConstants
@@ -13,7 +13,7 @@ import java.io.ByteArrayOutputStream
 
 class OTARepositoryImpl(
     private val service: GitHubService,
-    private val context: Context
+    private val app: Application
 ) : OTARepository {
 
     override suspend fun getLatestRelease(): Resource<FirmwareRelease> = withContext(Dispatchers.IO) {
@@ -31,7 +31,7 @@ class OTARepositoryImpl(
                         size = asset.size
                     ))
                 } else {
-                    Resource.Error(context.getString(R.string.ota_error_no_release))
+                    Resource.Error(app.getString(R.string.ota_error_no_release))
                 }
             } else {
                 val code = response.code()
@@ -39,14 +39,14 @@ class OTARepositoryImpl(
                 val rateRemaining = response.headers()["X-RateLimit-Remaining"]
                 
                 val message = if (code == 403 && rateRemaining == "0") {
-                    context.getString(R.string.ota_error_github_rate_limit)
+                    app.getString(R.string.ota_error_github_rate_limit)
                 } else {
-                    context.getString(R.string.ota_error_github_generic, code, errorBody)
+                    app.getString(R.string.ota_error_github_generic, code, errorBody)
                 }
                 Resource.Error(message)
             }
         } catch (e: Exception) {
-            Resource.Error(context.getString(R.string.ota_error_network, e.message ?: ""), e)
+            Resource.Error(app.getString(R.string.ota_error_network, e.message ?: ""), e)
         }
     }
 
@@ -58,7 +58,7 @@ class OTARepositoryImpl(
         try {
             val response = service.downloadFile(url)
             if (response.isSuccessful) {
-                val body = response.body() ?: return@withContext Resource.Error(context.getString(R.string.ota_error_empty))
+                val body = response.body() ?: return@withContext Resource.Error(app.getString(R.string.ota_error_empty))
                 
                 val contentLength = if (body.contentLength() > 0L) body.contentLength() else expectedSize
                 
@@ -83,10 +83,10 @@ class OTARepositoryImpl(
             } else {
                 val code = response.code()
                 val errorBody = response.errorBody()?.string() ?: ""
-                Resource.Error(context.getString(R.string.ota_error_download_generic, code, errorBody))
+                Resource.Error(app.getString(R.string.ota_error_download_generic, code, errorBody))
             }
         } catch (e: Exception) {
-            Resource.Error(context.getString(R.string.ota_error_network, e.message ?: ""), e)
+            Resource.Error(app.getString(R.string.ota_error_network, e.message ?: ""), e)
         }
     }
 }

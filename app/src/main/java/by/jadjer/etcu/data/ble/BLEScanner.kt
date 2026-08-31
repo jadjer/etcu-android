@@ -62,7 +62,12 @@ class BLEScanner(
         _discoveredDevices.value = emptyMap()
         _isScanning.value = true
         
-        central.scanForPeripheralsWithServices(arrayOf(BLEConstants.SERVICE_UUID))
+        try {
+            central.scanForPeripheralsWithServices(arrayOf(BLEConstants.SERVICE_UUID))
+        } catch (_: SecurityException) {
+            _isScanning.value = false
+            return
+        }
 
         scanJob?.cancel()
         scanJob = scannerScope.launch {

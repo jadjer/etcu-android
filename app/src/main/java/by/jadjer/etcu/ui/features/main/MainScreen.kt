@@ -6,61 +6,39 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import by.jadjer.etcu.R
-import by.jadjer.etcu.domain.model.SystemError
-import by.jadjer.etcu.ui.component.ErrorsBlock
-import by.jadjer.etcu.ui.features.device.DeviceViewModel
-import by.jadjer.etcu.ui.features.device.EcuScreen
-import by.jadjer.etcu.ui.features.device.ServoScreen
-import by.jadjer.etcu.ui.features.device.SettingsScreen
-import by.jadjer.etcu.ui.features.device.SystemScreen
+import androidx.navigation.compose.*
+import by.jadjer.etcu.di.ViewModelFactory
+import by.jadjer.etcu.ui.component.*
+import by.jadjer.etcu.ui.features.device.*
 import by.jadjer.etcu.ui.features.ota.OtaScreen
 import by.jadjer.etcu.ui.features.ota.OtaViewModel
 import by.jadjer.etcu.ui.features.scan.ScanScreen
 import by.jadjer.etcu.ui.features.scan.ScanViewModel
 import by.jadjer.etcu.ui.navigation.ScreenItem
+import by.jadjer.etcu.ui.theme.ETCUTheme
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.material3.Text
 import kotlinx.coroutines.launch
+
+val LocalNavController = staticCompositionLocalOf<NavHostController> {
+    error("No NavController provided")
+}
+
+val LocalPagerScrollEnabled = compositionLocalOf {
+    mutableStateOf(true)
+}
 
 @Composable
 fun MainScreen(viewModel: MainViewModel) {
     val connectionState by viewModel.connectionState.collectAsState()
     val savedMac by viewModel.savedMac.collectAsState()
-
     val connectionStatus = connectionState.toDisplayString(savedMac ?: "")
 
     when {
@@ -72,20 +50,23 @@ fun MainScreen(viewModel: MainViewModel) {
                 onResetClick = viewModel::clearLastMac
             )
         }
-
         !connectionState.isActive -> {
-            // Запрашиваем из общей Фабрики именно ScanViewModel
-            val scanViewModel: ScanViewModel = viewModel(factory = MainViewModel.Factory)
+            val scanViewModel: ScanViewModel = viewModel(factory = ViewModelFactory)
             ScanScreen(viewModel = scanViewModel)
         }
-
         else -> {
-            // Запрашиваем из общей Фабрики именно DeviceViewModel
-            val deviceViewModel: DeviceViewModel = viewModel(factory = MainViewModel.Factory)
-            MainScreenContent(
-                deviceViewModel = deviceViewModel,
-                connectionStatus = connectionStatus
-            )
+            val deviceViewModel: DeviceViewModel = viewModel(factory = ViewModelFactory)
+            MainScreenContent(deviceViewModel, connectionStatus)
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MainScreenPreview() {
+    ETCUTheme {
+        Box(Modifier.fillMaxSize()) {
+            Text("Main Screen Preview", Modifier.padding(16.dp))
         }
     }
 }
@@ -99,8 +80,6 @@ private fun MainScreenContent(
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-
-    // Безопасно определяем текущий экран на основе роутов навигации (Routes)
     val currentScreen = ScreenItem.fromRoute(currentRoute)
 
     val coroutineScope = rememberCoroutineScope()
@@ -114,11 +93,8 @@ private fun MainScreenContent(
 
     CompositionLocalProvider(LocalNavController provides navController) {
         Scaffold(
-            topBar = {
-                MainTopAppBar(connectionStatus = connectionStatus)
-            },
+            topBar = { MainTopAppBar(connectionStatus) },
             bottomBar = {
-                // Скрываем нижнее меню, если мы провалились на экран OTA
                 if (currentScreen != ScreenItem.OTA) {
                     MainNavigationBar(
                         pagerState = pagerState,
@@ -126,29 +102,20 @@ private fun MainScreenContent(
                         onScreenSelected = { screen ->
                             val index = navItems.indexOf(screen)
                             if (index != -1) {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
+                                coroutineScope.launch { pagerState.animateScrollToPage(index) }
                             }
                         }
                     )
                 }
             },
             floatingActionButton = {
-                // Прячем FAB с ошибками проприетарного протокола во время OTA прошивки
                 if (activeErrors.isNotEmpty() && currentScreen != ScreenItem.OTA) {
-                    ErrorFab(
-                        errorCount = activeErrors.size,
-                        onClick = { showErrorsSheet = true }
-                    )
+                    ErrorFab(errorCount = activeErrors.size, onClick = { showErrorsSheet = true })
                 }
             }
         ) { innerPadding ->
             if (showErrorsSheet) {
-                ErrorsBottomSheet(
-                    activeErrors = activeErrors,
-                    onDismiss = { showErrorsSheet = false }
-                )
+                ErrorsBottomSheet(activeErrors, onDismiss = { showErrorsSheet = false })
             }
 
             MainNavigationHost(
@@ -162,61 +129,8 @@ private fun MainScreenContent(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun MainTopAppBar(connectionStatus: String) {
-    TopAppBar(
-        title = { Text(stringResource(R.string.app_name)) },
-        actions = {
-            Text(
-                text = connectionStatus,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(end = 16.dp)
-            )
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
-    )
-}
-
-@Composable
-private fun ErrorFab(errorCount: Int, onClick: () -> Unit) {
-    FloatingActionButton(
-        onClick = onClick,
-        containerColor = MaterialTheme.colorScheme.errorContainer,
-        contentColor = MaterialTheme.colorScheme.onErrorContainer
-    ) {
-        BadgedBox(
-            badge = {
-                Badge { Text(errorCount.toString()) }
-            }
-        ) {
-            Icon(Icons.Default.Warning, contentDescription = stringResource(R.string.common_errors))
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ErrorsBottomSheet(
-    activeErrors: List<SystemError>,
-    onDismiss: () -> Unit
-) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState()
-    ) {
-        Box(modifier = Modifier
-            .padding(16.dp)
-            .padding(bottom = 32.dp)) {
-            ErrorsBlock(activeErrors = activeErrors)
-        }
-    }
-}
-
-@Composable
-private fun MainNavigationHost(
+fun MainNavigationHost(
     navController: NavHostController,
     navItems: List<ScreenItem>,
     pagerState: PagerState,
@@ -228,7 +142,6 @@ private fun MainNavigationHost(
             navController = navController,
             startDestination = MainNavRoutes.Routes.ROOT
         ) {
-            // Локальный маршрут №1: Корневой экран, содержащий HorizontalPager с вкладками
             composable(MainNavRoutes.Routes.ROOT) {
                 val pagerScrollEnabled = remember { mutableStateOf(true) }
                 CompositionLocalProvider(LocalPagerScrollEnabled provides pagerScrollEnabled) {
@@ -241,10 +154,8 @@ private fun MainNavigationHost(
                     }
                 }
             }
-
-            // Локальный маршрут №2: Экран OTA прошивки, создающийся со своей OtaViewModel
             composable(MainNavRoutes.Routes.OTA) {
-                val otaViewModel: OtaViewModel = viewModel(factory = MainViewModel.Factory)
+                val otaViewModel: OtaViewModel = viewModel(factory = ViewModelFactory)
                 OtaScreen(viewModel = otaViewModel)
             }
         }
@@ -262,33 +173,6 @@ private fun MainTabContent(item: ScreenItem, deviceViewModel: DeviceViewModel) {
             SettingsScreen(
                 viewModel = deviceViewModel,
                 onOtaClick = { navController.navigate(MainNavRoutes.Routes.OTA) }
-            )
-        }
-    }
-}
-
-val LocalNavController = staticCompositionLocalOf<NavHostController> {
-    error("No NavController provided")
-}
-
-val LocalPagerScrollEnabled = compositionLocalOf {
-    mutableStateOf(true)
-}
-
-@Composable
-private fun MainNavigationBar(
-    pagerState: PagerState,
-    navItems: List<ScreenItem>,
-    onScreenSelected: (ScreenItem) -> Unit
-) {
-    NavigationBar {
-        navItems.forEachIndexed { index, screen ->
-            val title = stringResource(screen.titleResId)
-            NavigationBarItem(
-                icon = { Icon(screen.icon, contentDescription = title) },
-                label = { Text(title) },
-                selected = pagerState.currentPage == index,
-                onClick = { onScreenSelected(screen) }
             )
         }
     }

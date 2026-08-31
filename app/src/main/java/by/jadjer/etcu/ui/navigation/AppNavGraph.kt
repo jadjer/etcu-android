@@ -15,16 +15,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import by.jadjer.etcu.ETCUApplication
+import by.jadjer.etcu.di.ViewModelFactory
 import by.jadjer.etcu.ui.features.main.MainScreen
-import by.jadjer.etcu.ui.features.main.MainViewModel
 import by.jadjer.etcu.ui.features.permission.PermissionsScreen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun AppNavGraph() {
-    val context = LocalContext.current
-    val app = context.applicationContext as ETCUApplication
+    val appContext = LocalContext.current.applicationContext
+    val app = appContext as ETCUApplication
     val navController = rememberNavController()
 
     val requiredPermissions = arrayOf(
@@ -35,7 +35,7 @@ fun AppNavGraph() {
     var hasPermissions by remember {
         mutableStateOf(
             requiredPermissions.all {
-                ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+                ContextCompat.checkSelfPermission(appContext, it) == PackageManager.PERMISSION_GRANTED
             }
         )
     }
@@ -63,7 +63,7 @@ fun AppNavGraph() {
         }
 
         composable(NavRoutes.MAIN) {
-            MainScreen(viewModel = viewModel(factory = MainViewModel.Factory))
+            MainScreen(viewModel = viewModel(factory = ViewModelFactory))
         }
     }
 }

@@ -7,61 +7,35 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.res.stringResource
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.SystemError
+import by.jadjer.etcu.ui.theme.ETCUTheme
 
 @Composable
 fun ErrorsBlock(activeErrors: List<SystemError>) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.diag_title),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
+    Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+        Text(stringResource(R.string.diag_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
         if (activeErrors.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFFE8F5E9), RoundedCornerShape(8.dp))
-                    .padding(12.dp)
-            ) {
-                Text(text = stringResource(R.string.diag_no_errors), color = Color(0xFF2E7D32))
+            Box(Modifier.fillMaxWidth().background(Color(0xFFE8F5E9), RoundedCornerShape(8.dp)).padding(12.dp)) {
+                Text(stringResource(R.string.diag_no_errors), color = Color(0xFF2E7D32))
             }
         } else {
             activeErrors.forEach { error ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                        .background(Color(0xFFFFEBEE), RoundedCornerShape(8.dp))
-                        .padding(12.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.diag_error_item, stringResource(id = error.resId)),
-                        color = Color(0xFFC62828),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                Box(Modifier.fillMaxWidth().padding(vertical = 4.dp).background(Color(0xFFFFEBEE), RoundedCornerShape(8.dp)).padding(12.dp)) {
+                    Text(stringResource(R.string.diag_error_item, stringResource(error.resId)), color = Color(0xFFC62828), style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun ErrorsBlockPreview() {
-    ErrorsBlock(
-        listOf(
-            SystemError.ACCELERATOR_CALIBRATE_FAULT,
-            SystemError.SERVO_READ_ERROR,
-        )
-    )
+private fun ErrorsBlockPreview() {
+    ETCUTheme {
+        ErrorsBlock(activeErrors = listOf(SystemError.ACCELERATOR_CALIBRATE_FAULT))
+    }
 }

@@ -1,11 +1,12 @@
 package by.jadjer.etcu.data.local
 
+import android.app.Application
 import android.content.Context
 import androidx.core.content.edit
 import by.jadjer.etcu.data.ble.BLEConstants
 
-class BLEPreferenceManager(context: Context) {
-    private val prefs = context.getSharedPreferences(BLEConstants.PREFS_NAME, Context.MODE_PRIVATE)
+class BLEPreferenceManager(app: Application) {
+    private val prefs = app.getSharedPreferences(BLEConstants.PREFS_NAME, Context.MODE_PRIVATE)
 
     fun saveLastMac(mac: String) {
         prefs.edit { putString(BLEConstants.KEY_LAST_MAC, mac) }

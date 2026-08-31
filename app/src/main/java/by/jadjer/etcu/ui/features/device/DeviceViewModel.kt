@@ -12,11 +12,9 @@ import kotlin.time.Duration.Companion.milliseconds
 
 class DeviceViewModel(private val repository: BLERepository) : ViewModel() {
 
-    // Telemetry and Info
     val telemetry: StateFlow<SystemTelemetry> = repository.telemetry
     val systemInfo: StateFlow<SystemInfo> = repository.systemInfo
 
-    // Control Data (local copy for editing)
     private val _controlData = MutableStateFlow(ControlData())
     val controlData: StateFlow<ControlData> = _controlData.asStateFlow()
 
@@ -28,10 +26,7 @@ class DeviceViewModel(private val repository: BLERepository) : ViewModel() {
             .launchIn(viewModelScope)
     }
 
-    // Actions
-    fun disconnect() {
-        repository.disconnect()
-    }
+    fun disconnect() = repository.disconnect()
 
     fun forgetDevice() {
         repository.clearLastMac()

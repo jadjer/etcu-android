@@ -1,6 +1,6 @@
 package by.jadjer.etcu.di
 
-import android.content.Context
+import android.app.Application
 import by.jadjer.etcu.data.ble.BLEManager
 import by.jadjer.etcu.data.local.BLEPreferenceManager
 import by.jadjer.etcu.data.network.GitHubService
@@ -13,19 +13,13 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class AppContainer(context: Context) {
+class AppContainer(private val app: Application) {
 
-    private val appContext = context.applicationContext
+    private val preferenceManager by lazy { BLEPreferenceManager(app) }
 
-    private val preferenceManager: BLEPreferenceManager by lazy {
-        BLEPreferenceManager(appContext)
-    }
+    private val bleManager by lazy { BLEManager(app, preferenceManager) }
 
-    private val bleManager: BLEManager by lazy {
-        BLEManager(appContext, preferenceManager)
-    }
-
-    private val githubService: GitHubService by lazy {
+    private val githubService by lazy {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
@@ -48,11 +42,6 @@ class AppContainer(context: Context) {
             .create(GitHubService::class.java)
     }
 
-    val bleRepository: BLERepository by lazy {
-        BLERepositoryImpl(bleManager)
-    }
-
-    val otaRepository: OTARepository by lazy {
-        OTARepositoryImpl(githubService, appContext)
-    }
+    val bleRepository: BLERepository by lazy { BLERepositoryImpl(bleManager) }
+    val otaRepository: OTARepository by lazy { OTARepositoryImpl(githubService, app) }
 }

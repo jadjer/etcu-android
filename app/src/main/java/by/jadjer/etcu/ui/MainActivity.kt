@@ -13,19 +13,15 @@ import by.jadjer.etcu.ui.navigation.AppNavGraph
 import by.jadjer.etcu.ui.theme.ETCUTheme
 
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
-
         super.onCreate(savedInstanceState)
-
         enableEdgeToEdge()
-
         setContent {
             ETCUTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background,
+                    color = MaterialTheme.colorScheme.background
                 ) {
                     AppNavGraph()
                 }

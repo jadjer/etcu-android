@@ -15,13 +15,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun PermissionsScreen(onPermissionsGranted: () -> Unit) {
     val context = LocalContext.current
     val permissions = remember {
-        arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
+        arrayOf(
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
     }
 
     var isPermanentlyDenied by remember { mutableStateOf(false) }
@@ -76,5 +81,13 @@ fun PermissionsScreen(onPermissionsGranted: () -> Unit) {
         ) {
             Text(text = if (isPermanentlyDenied) "Открыть настройки" else "Предоставить доступ")
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PermissionsScreenPreview() {
+    MaterialTheme {
+        PermissionsScreen(onPermissionsGranted = {})
     }
 }

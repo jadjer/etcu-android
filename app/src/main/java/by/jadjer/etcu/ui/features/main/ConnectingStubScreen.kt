@@ -1,10 +1,24 @@
 package by.jadjer.etcu.ui.features.main
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BluetoothDisabled
 import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.ConnectionState
+import by.jadjer.etcu.ui.theme.ETCUTheme
 
 @Composable
 fun ConnectingStubScreen(
@@ -82,7 +97,7 @@ fun ConnectingStubScreen(
 @Composable
 private fun ConnectionIndicator(state: ConnectionState) {
     Box(
-        modifier = Modifier.size(64.dp),
+        modifier = Modifier.size(108.dp),
         contentAlignment = Alignment.Center
     ) {
         if (state.isProcessing) {
@@ -109,7 +124,7 @@ private fun ConnectionIndicator(state: ConnectionState) {
 @Preview(showBackground = true)
 @Composable
 fun ConnectingStubScreenPreview() {
-    MaterialTheme {
+    ETCUTheme {
         ConnectingStubScreen(
             connectionStatus = "Connecting to device...",
             connectionState = ConnectionState.CONNECTING,

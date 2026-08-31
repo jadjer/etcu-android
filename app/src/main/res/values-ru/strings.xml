@@ -48,12 +48,12 @@
     <string name="ecu_connected">Есть связь</string>
     <string name="ecu_disconnected">Нет связи</string>
     <string name="ecu_rpm">Обороты двигателя</string>
-    <string name="ecu_speed">Скорость автомобиля</string>
+    <string name="ecu_speed">Скорость</string>
     <string name="ecu_tps">Положение TPS</string>
     <string name="ecu_engine_status">Двигатель запущен</string>
     <string name="ecu_engine_started">Запущен</string>
     <string name="ecu_engine_stopped">Остановлен</string>
-    <string name="ecu_clutch_status">Статус сцепления (ECU)</string>
+    <string name="ecu_clutch_status">Статус сцепления</string>
     <string name="ecu_clutch_pressed">Нажато</string>
     <string name="ecu_clutch_released">Отпущено</string>
 

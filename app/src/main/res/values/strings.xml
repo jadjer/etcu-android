@@ -54,7 +54,7 @@
     <string name="ecu_engine_status">Engine Status</string>
     <string name="ecu_engine_started">Started</string>
     <string name="ecu_engine_stopped">Stopped</string>
-    <string name="ecu_clutch_status">Clutch Status (ECU)</string>
+    <string name="ecu_clutch_status">Clutch Status</string>
     <string name="ecu_clutch_pressed">Pressed</string>
     <string name="ecu_clutch_released">Released</string>
 
@@ -105,7 +105,7 @@
     <string name="unit_v">" V"</string>
     <string name="unit_celsius" translatable="false">" °C"</string>
     <string name="unit_raw_1000" translatable="false">" / 1000"</string>
-    <string name="unit_raw_1024" translatable="false">" / 1024"</string>
+    <string name="unit_raw_4095" translatable="false">" / 4095"</string>
     <string name="unit_meters">" m"</string>
     <string name="unit_percent" translatable="false">" %"</string>
     <string name="unit_format" translatable="false"> %s</string>

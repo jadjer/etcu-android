@@ -51,12 +51,12 @@
     <string name="ecu_connected">Ёсць сувязь</string>
     <string name="ecu_disconnected">Няма сувязі</string>
     <string name="ecu_rpm">Абароты рухавіка</string>
-    <string name="ecu_speed">Хуткасць аўтамабіля</string>
+    <string name="ecu_speed">Хуткасць</string>
     <string name="ecu_tps">Палажэнне TPS</string>
     <string name="ecu_engine_status">Рухавік запушчаны</string>
     <string name="ecu_engine_started">Запушчаны</string>
     <string name="ecu_engine_stopped">Спынены</string>
-    <string name="ecu_clutch_status">Статус счэплення (ECU)</string>
+    <string name="ecu_clutch_status">Статус счэплення</string>
     <string name="ecu_clutch_pressed">Націснута</string>
     <string name="ecu_clutch_released">Адпушчана</string>
 
@@ -101,7 +101,7 @@
     <string name="diag_error_item">⚠️ %s</string>
 
     <!-- Units -->
-    <string name="unit_rpm">" аб/мін"</string>
+    <string name="unit_rpm">" аб/хв"</string>
     <string name="unit_kmh">" км/г"</string>
     <string name="unit_ma">" мА"</string>
     <string name="unit_v">" В"</string>
