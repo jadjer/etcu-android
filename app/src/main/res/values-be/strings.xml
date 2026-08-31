@@ -1,8 +1,5 @@
 <resources>
 
-
-
-
     <!-- Navigation -->
     <string name="nav_ecu">ЭБУ</string>
     <string name="nav_servo">Прывад</string>
@@ -114,8 +111,9 @@
     <string name="settings_build_date">Дата прашыўкі</string>
     <string name="settings_firmware_version">Версія прашыўкі</string>
     <string name="settings_control">Кіраванне</string>
-    <string name="settings_accel_range">Дыяпазон акселератара: ад %1$d да %2$d</string>
     <string name="settings_servo_range">Дыяпазон серва: ад %1$d да %2$d</string>
+    <string name="settings_accel_range">Дыяпазон акселератара: ад %1$d да %2$d</string>
+    <string name="settings_accel_dead_range">Дыяпазон акселератара: ад %1$d да %2$d</string>
     <string name="settings_device_settings">Налады прылады</string>
     <string name="btn_disconnect">Адключыць прыладу</string>
     <string name="btn_forget">Забыць прыладу</string>

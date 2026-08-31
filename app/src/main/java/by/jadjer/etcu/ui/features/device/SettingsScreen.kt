@@ -38,13 +38,19 @@ fun SettingsScreen(
     SettingsScreenContent(
         controlData = controlData,
         systemInfo = systemInfo,
+        onAccDeadRangeChange = {min, max ->
+            viewModel.updateAccDeadRange(
+                min = min.toInt(),
+                max = max.toInt(),
+            )
+        },
         onAccRangeChange = { min, max ->
             viewModel.updateAccRange(
                 min = min.toInt(),
                 max = max.toInt(),
             )
         },
-        onServoRangeChange = {min, max ->
+        onServoRangeChange = { min, max ->
             viewModel.updateServoRange(
                 min = min.toInt(),
                 max = max.toInt(),
@@ -60,6 +66,7 @@ fun SettingsScreen(
 fun SettingsScreenContent(
     controlData: ControlData,
     systemInfo: SystemInfo,
+    onAccDeadRangeChange: (Float, Float) -> Unit,
     onAccRangeChange: (Float, Float) -> Unit,
     onServoRangeChange: (Float, Float) -> Unit,
     onDisconnectClick: () -> Unit,
@@ -73,7 +80,10 @@ fun SettingsScreenContent(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(stringResource(R.string.settings_device_info), style = MaterialTheme.typography.titleLarge)
+        Text(
+            stringResource(R.string.settings_device_info),
+            style = MaterialTheme.typography.titleLarge
+        )
 
         TelemetryRow(
             label = stringResource(R.string.settings_board_version),
@@ -95,16 +105,38 @@ fun SettingsScreenContent(
         Text(stringResource(R.string.settings_control), style = MaterialTheme.typography.titleLarge)
 
         Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 ControlRangeSlider(
-                    label = stringResource(R.string.settings_accel_range, controlData.accMin, controlData.accMax),
-                    currentMin = controlData.accMin,
-                    currentMax = controlData.accMax,
+                    label = stringResource(
+                        R.string.settings_accel_dead_range,
+                        controlData.acceleratorDeadMin,
+                        controlData.acceleratorDeadMax
+                    ),
+                    currentMin = controlData.acceleratorDeadMin,
+                    currentMax = controlData.acceleratorDeadMax,
+                    onRangeChange = onAccDeadRangeChange
+                )
+
+                ControlRangeSlider(
+                    label = stringResource(
+                        R.string.settings_accel_range,
+                        controlData.acceleratorMin,
+                        controlData.acceleratorMax
+                    ),
+                    currentMin = controlData.acceleratorMin,
+                    currentMax = controlData.acceleratorMax,
                     onRangeChange = onAccRangeChange
                 )
 
                 ControlRangeSlider(
-                    label = stringResource(R.string.settings_servo_range, controlData.servoMin, controlData.servoMax),
+                    label = stringResource(
+                        R.string.settings_servo_range,
+                        controlData.servoMin,
+                        controlData.servoMax
+                    ),
                     currentMin = controlData.servoMin,
                     currentMax = controlData.servoMax,
                     onRangeChange = onServoRangeChange
@@ -114,7 +146,10 @@ fun SettingsScreenContent(
 
         HorizontalDivider()
 
-        Text(stringResource(R.string.settings_device_settings), style = MaterialTheme.typography.titleLarge)
+        Text(
+            stringResource(R.string.settings_device_settings),
+            style = MaterialTheme.typography.titleLarge
+        )
 
         Button(
             onClick = onDisconnectClick,
@@ -151,16 +186,19 @@ fun SettingsScreenPreview() {
     MaterialTheme {
         SettingsScreenContent(
             controlData = ControlData(
-                accMin = 150,
-                accMax = 900,
                 servoMin = 0,
                 servoMax = 1000,
+                acceleratorMin = 150,
+                acceleratorMax = 850,
+                acceleratorDeadMin = 100,
+                acceleratorDeadMax = 900
             ),
             systemInfo = SystemInfo(
                 boardVersion = "v2.1",
                 buildDate = "2023-08-20",
                 firmwareVersion = "1.2.3"
             ),
+            onAccDeadRangeChange = { _, _ -> },
             onAccRangeChange = { _, _ -> },
             onServoRangeChange = { _, _ -> },
             onDisconnectClick = {},

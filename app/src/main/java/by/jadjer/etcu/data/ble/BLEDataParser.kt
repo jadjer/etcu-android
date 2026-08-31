@@ -23,10 +23,12 @@ class BLEDataParser {
         return try {
             val buffer = bytes.toLittleEndianBuffer()
             ControlData(
-                accMin = buffer.uShort,
-                accMax = buffer.uShort,
                 servoMin = buffer.uShort,
                 servoMax = buffer.uShort,
+                acceleratorMin = buffer.uShort,
+                acceleratorMax = buffer.uShort,
+                acceleratorDeadMin = buffer.uShort,
+                acceleratorDeadMax = buffer.uShort,
             )
         } catch (_: Exception) {
             ControlData()
@@ -99,10 +101,12 @@ class BLEDataParser {
 
     fun serializeControlData(data: ControlData): ByteArray {
         return ByteBuffer.allocate(CONTROL_DATA_SIZE).order(ByteOrder.LITTLE_ENDIAN)
-            .putShort(data.accMin.toShort())
-            .putShort(data.accMax.toShort())
             .putShort(data.servoMin.toShort())
             .putShort(data.servoMax.toShort())
+            .putShort(data.acceleratorMin.toShort())
+            .putShort(data.acceleratorMax.toShort())
+            .putShort(data.acceleratorDeadMin.toShort())
+            .putShort(data.acceleratorDeadMax.toShort())
             .array()
     }
 

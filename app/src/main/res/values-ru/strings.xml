@@ -111,8 +111,9 @@
     <string name="settings_build_date">Дата прошивки</string>
     <string name="settings_firmware_version">Версия прошивки</string>
     <string name="settings_control">Управление</string>
-    <string name="settings_accel_range">Диапазон акселератора: от %1$d до %2$d</string>
     <string name="settings_servo_range">Диапазон серво: от %1$d до %2$d</string>
+    <string name="settings_accel_range">Диапазон акселератора: от %1$d до %2$d</string>
+    <string name="settings_accel_dead_range">Диапазон акселератора: от %1$d до %2$d</string>
     <string name="settings_device_settings">Настройки устройства</string>
     <string name="btn_disconnect">Отключить устройство</string>
     <string name="btn_forget">Забыть устройство</string>
