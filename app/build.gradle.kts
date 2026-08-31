@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "by.jadjer.etcu"
-        minSdk = 35
+        minSdk = 36
         targetSdk = 37
         versionCode = 3
         versionName = "1.0.2"
