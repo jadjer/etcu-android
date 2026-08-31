@@ -1,8 +1,8 @@
 package by.jadjer.etcu.ui.features.ota
 
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.viewModelScope
 import android.app.Application
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import by.jadjer.etcu.R
 import by.jadjer.etcu.data.ble.BLEConstants
 import by.jadjer.etcu.domain.model.OTAChunk
@@ -37,7 +37,7 @@ class OtaViewModel(
     private val app: Application,
     private val bleRepository: BLERepository,
     private val otaRepository: OTARepository
-) : AndroidViewModel(app) {
+) : ViewModel() {
 
     private val _state = MutableStateFlow<OTAState>(OTAState.Idle)
     val state = _state.asStateFlow()
