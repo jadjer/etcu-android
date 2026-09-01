@@ -11,7 +11,7 @@ android {
         applicationId = "by.jadjer.etcu"
         minSdk = 36
         targetSdk = 37
-        versionCode = 11
+        versionCode = 13
         versionName = "1.0.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -22,7 +22,9 @@ android {
             optimization {
                 enable = true
             }
-            ndk.debugSymbolLevel = "FULL"
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
         }
     }
     compileOptions {
