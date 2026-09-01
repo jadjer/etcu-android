@@ -27,8 +27,6 @@ class BLEDataParser {
                 servoMax = buffer.uShort,
                 acceleratorMin = buffer.uShort,
                 acceleratorMax = buffer.uShort,
-                acceleratorDeadMin = buffer.uShort,
-                acceleratorDeadMax = buffer.uShort,
             )
         } catch (_: Exception) {
             ControlData()
@@ -105,8 +103,6 @@ class BLEDataParser {
             .putShort(data.servoMax.toShort())
             .putShort(data.acceleratorMin.toShort())
             .putShort(data.acceleratorMax.toShort())
-            .putShort(data.acceleratorDeadMin.toShort())
-            .putShort(data.acceleratorDeadMax.toShort())
             .array()
     }
 

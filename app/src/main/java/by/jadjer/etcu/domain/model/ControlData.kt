@@ -5,6 +5,4 @@ data class ControlData(
     val servoMax: Int = 0,
     val acceleratorMin: Int = 0,
     val acceleratorMax: Int = 0,
-    val acceleratorDeadMin: Int = 0,
-    val acceleratorDeadMax: Int = 0,
 )

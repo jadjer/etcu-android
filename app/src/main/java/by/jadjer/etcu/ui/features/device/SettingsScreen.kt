@@ -38,12 +38,6 @@ fun SettingsScreen(
     SettingsScreenContent(
         controlData = controlData,
         systemInfo = systemInfo,
-        onAccDeadRangeChange = {min, max ->
-            viewModel.updateAccDeadRange(
-                min = min.toInt(),
-                max = max.toInt(),
-            )
-        },
         onAccRangeChange = { min, max ->
             viewModel.updateAccRange(
                 min = min.toInt(),
@@ -66,7 +60,6 @@ fun SettingsScreen(
 fun SettingsScreenContent(
     controlData: ControlData,
     systemInfo: SystemInfo,
-    onAccDeadRangeChange: (Float, Float) -> Unit,
     onAccRangeChange: (Float, Float) -> Unit,
     onServoRangeChange: (Float, Float) -> Unit,
     onDisconnectClick: () -> Unit,
@@ -111,19 +104,6 @@ fun SettingsScreenContent(
             ) {
                 ControlRangeSlider(
                     label = stringResource(
-                        R.string.settings_accel_dead_range,
-                        controlData.acceleratorDeadMin,
-                        controlData.acceleratorDeadMax
-                    ),
-                    currentMin = controlData.acceleratorDeadMin,
-                    currentMax = controlData.acceleratorDeadMax,
-                    onRangeChange = onAccDeadRangeChange,
-                    valueRange = 0f..1000f,
-                    steps = 999
-                )
-
-                ControlRangeSlider(
-                    label = stringResource(
                         R.string.settings_accel_range,
                         controlData.acceleratorMin,
                         controlData.acceleratorMax
@@ -131,8 +111,8 @@ fun SettingsScreenContent(
                     currentMin = controlData.acceleratorMin,
                     currentMax = controlData.acceleratorMax,
                     onRangeChange = onAccRangeChange,
-                    valueRange = controlData.acceleratorDeadMin.toFloat()..controlData.acceleratorDeadMax.toFloat(),
-                    steps = (controlData.acceleratorDeadMax - controlData.acceleratorDeadMin).coerceAtLeast(1) - 1
+                    valueRange = 0f..1000f,
+                    steps = 999
                 )
 
                 ControlRangeSlider(
@@ -196,15 +176,12 @@ fun SettingsScreenPreview() {
                 servoMax = 1000,
                 acceleratorMin = 150,
                 acceleratorMax = 850,
-                acceleratorDeadMin = 100,
-                acceleratorDeadMax = 900
             ),
             systemInfo = SystemInfo(
                 boardVersion = "v2.1",
                 buildDate = "2023-08-20",
                 firmwareVersion = "1.2.3"
             ),
-            onAccDeadRangeChange = { _, _ -> },
             onAccRangeChange = { _, _ -> },
             onServoRangeChange = { _, _ -> },
             onDisconnectClick = {},
