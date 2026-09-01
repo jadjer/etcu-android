@@ -117,7 +117,9 @@ fun SettingsScreenContent(
                     ),
                     currentMin = controlData.acceleratorDeadMin,
                     currentMax = controlData.acceleratorDeadMax,
-                    onRangeChange = onAccDeadRangeChange
+                    onRangeChange = onAccDeadRangeChange,
+                    valueRange = 0f..1000f,
+                    steps = 999
                 )
 
                 ControlRangeSlider(
@@ -128,7 +130,9 @@ fun SettingsScreenContent(
                     ),
                     currentMin = controlData.acceleratorMin,
                     currentMax = controlData.acceleratorMax,
-                    onRangeChange = onAccRangeChange
+                    onRangeChange = onAccRangeChange,
+                    valueRange = controlData.acceleratorDeadMin.toFloat()..controlData.acceleratorDeadMax.toFloat(),
+                    steps = (controlData.acceleratorDeadMax - controlData.acceleratorDeadMin).coerceAtLeast(1) - 1
                 )
 
                 ControlRangeSlider(
@@ -139,7 +143,9 @@ fun SettingsScreenContent(
                     ),
                     currentMin = controlData.servoMin,
                     currentMax = controlData.servoMax,
-                    onRangeChange = onServoRangeChange
+                    onRangeChange = onServoRangeChange,
+                    valueRange = 0f..1000f,
+                    steps = 999
                 )
             }
         }

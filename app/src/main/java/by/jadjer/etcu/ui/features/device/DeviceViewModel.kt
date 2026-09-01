@@ -34,13 +34,27 @@ class DeviceViewModel(private val repository: BLERepository) : ViewModel() {
     }
 
     fun updateAccDeadRange(min: Int, max: Int) {
-        val updated = _controlData.value.copy(acceleratorDeadMin = min, acceleratorDeadMax = max)
+        val currentAccMin = _controlData.value.acceleratorMin
+        val currentAccMax = _controlData.value.acceleratorMax
+
+        val updated = _controlData.value.copy(
+            acceleratorDeadMin = min,
+            acceleratorDeadMax = max,
+            acceleratorMin = currentAccMin.coerceIn(min, max),
+            acceleratorMax = currentAccMax.coerceIn(min, max)
+        )
         _controlData.value = updated
         scheduleUpdate(updated)
     }
 
     fun updateAccRange(min: Int, max: Int) {
-        val updated = _controlData.value.copy(acceleratorMin = min, acceleratorMax = max)
+        val deadMin = _controlData.value.acceleratorDeadMin
+        val deadMax = _controlData.value.acceleratorDeadMax
+
+        val updated = _controlData.value.copy(
+            acceleratorMin = min.coerceIn(deadMin, deadMax),
+            acceleratorMax = max.coerceIn(deadMin, deadMax)
+        )
         _controlData.value = updated
         scheduleUpdate(updated)
     }
