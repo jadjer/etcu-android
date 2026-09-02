@@ -40,7 +40,7 @@ fun SystemScreenContent(
         Text(stringResource(R.string.system_telemetry_title), style = MaterialTheme.typography.titleMedium)
 
         TelemetryRow(
-            label = stringResource(R.string.system_mode),
+            label = stringResource(R.string.system_state),
             value = stringResource(telemetry.systemState.resId),
             icon = Icons.Default.Info
         )

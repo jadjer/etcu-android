@@ -18,6 +18,10 @@ class DeviceViewModel(private val repository: BLERepository) : ViewModel() {
     private val _controlData = MutableStateFlow(ControlData())
     val controlData: StateFlow<ControlData> = _controlData.asStateFlow()
 
+    val operatingMode: StateFlow<OperatingMode> = controlData
+        .map { OperatingMode.fromServoMax(it.servoMax) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), OperatingMode.CUSTOM)
+
     private var updateJob: Job? = null
 
     init {
@@ -37,6 +41,14 @@ class DeviceViewModel(private val repository: BLERepository) : ViewModel() {
         val updated = _controlData.value.copy(servoMin = min, servoMax = max)
         _controlData.value = updated
         scheduleUpdate(updated)
+    }
+
+    fun updateOperatingMode(mode: OperatingMode) {
+        mode.servoMax?.let { max ->
+            val updated = _controlData.value.copy(servoMax = max)
+            _controlData.value = updated
+            scheduleUpdate(updated)
+        }
     }
 
     fun updateAccRange(min: Int, max: Int) {

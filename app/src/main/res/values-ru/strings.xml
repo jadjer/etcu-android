@@ -74,7 +74,7 @@
 
     <!-- System Screen -->
     <string name="system_telemetry_title">Текущая телеметрия</string>
-    <string name="system_mode">Режим системы</string>
+    <string name="system_state">Состояние системы</string>
     <string name="system_accel">Акселератор</string>
     <string name="system_throttle_target">Дроссель</string>
     <string name="system_guard">Защита</string>
@@ -111,6 +111,11 @@
     <string name="settings_build_date">Дата прошивки</string>
     <string name="settings_firmware_version">Версия прошивки</string>
     <string name="settings_control">Управление</string>
+    <string name="settings_operating_mode">Режим работы</string>
+    <string name="mode_rain">Дождь (30%)</string>
+    <string name="mode_normal">Нормальный (60%)</string>
+    <string name="mode_sport">Спорт (90%)</string>
+    <string name="mode_custom">Пользовательский</string>
     <string name="settings_servo_range">Диапазон серво: от %1$d до %2$d</string>
     <string name="settings_accel_range">Диапазон акселератора: от %1$d до %2$d</string>
     <string name="settings_device_settings">Настройки устройства</string>

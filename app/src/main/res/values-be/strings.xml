@@ -74,7 +74,7 @@
 
     <!-- System Screen -->
     <string name="system_telemetry_title">Бягучая тэлеметрыя</string>
-    <string name="system_mode">Рэжым сістэмы</string>
+    <string name="system_state">Стан сістэмы</string>
     <string name="system_accel">Акселератар</string>
     <string name="system_throttle_target">Дросель</string>
     <string name="system_guard">Абарона</string>
@@ -111,6 +111,11 @@
     <string name="settings_build_date">Дата прашыўкі</string>
     <string name="settings_firmware_version">Версія прашыўкі</string>
     <string name="settings_control">Кіраванне</string>
+    <string name="settings_operating_mode">Рэжым працы</string>
+    <string name="mode_rain">Дождж (30%)</string>
+    <string name="mode_normal">Нармальны (60%)</string>
+    <string name="mode_sport">Спорт (90%)</string>
+    <string name="mode_custom">Карыстальніцкі</string>
     <string name="settings_servo_range">Дыяпазон серва: ад %1$d да %2$d</string>
     <string name="settings_accel_range">Дыяпазон акселератара: ад %1$d да %2$d</string>
     <string name="settings_device_settings">Налады прылады</string>

@@ -2,6 +2,7 @@ package by.jadjer.etcu.ui.features.device
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -10,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -23,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.ControlData
+import by.jadjer.etcu.domain.model.OperatingMode
 import by.jadjer.etcu.domain.model.SystemInfo
 import by.jadjer.etcu.ui.component.ControlRangeSlider
 import by.jadjer.etcu.ui.component.TelemetryRow
@@ -34,10 +37,13 @@ fun SettingsScreen(
 ) {
     val controlData by viewModel.controlData.collectAsState()
     val systemInfo by viewModel.systemInfo.collectAsState()
+    val operatingMode by viewModel.operatingMode.collectAsState()
 
     SettingsScreenContent(
         controlData = controlData,
         systemInfo = systemInfo,
+        operatingMode = operatingMode,
+        onModeChange = { viewModel.updateOperatingMode(it) },
         onAccRangeChange = { min, max ->
             viewModel.updateAccRange(
                 min = min.toInt(),
@@ -60,6 +66,8 @@ fun SettingsScreen(
 fun SettingsScreenContent(
     controlData: ControlData,
     systemInfo: SystemInfo,
+    operatingMode: OperatingMode,
+    onModeChange: (OperatingMode) -> Unit,
     onAccRangeChange: (Float, Float) -> Unit,
     onServoRangeChange: (Float, Float) -> Unit,
     onDisconnectClick: () -> Unit,
@@ -102,6 +110,27 @@ fun SettingsScreenContent(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                Text(stringResource(R.string.settings_operating_mode), style = MaterialTheme.typography.labelLarge)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OperatingMode.entries.filter { it != OperatingMode.CUSTOM }.forEach { mode ->
+                        FilterChip(
+                            selected = operatingMode == mode,
+                            onClick = { onModeChange(mode) },
+                            label = { Text(stringResource(mode.resId)) }
+                        )
+                    }
+                }
+                if (operatingMode == OperatingMode.CUSTOM) {
+                    Text(
+                        stringResource(OperatingMode.CUSTOM.resId),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
                 ControlRangeSlider(
                     label = stringResource(
                         R.string.settings_accel_range,
@@ -173,7 +202,7 @@ fun SettingsScreenPreview() {
         SettingsScreenContent(
             controlData = ControlData(
                 servoMin = 0,
-                servoMax = 1000,
+                servoMax = 600,
                 acceleratorMin = 150,
                 acceleratorMax = 850,
             ),
@@ -182,6 +211,8 @@ fun SettingsScreenPreview() {
                 buildDate = "2023-08-20",
                 firmwareVersion = "1.2.3"
             ),
+            operatingMode = OperatingMode.NORMAL,
+            onModeChange = {},
             onAccRangeChange = { _, _ -> },
             onServoRangeChange = { _, _ -> },
             onDisconnectClick = {},
