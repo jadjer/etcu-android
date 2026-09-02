@@ -27,6 +27,7 @@ class OTARepositoryImpl(
                     Resource.Success(FirmwareRelease(
                         version = body.tagName,
                         name = body.name,
+                        description = body.body,
                         downloadUrl = asset.downloadUrl,
                         size = asset.size
                     ))

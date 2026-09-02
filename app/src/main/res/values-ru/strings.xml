@@ -157,6 +157,7 @@
 
     <!-- OTA -->
     <string name="ota_title">Обновление прошивки</string>
+    <string name="ota_release_notes">Описание релиза</string>
     <string name="btn_check_updates">Проверить обновления</string>
     <string name="ota_searching">Поиск новой версии…</string>
     <string name="ota_current_version">Текущая версия: %s</string>

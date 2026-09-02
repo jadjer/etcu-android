@@ -1,6 +1,8 @@
 package by.jadjer.etcu.ui.features.ota
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
@@ -64,6 +66,36 @@ fun OtaScreenContent(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(top = 8.dp)
                 )
+
+                if (!state.description.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = stringResource(R.string.ota_release_notes),
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.align(Alignment.Start)
+                    )
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 200.dp)
+                            .padding(top = 8.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .padding(12.dp)
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            Text(
+                                text = state.description,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(24.dp))
                 Button(
                     onClick = { onStartUpdate(state.downloadUrl, state.size) },
@@ -148,7 +180,13 @@ fun OtaScreenContent(
 fun OtaScreenPreview() {
     MaterialTheme {
         OtaScreenContent(
-            state = OTAState.Uploading(0.45f, 45, 100, 20480),
+            state = OTAState.UpdateAvailable(
+                currentVersion = "1.0.0",
+                latestVersion = "1.1.0",
+                description = "• Added new features\n• Fixed bugs\n• Improved performance",
+                downloadUrl = "",
+                size = 1024
+            ),
             onCheckUpdates = {},
             onStartUpdate = { _, _ -> }
         )

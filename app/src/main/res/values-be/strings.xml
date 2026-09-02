@@ -157,6 +157,7 @@
 
     <!-- OTA -->
     <string name="ota_title">Абнаўленне прашыўкі</string>
+    <string name="ota_release_notes">Апісанне рэлізу</string>
     <string name="btn_check_updates">Праверыць абнаўленні</string>
     <string name="ota_searching">Пошук новай версіі…</string>
     <string name="ota_current_version">Бягучая версія: %s</string>

@@ -162,6 +162,7 @@
 
     <!-- OTA -->
     <string name="ota_title">Firmware Update</string>
+    <string name="ota_release_notes">Release Notes</string>
     <string name="btn_check_updates">Check for Updates</string>
     <string name="ota_searching">Searching for new version…</string>
     <string name="ota_current_version">Current version: %s</string>

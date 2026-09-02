@@ -23,6 +23,7 @@ sealed class OTAState {
     data class UpdateAvailable(
         val currentVersion: String,
         val latestVersion: String,
+        val description: String?,
         val downloadUrl: String,
         val size: Long
     ) : OTAState()
@@ -107,6 +108,7 @@ class OtaViewModel(
                         _state.value = OTAState.UpdateAvailable(
                             currentVersion = current,
                             latestVersion = release.version,
+                            description = release.description,
                             downloadUrl = release.downloadUrl,
                             size = release.size
                         )
