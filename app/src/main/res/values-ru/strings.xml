@@ -110,6 +110,8 @@
     <string name="settings_board_version">Версия платы</string>
     <string name="settings_build_date">Дата прошивки</string>
     <string name="settings_firmware_version">Версия прошивки</string>
+    <string name="settings_accel_settings">Настройки акселератора</string>
+    <string name="settings_servo_settings">Настройки привода</string>
     <string name="settings_control">Управление</string>
     <string name="settings_operating_mode">Режим работы</string>
     <string name="mode_rain">Дождь (30%)</string>

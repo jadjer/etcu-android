@@ -115,6 +115,8 @@
     <string name="settings_board_version">Board Version</string>
     <string name="settings_build_date">Build Date</string>
     <string name="settings_firmware_version">Firmware Version</string>
+    <string name="settings_accel_settings">Accelerator Settings</string>
+    <string name="settings_servo_settings">Servo Settings</string>
     <string name="settings_control">Control</string>
     <string name="settings_operating_mode">Operating Mode</string>
     <string name="mode_rain">Rain (30%)</string>

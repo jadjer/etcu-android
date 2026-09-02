@@ -2,6 +2,7 @@ package by.jadjer.etcu.ui.features.device
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -110,27 +112,7 @@ fun SettingsScreenContent(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(stringResource(R.string.settings_operating_mode), style = MaterialTheme.typography.labelLarge)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    OperatingMode.entries.filter { it != OperatingMode.CUSTOM }.forEach { mode ->
-                        FilterChip(
-                            selected = operatingMode == mode,
-                            onClick = { onModeChange(mode) },
-                            label = { Text(stringResource(mode.resId)) }
-                        )
-                    }
-                }
-                if (operatingMode == OperatingMode.CUSTOM) {
-                    Text(
-                        stringResource(OperatingMode.CUSTOM.resId),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-
+                Text(stringResource(R.string.settings_accel_settings), style = MaterialTheme.typography.titleMedium)
                 ControlRangeSlider(
                     label = stringResource(
                         R.string.settings_accel_range,
@@ -143,6 +125,41 @@ fun SettingsScreenContent(
                     valueRange = 0f..1000f,
                     steps = 999
                 )
+            }
+        }
+
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(stringResource(R.string.settings_servo_settings), style = MaterialTheme.typography.titleMedium)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(R.string.settings_operating_mode), style = MaterialTheme.typography.labelLarge)
+                    if (operatingMode == OperatingMode.CUSTOM) {
+                        Text(
+                            stringResource(OperatingMode.CUSTOM.resId),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OperatingMode.entries.filter { it != OperatingMode.CUSTOM }.forEach { mode ->
+                        FilterChip(
+                            selected = operatingMode == mode,
+                            onClick = { onModeChange(mode) },
+                            label = { Text(stringResource(mode.resId)) }
+                        )
+                    }
+                }
 
                 ControlRangeSlider(
                     label = stringResource(
