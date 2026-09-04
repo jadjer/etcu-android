@@ -12,9 +12,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
+import java.util.regex.Pattern
 
 @Composable
 fun OtaScreen(viewModel: OtaViewModel) {
@@ -88,8 +94,29 @@ fun OtaScreenContent(
                                 .padding(12.dp)
                                 .verticalScroll(rememberScrollState())
                         ) {
+                            val annotatedString = buildAnnotatedString {
+                                val pattern = Pattern.compile("(https?://[\\w\\d:#@%/;$()~_?+\\-=.&]*)")
+                                val matcher = pattern.matcher(state.description)
+                                var lastIndex = 0
+                                while (matcher.find()) {
+                                    append(state.description.substring(lastIndex, matcher.start()))
+                                    val url = matcher.group()
+                                    pushLink(LinkAnnotation.Url(url))
+                                    withStyle(
+                                        SpanStyle(
+                                            color = MaterialTheme.colorScheme.primary,
+                                            textDecoration = TextDecoration.Underline
+                                        )
+                                    ) {
+                                        append(url)
+                                    }
+                                    pop()
+                                    lastIndex = matcher.end()
+                                }
+                                append(state.description.substring(lastIndex))
+                            }
                             Text(
-                                text = state.description,
+                                text = annotatedString,
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
