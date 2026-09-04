@@ -11,7 +11,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
-import by.jadjer.etcu.domain.model.SystemError
+import by.jadjer.etcu.domain.model.system.SystemError
 import by.jadjer.etcu.ui.theme.ETCUTheme
 
 @Composable

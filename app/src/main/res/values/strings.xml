@@ -114,6 +114,9 @@
     <string name="unit_meters">" m"</string>
     <string name="unit_percent" translatable="false">" %"</string>
     <string name="unit_format" translatable="false"> %s</string>
+    <string name="label_min">Min</string>
+    <string name="label_max">Max</string>
+    <string name="label_avg">Avg</string>
 
     <!-- Settings Screen -->
     <string name="settings_device_info">Device Information</string>

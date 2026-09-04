@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import by.jadjer.etcu.R
 import by.jadjer.etcu.data.ble.BLEConstants
-import by.jadjer.etcu.domain.model.OTAChunk
-import by.jadjer.etcu.domain.model.OTAStatus
+import by.jadjer.etcu.domain.model.ota.OTAChunk
+import by.jadjer.etcu.domain.model.ota.OTAStatus
 import by.jadjer.etcu.domain.repository.BLERepository
 import by.jadjer.etcu.domain.repository.OTARepository
 import by.jadjer.etcu.domain.util.Resource

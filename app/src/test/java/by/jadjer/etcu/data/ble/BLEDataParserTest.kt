@@ -1,7 +1,7 @@
 package by.jadjer.etcu.data.ble
 
-import by.jadjer.etcu.domain.model.ControlData
-import by.jadjer.etcu.domain.model.OTAStatus
+import by.jadjer.etcu.domain.model.control.ControlData
+import by.jadjer.etcu.domain.model.ota.OTAStatus
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -34,10 +34,10 @@ class BLEDataParserTest {
         
         val result = parser.parseControlData(bytes)
         
-        assertEquals(100, result.accMin)
-        assertEquals(200, result.accMax)
-        assertEquals(300, result.servoMin)
-        assertEquals(400, result.servoMax)
+        assertEquals(100, result.servoMin)
+        assertEquals(200, result.servoMax)
+        assertEquals(300, result.acceleratorMin)
+        assertEquals(400, result.acceleratorMax)
     }
 
     @Test

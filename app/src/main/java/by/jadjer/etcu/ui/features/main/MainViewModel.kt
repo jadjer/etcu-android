@@ -1,8 +1,8 @@
 package by.jadjer.etcu.ui.features.main
 
 import androidx.lifecycle.ViewModel
-import by.jadjer.etcu.domain.model.ConnectionState
-import by.jadjer.etcu.domain.model.SystemTelemetry
+import by.jadjer.etcu.domain.model.ble.ConnectionState
+import by.jadjer.etcu.domain.model.telemetry.SystemTelemetry
 import by.jadjer.etcu.domain.repository.BLERepository
 import kotlinx.coroutines.flow.StateFlow
 

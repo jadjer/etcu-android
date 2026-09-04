@@ -4,13 +4,17 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.bluetooth.BluetoothGattCharacteristic
 import by.jadjer.etcu.data.local.BLEPreferenceManager
-import by.jadjer.etcu.domain.model.*
+import by.jadjer.etcu.domain.model.control.*
+import by.jadjer.etcu.domain.model.telemetry.*
+import by.jadjer.etcu.domain.model.ota.*
+import by.jadjer.etcu.domain.model.system.*
+import by.jadjer.etcu.domain.model.ble.*
 import com.welie.blessed.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import by.jadjer.etcu.domain.model.ConnectionState as AppConnectionState
+import by.jadjer.etcu.domain.model.ble.ConnectionState as AppConnectionState
 
 @SuppressLint("MissingPermission")
 class BLEManager(

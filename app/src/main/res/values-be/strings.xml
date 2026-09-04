@@ -108,6 +108,9 @@
     <string name="unit_ma">" мА"</string>
     <string name="unit_v">" В"</string>
     <string name="unit_meters">" м"</string>
+    <string name="label_min">Мін</string>
+    <string name="label_max">Макс</string>
+    <string name="label_avg">Сяр</string>
 
 
     <!-- Settings Screen -->

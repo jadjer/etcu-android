@@ -3,7 +3,7 @@ package by.jadjer.etcu.ui.features.main
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import by.jadjer.etcu.R
-import by.jadjer.etcu.domain.model.ConnectionState
+import by.jadjer.etcu.domain.model.ble.ConnectionState
 
 @Composable
 fun ConnectionState.toDisplayString(param: String = ""): String {

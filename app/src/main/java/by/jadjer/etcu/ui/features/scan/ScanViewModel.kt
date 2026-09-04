@@ -1,8 +1,8 @@
 package by.jadjer.etcu.ui.features.scan
 
 import androidx.lifecycle.ViewModel
-import by.jadjer.etcu.domain.model.ConnectionState
-import by.jadjer.etcu.domain.model.DiscoveredDevice
+import by.jadjer.etcu.domain.model.ble.ConnectionState
+import by.jadjer.etcu.domain.model.ble.DiscoveredDevice
 import by.jadjer.etcu.domain.repository.BLERepository
 import kotlinx.coroutines.flow.StateFlow
 

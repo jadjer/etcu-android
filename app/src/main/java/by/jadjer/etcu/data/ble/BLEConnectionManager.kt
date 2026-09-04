@@ -6,7 +6,7 @@ import android.bluetooth.BluetoothAdapter
 import android.os.Handler
 import android.os.Looper
 import by.jadjer.etcu.data.local.BLEPreferenceManager
-import by.jadjer.etcu.domain.model.ConnectionState
+import by.jadjer.etcu.domain.model.ble.ConnectionState
 import com.welie.blessed.BluetoothCentralManager
 import com.welie.blessed.BluetoothCentralManagerCallback
 import com.welie.blessed.BluetoothPeripheral

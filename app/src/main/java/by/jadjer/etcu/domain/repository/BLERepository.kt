@@ -1,6 +1,10 @@
 package by.jadjer.etcu.domain.repository
 
-import by.jadjer.etcu.domain.model.*
+import by.jadjer.etcu.domain.model.ble.*
+import by.jadjer.etcu.domain.model.control.*
+import by.jadjer.etcu.domain.model.telemetry.*
+import by.jadjer.etcu.domain.model.system.*
+import by.jadjer.etcu.domain.model.ota.*
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 

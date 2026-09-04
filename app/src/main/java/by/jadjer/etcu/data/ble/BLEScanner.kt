@@ -2,7 +2,7 @@ package by.jadjer.etcu.data.ble
 
 import android.annotation.SuppressLint
 import android.bluetooth.le.ScanResult
-import by.jadjer.etcu.domain.model.DiscoveredDevice
+import by.jadjer.etcu.domain.model.ble.DiscoveredDevice
 import com.welie.blessed.BluetoothCentralManager
 import com.welie.blessed.BluetoothPeripheral
 import com.welie.blessed.BondState

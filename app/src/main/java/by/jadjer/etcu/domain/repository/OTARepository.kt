@@ -1,6 +1,6 @@
 package by.jadjer.etcu.domain.repository
 
-import by.jadjer.etcu.domain.model.FirmwareRelease
+import by.jadjer.etcu.domain.model.ota.FirmwareRelease
 import by.jadjer.etcu.domain.util.Resource
 
 interface OTARepository {

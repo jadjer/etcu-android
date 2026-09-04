@@ -4,7 +4,7 @@ import android.app.Application
 import by.jadjer.etcu.R
 import by.jadjer.etcu.data.network.GitHubService
 import by.jadjer.etcu.data.network.NetworkConstants
-import by.jadjer.etcu.domain.model.FirmwareRelease
+import by.jadjer.etcu.domain.model.ota.FirmwareRelease
 import by.jadjer.etcu.domain.repository.OTARepository
 import by.jadjer.etcu.domain.util.Resource
 import kotlinx.coroutines.Dispatchers

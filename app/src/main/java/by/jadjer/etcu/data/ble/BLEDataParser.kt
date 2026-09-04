@@ -4,15 +4,15 @@ import by.jadjer.etcu.data.ble.BLEConstants.CONTROL_DATA_SIZE
 import by.jadjer.etcu.data.ble.BLEConstants.INFO_STR_LEN
 import by.jadjer.etcu.data.ble.BLEConstants.SYSTEM_INFO_SIZE
 import by.jadjer.etcu.data.ble.BLEConstants.TELEMETRY_SIZE
-import by.jadjer.etcu.domain.model.ControlData
-import by.jadjer.etcu.domain.model.ECUTelemetry
-import by.jadjer.etcu.domain.model.OTAChunk
-import by.jadjer.etcu.domain.model.OTAStatus
-import by.jadjer.etcu.domain.model.ServoTelemetry
-import by.jadjer.etcu.domain.model.SystemError
-import by.jadjer.etcu.domain.model.SystemInfo
-import by.jadjer.etcu.domain.model.SystemState
-import by.jadjer.etcu.domain.model.SystemTelemetry
+import by.jadjer.etcu.domain.model.control.ControlData
+import by.jadjer.etcu.domain.model.telemetry.ECUTelemetry
+import by.jadjer.etcu.domain.model.ota.OTAChunk
+import by.jadjer.etcu.domain.model.ota.OTAStatus
+import by.jadjer.etcu.domain.model.telemetry.ServoTelemetry
+import by.jadjer.etcu.domain.model.system.SystemError
+import by.jadjer.etcu.domain.model.system.SystemInfo
+import by.jadjer.etcu.domain.model.system.SystemState
+import by.jadjer.etcu.domain.model.telemetry.SystemTelemetry
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
