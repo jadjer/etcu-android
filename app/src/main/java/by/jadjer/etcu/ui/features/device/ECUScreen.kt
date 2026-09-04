@@ -4,9 +4,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.TwoWheeler
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -40,7 +43,14 @@ fun EcuScreenContent(telemetry: ECUTelemetry) {
             activeText = stringResource(R.string.ecu_connected),
             inactiveText = stringResource(R.string.ecu_disconnected)
         )
-        
+
+        StatusIndicator(
+            label = stringResource(R.string.ecu_engine_status),
+            isActive = telemetry.isStarted,
+            activeText = stringResource(R.string.ecu_engine_started),
+            inactiveText = stringResource(R.string.ecu_engine_stopped)
+        )
+
         TelemetryRow(
             label = stringResource(R.string.ecu_rpm),
             value = telemetry.rpm.toString(),
@@ -59,15 +69,38 @@ fun EcuScreenContent(telemetry: ECUTelemetry) {
             label = stringResource(R.string.ecu_tps),
             value = telemetry.tps.toString(),
             unit = stringResource(R.string.unit_raw_1000),
-            icon = Icons.Default.DirectionsCar
+            icon = Icons.Default.TwoWheeler
+        )
+
+        TelemetryRow(
+            label = stringResource(R.string.ecu_battery),
+            value = telemetry.battery.toString(),
+            unit = stringResource(R.string.unit_v),
+            icon = Icons.Default.FlashOn
+        )
+
+        TelemetryRow(
+            label = stringResource(R.string.ecu_map),
+            value = telemetry.map.toString(),
+            unit = stringResource(R.string.unit_kpa),
+            icon = Icons.Default.Cloud
+        )
+
+        TelemetryRow(
+            label = stringResource(R.string.ecu_air_temp),
+            value = telemetry.airTemp.toString(),
+            unit = stringResource(R.string.unit_celsius),
+            icon = Icons.Default.Thermostat
+        )
+
+        TelemetryRow(
+            label = stringResource(R.string.ecu_coolant_temp),
+            value = telemetry.coolantTemp.toString(),
+            unit = stringResource(R.string.unit_celsius),
+            icon = Icons.Default.Thermostat
         )
         
-        StatusIndicator(
-            label = stringResource(R.string.ecu_engine_status),
-            isActive = telemetry.isStarted,
-            activeText = stringResource(R.string.ecu_engine_started),
-            inactiveText = stringResource(R.string.ecu_engine_stopped)
-        )
+
         
         StatusIndicator(
             label = stringResource(R.string.ecu_clutch_status),
@@ -85,11 +118,15 @@ fun EcuScreenPreview() {
         EcuScreenContent(
             telemetry = ECUTelemetry(
                 isConnected = true,
-                rpm = 2500,
-                speed = 60,
-                tps = 150,
                 isStarted = true,
-                isClutchEnabled = false
+                isClutchEnabled = false,
+                rpm = 2500,
+                battery = 13,
+                speed = 60,
+                map = 56,
+                tps = 150,
+                airTemp = 30,
+                coolantTemp = 78,
             )
         )
     }

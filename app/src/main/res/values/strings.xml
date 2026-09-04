@@ -51,6 +51,10 @@
     <string name="ecu_rpm">Engine RPM</string>
     <string name="ecu_speed">Vehicle Speed</string>
     <string name="ecu_tps">TPS Position</string>
+    <string name="ecu_battery">Battery Voltage</string>
+    <string name="ecu_map">Manifold Pressure</string>
+    <string name="ecu_air_temp">Intake Air Temp</string>
+    <string name="ecu_coolant_temp">Coolant Temp</string>
     <string name="ecu_engine_status">Engine Status</string>
     <string name="ecu_engine_started">Started</string>
     <string name="ecu_engine_stopped">Stopped</string>
@@ -101,6 +105,7 @@
     <!-- Units -->
     <string name="unit_rpm">" RPM"</string>
     <string name="unit_kmh">" km/h"</string>
+    <string name="unit_kpa">" kPa"</string>
     <string name="unit_ma">" mA"</string>
     <string name="unit_v">" V"</string>
     <string name="unit_celsius" translatable="false">" °C"</string>

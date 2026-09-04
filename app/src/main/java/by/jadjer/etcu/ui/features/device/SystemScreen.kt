@@ -6,7 +6,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.PedalBike
+import androidx.compose.material.icons.filled.TwoWheeler
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -49,7 +49,7 @@ fun SystemScreenContent(
             label = stringResource(R.string.system_accel),
             value = telemetry.acceleratorPosition.toString(),
             unit = stringResource(R.string.unit_raw_1000),
-            icon = Icons.Default.PedalBike
+            icon = Icons.Default.TwoWheeler
         )
         
         TelemetryRow(

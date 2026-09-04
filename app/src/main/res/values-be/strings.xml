@@ -50,6 +50,10 @@
     <string name="ecu_rpm">Абароты рухавіка</string>
     <string name="ecu_speed">Хуткасць</string>
     <string name="ecu_tps">Палажэнне TPS</string>
+    <string name="ecu_battery">Напружанне АКБ</string>
+    <string name="ecu_map">Ціск у калектары</string>
+    <string name="ecu_air_temp">Тэмп. паветра на ўпуску</string>
+    <string name="ecu_coolant_temp">Тэмп. ахаладж. вадкасці</string>
     <string name="ecu_engine_status">Рухавік запушчаны</string>
     <string name="ecu_engine_started">Запушчаны</string>
     <string name="ecu_engine_stopped">Спынены</string>
@@ -100,6 +104,7 @@
     <!-- Units -->
     <string name="unit_rpm">" аб/хв"</string>
     <string name="unit_kmh">" км/г"</string>
+    <string name="unit_kpa">" кПа"</string>
     <string name="unit_ma">" мА"</string>
     <string name="unit_v">" В"</string>
     <string name="unit_meters">" м"</string>

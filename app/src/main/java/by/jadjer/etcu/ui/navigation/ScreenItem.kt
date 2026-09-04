@@ -1,22 +1,22 @@
 package by.jadjer.etcu.ui.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Dns
+import androidx.compose.material.icons.filled.Engineering
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.SettingsInputComponent
 import androidx.compose.material.icons.filled.SystemUpdate
+import androidx.compose.material.icons.filled.TwoWheeler
 import androidx.compose.ui.graphics.vector.ImageVector
 import by.jadjer.etcu.R
 import by.jadjer.etcu.ui.features.main.MainNavRoutes
 
 sealed class ScreenItem(val titleResId: Int, val icon: ImageVector, val route: String) {
     data object ECU :
-        ScreenItem(R.string.nav_ecu, Icons.Default.DirectionsCar, MainNavRoutes.Tabs.ECU)
+        ScreenItem(R.string.nav_ecu, Icons.Default.TwoWheeler, MainNavRoutes.Tabs.ECU)
 
     data object Servo : ScreenItem(
         R.string.nav_servo,
-        Icons.Default.SettingsInputComponent,
+        Icons.Default.Engineering,
         MainNavRoutes.Tabs.SERVO
     )
 

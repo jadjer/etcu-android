@@ -6,6 +6,10 @@ data class ECUTelemetry(
     val isClutchEnabled: Boolean = false,
 
     val rpm: Int = 0,
+    val battery: Int = 0,
     val speed: Int = 0,
+    val map: Int = 0,
     val tps: Int = 0,
+    val airTemp: Int = 0,
+    val coolantTemp: Int = 0,
 )

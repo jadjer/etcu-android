@@ -50,6 +50,10 @@
     <string name="ecu_rpm">Обороты двигателя</string>
     <string name="ecu_speed">Скорость</string>
     <string name="ecu_tps">Положение TPS</string>
+    <string name="ecu_battery">Напряжение АКБ</string>
+    <string name="ecu_map">Давление в коллекторе</string>
+    <string name="ecu_air_temp">Темп. возд. на впуске</string>
+    <string name="ecu_coolant_temp">Темп. охлажд. жидкости</string>
     <string name="ecu_engine_status">Двигатель запущен</string>
     <string name="ecu_engine_started">Запущен</string>
     <string name="ecu_engine_stopped">Остановлен</string>
@@ -100,6 +104,7 @@
     <!-- Units -->
     <string name="unit_rpm">" об/мин"</string>
     <string name="unit_kmh">" км/ч"</string>
+    <string name="unit_kpa">" кПа"</string>
     <string name="unit_ma">" мА"</string>
     <string name="unit_v">" В"</string>
     <string name="unit_meters">" м"</string>

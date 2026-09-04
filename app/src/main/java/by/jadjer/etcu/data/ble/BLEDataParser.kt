@@ -78,8 +78,12 @@ class BLEDataParser {
         isStarted = bool,
         isClutchEnabled = bool,
         rpm = uShort,
+        battery = uByte,
         speed = uByte,
+        map = uByte,
         tps = uShort,
+        airTemp = uByte,
+        coolantTemp = uByte,
     )
 
     private fun ByteBuffer.parseServoTelemetry() = ServoTelemetry(
