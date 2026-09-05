@@ -4,7 +4,9 @@ import by.jadjer.etcu.data.ble.BLEConstants.CONTROL_DATA_SIZE
 import by.jadjer.etcu.data.ble.BLEConstants.INFO_STR_LEN
 import by.jadjer.etcu.data.ble.BLEConstants.SYSTEM_INFO_SIZE
 import by.jadjer.etcu.data.ble.BLEConstants.TELEMETRY_SIZE
+import by.jadjer.etcu.domain.model.control.AutoSet
 import by.jadjer.etcu.domain.model.control.ControlData
+import by.jadjer.etcu.domain.model.control.Range
 import by.jadjer.etcu.domain.model.telemetry.ECUTelemetry
 import by.jadjer.etcu.domain.model.ota.OTAChunk
 import by.jadjer.etcu.domain.model.ota.OTAStatus
@@ -22,11 +24,34 @@ class BLEDataParser {
 
         return try {
             val buffer = bytes.toLittleEndianBuffer()
+            
+            // AutoSet (6 bytes)
+            buffer.get() // tag
+            val autoSet = AutoSet(
+                enabled = buffer.bool,
+                delay = buffer.uShort,
+                threshold = buffer.uByte,
+                tolerance = buffer.uByte
+            )
+            
+            // Servo (5 bytes)
+            buffer.get() // tag
+            val servo = Range(
+                min = buffer.uShort,
+                max = buffer.uShort
+            )
+            
+            // Accelerator (5 bytes)
+            buffer.get() // tag
+            val accelerator = Range(
+                min = buffer.uShort,
+                max = buffer.uShort
+            )
+
             ControlData(
-                servoMin = buffer.uShort,
-                servoMax = buffer.uShort,
-                acceleratorMin = buffer.uShort,
-                acceleratorMax = buffer.uShort,
+                autoSet = autoSet,
+                servo = servo,
+                accelerator = accelerator
             )
         } catch (_: Exception) {
             ControlData()
@@ -103,10 +128,20 @@ class BLEDataParser {
 
     fun serializeControlData(data: ControlData): ByteArray {
         return ByteBuffer.allocate(CONTROL_DATA_SIZE).order(ByteOrder.LITTLE_ENDIAN)
-            .putShort(data.servoMin.toShort())
-            .putShort(data.servoMax.toShort())
-            .putShort(data.acceleratorMin.toShort())
-            .putShort(data.acceleratorMax.toShort())
+            // AutoSet
+            .put(0.toByte()) // tag
+            .put(if (data.autoSet.enabled) 1.toByte() else 0.toByte())
+            .putShort(data.autoSet.delay.toShort())
+            .put(data.autoSet.threshold.toByte())
+            .put(data.autoSet.tolerance.toByte())
+            // Servo
+            .put(0.toByte()) // tag
+            .putShort(data.servo.min.toShort())
+            .putShort(data.servo.max.toShort())
+            // Accelerator
+            .put(0.toByte()) // tag
+            .putShort(data.accelerator.min.toShort())
+            .putShort(data.accelerator.max.toShort())
             .array()
     }
 

@@ -25,19 +25,33 @@ class BLEDataParserTest {
 
     @Test
     fun `parseControlData parses correctly`() {
-        val bytes = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN)
-            .putShort(100.toShort())
-            .putShort(200.toShort())
-            .putShort(300.toShort())
-            .putShort(400.toShort())
+        val bytes = ByteBuffer.allocate(16).order(ByteOrder.LITTLE_ENDIAN)
+            // AutoSet
+            .put(0.toByte()) // tag
+            .put(1.toByte()) // enabled
+            .putShort(500.toShort()) // delay
+            .put(10.toByte()) // threshold
+            .put(2.toByte()) // tolerance
+            // Servo
+            .put(0.toByte()) // tag
+            .putShort(100.toShort()) // min
+            .putShort(600.toShort()) // max
+            // Accel
+            .put(0.toByte()) // tag
+            .putShort(150.toShort()) // min
+            .putShort(850.toShort()) // max
             .array()
         
         val result = parser.parseControlData(bytes)
         
-        assertEquals(100, result.servoMin)
-        assertEquals(200, result.servoMax)
-        assertEquals(300, result.acceleratorMin)
-        assertEquals(400, result.acceleratorMax)
+        assertEquals(true, result.autoSet.enabled)
+        assertEquals(500, result.autoSet.delay)
+        assertEquals(10, result.autoSet.threshold)
+        assertEquals(2, result.autoSet.tolerance)
+        assertEquals(100, result.servo.min)
+        assertEquals(600, result.servo.max)
+        assertEquals(150, result.accelerator.min)
+        assertEquals(850, result.accelerator.max)
     }
 
     @Test

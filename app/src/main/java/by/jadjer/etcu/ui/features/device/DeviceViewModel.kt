@@ -33,7 +33,7 @@ class DeviceViewModel(private val repository: BLERepository) : ViewModel() {
     val controlData: StateFlow<ControlData> = _controlData.asStateFlow()
 
     val operatingMode: StateFlow<OperatingMode> = controlData
-        .map { OperatingMode.fromServoMax(it.servoMax) }
+        .map { OperatingMode.fromServoMax(it.servo.max) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), OperatingMode.CUSTOM)
 
     private var updateJob: Job? = null
@@ -60,14 +60,14 @@ class DeviceViewModel(private val repository: BLERepository) : ViewModel() {
     }
 
     fun updateServoRange(min: Int, max: Int) {
-        val updated = _controlData.value.copy(servoMin = min, servoMax = max)
+        val updated = _controlData.value.copy(servo = _controlData.value.servo.copy(min = min, max = max))
         _controlData.value = updated
         scheduleUpdate(updated)
     }
 
     fun updateOperatingMode(mode: OperatingMode) {
         mode.servoMax?.let { max ->
-            val updated = _controlData.value.copy(servoMax = max)
+            val updated = _controlData.value.copy(servo = _controlData.value.servo.copy(max = max))
             _controlData.value = updated
             scheduleUpdate(updated)
         }
@@ -75,9 +75,26 @@ class DeviceViewModel(private val repository: BLERepository) : ViewModel() {
 
     fun updateAccRange(min: Int, max: Int) {
         val updated = _controlData.value.copy(
-            acceleratorMin = min,
-            acceleratorMax = max
+            accelerator = _controlData.value.accelerator.copy(min = min, max = max)
         )
+        _controlData.value = updated
+        scheduleUpdate(updated)
+    }
+
+    fun updateAutoSet(
+        enabled: Boolean? = null,
+        delay: Int? = null,
+        threshold: Int? = null,
+        tolerance: Int? = null
+    ) {
+        val current = _controlData.value.autoSet
+        val updatedAutoSet = current.copy(
+            enabled = enabled ?: current.enabled,
+            delay = delay ?: current.delay,
+            threshold = threshold ?: current.threshold,
+            tolerance = tolerance ?: current.tolerance
+        )
+        val updated = _controlData.value.copy(autoSet = updatedAutoSet)
         _controlData.value = updated
         scheduleUpdate(updated)
     }

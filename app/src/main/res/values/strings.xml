@@ -133,6 +133,11 @@
     <string name="mode_custom">Custom</string>
     <string name="settings_servo_range">Servo range: from %1$d to %2$d</string>
     <string name="settings_accel_range">Accelerator range: from %1$d to %2$d</string>
+    <string name="settings_autoset_settings">Auto Cruise Control</string>
+    <string name="settings_autoset_enabled">Auto-activation</string>
+    <string name="settings_autoset_delay">Activation Delay: %1$d ms</string>
+    <string name="settings_autoset_threshold">Activation Threshold: %1$d km/h</string>
+    <string name="settings_autoset_tolerance">Speed Tolerance: %1$d km/h</string>
     <string name="settings_device_settings">Device Settings</string>
     <string name="btn_disconnect">Disconnect Device</string>
     <string name="btn_forget">Forget Device</string>
