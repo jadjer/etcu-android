@@ -11,13 +11,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -34,6 +31,9 @@ import by.jadjer.etcu.domain.model.control.OperatingMode
 import by.jadjer.etcu.domain.model.control.Range
 import by.jadjer.etcu.domain.model.system.SystemInfo
 import by.jadjer.etcu.ui.component.ControlRangeSlider
+import by.jadjer.etcu.ui.component.ControlSlider
+import by.jadjer.etcu.ui.component.ControlSwitch
+import by.jadjer.etcu.ui.component.SettingsGroup
 import by.jadjer.etcu.ui.component.telemetry.TelemetryRow
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
 
@@ -116,133 +116,93 @@ fun SettingsScreenContent(
 
         Text(stringResource(R.string.settings_control), style = MaterialTheme.typography.titleLarge)
 
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text(stringResource(R.string.settings_accel_settings), style = MaterialTheme.typography.titleMedium)
-                ControlRangeSlider(
-                    label = stringResource(
-                        R.string.settings_accel_range,
-                        controlData.accelerator.min,
-                        controlData.accelerator.max
-                    ),
-                    currentMin = controlData.accelerator.min,
-                    currentMax = controlData.accelerator.max,
-                    onRangeChange = onAccRangeChange,
-                    valueRange = 0f..1000f,
-                    steps = 999
-                )
-            }
+        SettingsGroup(title = stringResource(R.string.settings_accel_settings)) {
+            ControlRangeSlider(
+                label = stringResource(
+                    R.string.settings_accel_range,
+                    controlData.accelerator.min,
+                    controlData.accelerator.max
+                ),
+                currentMin = controlData.accelerator.min,
+                currentMax = controlData.accelerator.max,
+                onRangeChange = onAccRangeChange,
+                valueRange = 0f..1000f,
+                steps = 999
+            )
         }
 
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text(stringResource(R.string.settings_autoset_settings), style = MaterialTheme.typography.titleMedium)
+        SettingsGroup(title = stringResource(R.string.settings_autoset_settings)) {
+            ControlSwitch(
+                label = stringResource(R.string.settings_autoset_enabled),
+                checked = controlData.autoSet.enabled,
+                onCheckedChange = { onAutoSetChange(it, null, null, null) }
+            )
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(stringResource(R.string.settings_autoset_enabled), style = MaterialTheme.typography.bodyLarge)
-                    Switch(
-                        checked = controlData.autoSet.enabled,
-                        onCheckedChange = { onAutoSetChange(it, null, null, null) }
-                    )
-                }
+            ControlSlider(
+                label = stringResource(R.string.settings_autoset_delay, controlData.autoSet.delay),
+                value = controlData.autoSet.delay,
+                onValueChange = { onAutoSetChange(null, it.toInt(), null, null) },
+                valueRange = 0f..5000f,
+                steps = 49
+            )
 
-                Column {
-                    Text(
-                        stringResource(R.string.settings_autoset_delay, controlData.autoSet.delay),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Slider(
-                        value = controlData.autoSet.delay.toFloat(),
-                        onValueChange = { onAutoSetChange(null, it.toInt(), null, null) },
-                        valueRange = 0f..5000f,
-                        steps = 49
-                    )
-                }
+            ControlSlider(
+                label = stringResource(R.string.settings_autoset_threshold, controlData.autoSet.threshold),
+                value = controlData.autoSet.threshold,
+                onValueChange = { onAutoSetChange(null, null, it.toInt(), null) },
+                valueRange = 0f..255f,
+                steps = 254
+            )
 
-                Column {
-                    Text(
-                        stringResource(R.string.settings_autoset_threshold, controlData.autoSet.threshold),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Slider(
-                        value = controlData.autoSet.threshold.toFloat(),
-                        onValueChange = { onAutoSetChange(null, null, it.toInt(), null) },
-                        valueRange = 0f..255f,
-                        steps = 254
-                    )
-                }
-
-                Column {
-                    Text(
-                        stringResource(R.string.settings_autoset_tolerance, controlData.autoSet.tolerance),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Slider(
-                        value = controlData.autoSet.tolerance.toFloat(),
-                        onValueChange = { onAutoSetChange(null, null, null, it.toInt()) },
-                        valueRange = 0f..255f,
-                        steps = 254
-                    )
-                }
-            }
+            ControlSlider(
+                label = stringResource(R.string.settings_autoset_tolerance, controlData.autoSet.tolerance),
+                value = controlData.autoSet.tolerance,
+                onValueChange = { onAutoSetChange(null, null, null, it.toInt()) },
+                valueRange = 0f..255f,
+                steps = 254
+            )
         }
 
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+        SettingsGroup(title = stringResource(R.string.settings_servo_settings)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(stringResource(R.string.settings_servo_settings), style = MaterialTheme.typography.titleMedium)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(stringResource(R.string.settings_operating_mode), style = MaterialTheme.typography.labelLarge)
-                    if (operatingMode == OperatingMode.CUSTOM) {
-                        Text(
-                            stringResource(OperatingMode.CUSTOM.resId),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
+                Text(stringResource(R.string.settings_operating_mode), style = MaterialTheme.typography.labelLarge)
+                if (operatingMode == OperatingMode.CUSTOM) {
+                    Text(
+                        stringResource(OperatingMode.CUSTOM.resId),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    OperatingMode.entries.filter { it != OperatingMode.CUSTOM }.forEach { mode ->
-                        FilterChip(
-                            selected = operatingMode == mode,
-                            onClick = { onModeChange(mode) },
-                            label = { Text(stringResource(mode.resId)) }
-                        )
-                    }
-                }
-
-                ControlRangeSlider(
-                    label = stringResource(
-                        R.string.settings_servo_range,
-                        controlData.servo.min,
-                        controlData.servo.max
-                    ),
-                    currentMin = controlData.servo.min,
-                    currentMax = controlData.servo.max,
-                    onRangeChange = onServoRangeChange,
-                    valueRange = 0f..1000f,
-                    steps = 999
-                )
             }
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OperatingMode.entries.filter { it != OperatingMode.CUSTOM }.forEach { mode ->
+                    FilterChip(
+                        selected = operatingMode == mode,
+                        onClick = { onModeChange(mode) },
+                        label = { Text(stringResource(mode.resId)) }
+                    )
+                }
+            }
+
+            ControlRangeSlider(
+                label = stringResource(
+                    R.string.settings_servo_range,
+                    controlData.servo.min,
+                    controlData.servo.max
+                ),
+                currentMin = controlData.servo.min,
+                currentMax = controlData.servo.max,
+                onRangeChange = onServoRangeChange,
+                valueRange = 0f..1000f,
+                steps = 999
+            )
         }
 
         HorizontalDivider()
