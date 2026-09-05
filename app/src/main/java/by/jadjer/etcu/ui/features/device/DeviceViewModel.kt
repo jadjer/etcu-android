@@ -83,18 +83,18 @@ class DeviceViewModel(private val repository: BLERepository) : ViewModel() {
 
     fun updateAutoSet(
         enabled: Boolean? = null,
-        delay: Int? = null,
-        threshold: Int? = null,
-        tolerance: Int? = null
+        delaySec: Int? = null,
+        thresholdKmh: Int? = null,
+        toleranceKmh: Int? = null
     ) {
-        val current = _controlData.value.autoSet
-        val updatedAutoSet = current.copy(
+        val current = _controlData.value.cruise
+        val updatedCruise = current.copy(
             enabled = enabled ?: current.enabled,
-            delay = delay ?: current.delay,
-            threshold = threshold ?: current.threshold,
-            tolerance = tolerance ?: current.tolerance
+            delaySec = delaySec ?: current.delaySec,
+            thresholdKmh = thresholdKmh ?: current.thresholdKmh,
+            toleranceKmh = toleranceKmh ?: current.toleranceKmh
         )
-        val updated = _controlData.value.copy(autoSet = updatedAutoSet)
+        val updated = _controlData.value.copy(cruise = updatedCruise)
         _controlData.value = updated
         scheduleUpdate(updated)
     }

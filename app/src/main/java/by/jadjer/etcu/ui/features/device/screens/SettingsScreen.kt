@@ -25,10 +25,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
-import by.jadjer.etcu.domain.model.control.AutoSet
+import by.jadjer.etcu.domain.model.control.CruiseAutoSet
 import by.jadjer.etcu.domain.model.control.ControlData
 import by.jadjer.etcu.domain.model.control.OperatingMode
-import by.jadjer.etcu.domain.model.control.Range
+import by.jadjer.etcu.domain.model.control.PositionRange
 import by.jadjer.etcu.domain.model.system.SystemInfo
 import by.jadjer.etcu.ui.component.ControlRangeSlider
 import by.jadjer.etcu.ui.component.ControlSlider
@@ -134,29 +134,29 @@ fun SettingsScreenContent(
         SettingsGroup(title = stringResource(R.string.settings_autoset_settings)) {
             ControlSwitch(
                 label = stringResource(R.string.settings_autoset_enabled),
-                checked = controlData.autoSet.enabled,
+                checked = controlData.cruise.enabled,
                 onCheckedChange = { onAutoSetChange(it, null, null, null) }
             )
 
             ControlSlider(
-                label = stringResource(R.string.settings_autoset_delay, controlData.autoSet.delay),
-                value = controlData.autoSet.delay,
+                label = stringResource(R.string.settings_autoset_delay, controlData.cruise.delaySec),
+                value = controlData.cruise.delaySec,
                 onValueChange = { onAutoSetChange(null, it.toInt(), null, null) },
-                valueRange = 0f..5000f,
-                steps = 49
+                valueRange = 0f..255f,
+                steps = 254
             )
 
             ControlSlider(
-                label = stringResource(R.string.settings_autoset_threshold, controlData.autoSet.threshold),
-                value = controlData.autoSet.threshold,
+                label = stringResource(R.string.settings_autoset_threshold, controlData.cruise.thresholdKmh),
+                value = controlData.cruise.thresholdKmh,
                 onValueChange = { onAutoSetChange(null, null, it.toInt(), null) },
                 valueRange = 0f..255f,
                 steps = 254
             )
 
             ControlSlider(
-                label = stringResource(R.string.settings_autoset_tolerance, controlData.autoSet.tolerance),
-                value = controlData.autoSet.tolerance,
+                label = stringResource(R.string.settings_autoset_tolerance, controlData.cruise.toleranceKmh),
+                value = controlData.cruise.toleranceKmh,
                 onValueChange = { onAutoSetChange(null, null, null, it.toInt()) },
                 valueRange = 0f..255f,
                 steps = 254
@@ -247,9 +247,9 @@ fun SettingsScreenPreview() {
     MaterialTheme {
         SettingsScreenContent(
             controlData = ControlData(
-                autoSet = AutoSet(enabled = true, delay = 500, threshold = 10, tolerance = 2),
-                servo = Range(min = 0, max = 600),
-                accelerator = Range(min = 150, max = 850),
+                cruise = CruiseAutoSet(enabled = true, delaySec = 5, thresholdKmh = 40, toleranceKmh = 5),
+                servo = PositionRange(min = 0, max = 600),
+                accelerator = PositionRange(min = 150, max = 850),
             ),
             systemInfo = SystemInfo(
                 boardVersion = "v2.1",

@@ -1,19 +1,19 @@
 package by.jadjer.etcu.domain.model.control
 
 data class ControlData(
-    val autoSet: AutoSet = AutoSet(),
-    val servo: Range = Range(),
-    val accelerator: Range = Range(),
+    val cruise: CruiseAutoSet = CruiseAutoSet(),
+    val servo: PositionRange = PositionRange(),
+    val accelerator: PositionRange = PositionRange(),
 )
 
-data class AutoSet(
+data class CruiseAutoSet(
     val enabled: Boolean = false,
-    val delay: Int = 0,
-    val threshold: Int = 0,
-    val tolerance: Int = 0,
+    val delaySec: Int = 0,
+    val thresholdKmh: Int = 0,
+    val toleranceKmh: Int = 0,
 )
 
-data class Range(
+data class PositionRange(
     val min: Int = 0,
     val max: Int = 0,
 )

@@ -25,29 +25,26 @@ class BLEDataParserTest {
 
     @Test
     fun `parseControlData parses correctly`() {
-        val bytes = ByteBuffer.allocate(16).order(ByteOrder.LITTLE_ENDIAN)
-            // AutoSet
-            .put(0.toByte()) // tag
+        val bytes = ByteBuffer.allocate(12).order(ByteOrder.LITTLE_ENDIAN)
+            // CruiseAutoSet
             .put(1.toByte()) // enabled
-            .putShort(500.toShort()) // delay
-            .put(10.toByte()) // threshold
-            .put(2.toByte()) // tolerance
+            .put(5.toByte()) // delay_sec
+            .put(40.toByte()) // threshold_kmh
+            .put(5.toByte()) // tolerance_kmh
             // Servo
-            .put(0.toByte()) // tag
             .putShort(100.toShort()) // min
             .putShort(600.toShort()) // max
             // Accel
-            .put(0.toByte()) // tag
             .putShort(150.toShort()) // min
             .putShort(850.toShort()) // max
             .array()
         
         val result = parser.parseControlData(bytes)
         
-        assertEquals(true, result.autoSet.enabled)
-        assertEquals(500, result.autoSet.delay)
-        assertEquals(10, result.autoSet.threshold)
-        assertEquals(2, result.autoSet.tolerance)
+        assertEquals(true, result.cruise.enabled)
+        assertEquals(5, result.cruise.delaySec)
+        assertEquals(40, result.cruise.thresholdKmh)
+        assertEquals(5, result.cruise.toleranceKmh)
         assertEquals(100, result.servo.min)
         assertEquals(600, result.servo.max)
         assertEquals(150, result.accelerator.min)

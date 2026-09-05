@@ -4,9 +4,9 @@ import by.jadjer.etcu.data.ble.BLEConstants.CONTROL_DATA_SIZE
 import by.jadjer.etcu.data.ble.BLEConstants.INFO_STR_LEN
 import by.jadjer.etcu.data.ble.BLEConstants.SYSTEM_INFO_SIZE
 import by.jadjer.etcu.data.ble.BLEConstants.TELEMETRY_SIZE
-import by.jadjer.etcu.domain.model.control.AutoSet
+import by.jadjer.etcu.domain.model.control.CruiseAutoSet
 import by.jadjer.etcu.domain.model.control.ControlData
-import by.jadjer.etcu.domain.model.control.Range
+import by.jadjer.etcu.domain.model.control.PositionRange
 import by.jadjer.etcu.domain.model.telemetry.ECUTelemetry
 import by.jadjer.etcu.domain.model.ota.OTAChunk
 import by.jadjer.etcu.domain.model.ota.OTAStatus
@@ -25,31 +25,28 @@ class BLEDataParser {
         return try {
             val buffer = bytes.toLittleEndianBuffer()
             
-            // AutoSet (6 bytes)
-            buffer.get() // tag
-            val autoSet = AutoSet(
+            // CruiseAutoSet (4 bytes)
+            val cruise = CruiseAutoSet(
                 enabled = buffer.bool,
-                delay = buffer.uShort,
-                threshold = buffer.uByte,
-                tolerance = buffer.uByte
+                delaySec = buffer.uByte,
+                thresholdKmh = buffer.uByte,
+                toleranceKmh = buffer.uByte
             )
             
-            // Servo (5 bytes)
-            buffer.get() // tag
-            val servo = Range(
+            // Servo (4 bytes)
+            val servo = PositionRange(
                 min = buffer.uShort,
                 max = buffer.uShort
             )
             
-            // Accelerator (5 bytes)
-            buffer.get() // tag
-            val accelerator = Range(
+            // Accelerator (4 bytes)
+            val accelerator = PositionRange(
                 min = buffer.uShort,
                 max = buffer.uShort
             )
 
             ControlData(
-                autoSet = autoSet,
+                cruise = cruise,
                 servo = servo,
                 accelerator = accelerator
             )
@@ -128,18 +125,15 @@ class BLEDataParser {
 
     fun serializeControlData(data: ControlData): ByteArray {
         return ByteBuffer.allocate(CONTROL_DATA_SIZE).order(ByteOrder.LITTLE_ENDIAN)
-            // AutoSet
-            .put(0.toByte()) // tag
-            .put(if (data.autoSet.enabled) 1.toByte() else 0.toByte())
-            .putShort(data.autoSet.delay.toShort())
-            .put(data.autoSet.threshold.toByte())
-            .put(data.autoSet.tolerance.toByte())
+            // CruiseAutoSet
+            .put(if (data.cruise.enabled) 1.toByte() else 0.toByte())
+            .put(data.cruise.delaySec.toByte())
+            .put(data.cruise.thresholdKmh.toByte())
+            .put(data.cruise.toleranceKmh.toByte())
             // Servo
-            .put(0.toByte()) // tag
             .putShort(data.servo.min.toShort())
             .putShort(data.servo.max.toShort())
             // Accelerator
-            .put(0.toByte()) // tag
             .putShort(data.accelerator.min.toShort())
             .putShort(data.accelerator.max.toShort())
             .array()

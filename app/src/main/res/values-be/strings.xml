@@ -130,7 +130,7 @@
     <string name="settings_accel_range">Дыяпазон акселератара: ад %1$d да %2$d</string>
     <string name="settings_autoset_settings">Аўтаматычны круіз</string>
     <string name="settings_autoset_enabled">Аўта-актывацыя</string>
-    <string name="settings_autoset_delay">Затрымка актывацыі: %1$d мс</string>
+    <string name="settings_autoset_delay">Затрымка актывацыі: %1$d с</string>
     <string name="settings_autoset_threshold">Парог актывацыі: %1$d км/г</string>
     <string name="settings_autoset_tolerance">Допуск хуткасці: %1$d км/г</string>
     <string name="settings_device_settings">Налады прылады</string>
