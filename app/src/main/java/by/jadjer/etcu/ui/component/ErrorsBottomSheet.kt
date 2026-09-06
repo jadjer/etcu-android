@@ -24,9 +24,8 @@ fun ErrorsBottomSheet(activeErrors: List<SystemError>, onDismiss: () -> Unit) {
 @Composable
 private fun ErrorsBottomSheetPreview() {
     ETCUTheme {
-        // ModalBottomSheet content preview
         Box(Modifier.padding(16.dp)) {
-            ErrorsBlock(listOf(SystemError.SERVO_COMMS_ERROR))
+            ErrorsBlock(listOf(SystemError.SERVO_WRITE_ERROR))
         }
     }
 }

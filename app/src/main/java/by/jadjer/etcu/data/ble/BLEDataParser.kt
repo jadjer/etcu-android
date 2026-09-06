@@ -88,7 +88,7 @@ class BLEDataParser {
                 throttlePosition = buffer.uShort,
                 acceleratorPosition = buffer.uShort,
                 systemState = SystemState.fromByte(buffer.get()),
-                activeErrors = SystemError.parseErrors(buffer.uInt)
+                activeErrors = SystemError.parseErrors(buffer.uShort)
             )
         } catch (_: Exception) {
             SystemTelemetry()
@@ -158,5 +158,5 @@ class BLEDataParser {
     private val ByteBuffer.bool get() = get().toInt() != 0
     private val ByteBuffer.uByte get() = get().toInt() and 0xFF
     private val ByteBuffer.uShort get() = short.toInt() and 0xFFFF
-    private val ByteBuffer.uInt get() = int.toLong() and 0xFFFFFFFFL
+//    private val ByteBuffer.uInt get() = int.toLong() and 0xFFFFFFFFL
 }

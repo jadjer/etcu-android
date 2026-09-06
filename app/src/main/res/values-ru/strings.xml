@@ -154,19 +154,20 @@
     <string name="error_servo_overcurrent">Превышение допустимого тока сервопривода</string>
     <string name="error_servo_overtemp">Перегрев сервопривода</string>
     <string name="error_servo_calibrate">Ошибка калибровки сервопривода</string>
-    <string name="error_servo_power_fail">Сбой питания сервопривода</string>
-    <string name="error_accel_init">Сбой инициализации акселератора</string>
-    <string name="error_accel_calibrate">Сбой калибровки акселератора</string>
-    <string name="error_accel_read">Сбой чтения датчика акселератора</string>
+    <string name="error_servo_power_fail">Ошибка питания сервопривода</string>
+    <string name="error_accel_init">Ошибка инициализации акселератора</string>
+    <string name="error_accel_calibrate">Ошибка калибровки акселератора</string>
+    <string name="error_accel_read">Ошибка чтения датчика акселератора</string>
     <string name="error_accel_mismatch">Рассогласование каналов акселератора</string>
-    <string name="error_button_init">Сбой инициализации кнопок</string>
-    <string name="error_button_read">Сбой чтения состояния кнопок</string>
-    <string name="error_ecu_init">Сбой инициализации ЭБУ (ECU)</string>
-    <string name="error_indicator_init">Сбой инициализации индикатора</string>
-    <string name="error_bluetooth_init">Сбой инициализации Bluetooth на контроллере</string>
+    <string name="error_button_init">Ошибка инициализации кнопок</string>
+    <string name="error_button_read">Ошибка чтения состояния кнопок</string>
+    <string name="error_ecu_init">Ошибка инициализации ЭБУ (ECU)</string>
+    <string name="error_ecu_read">Ошибка чтения данных ЭБУ (ECU)</string>
+    <string name="error_indicator_init">Ошибка инициализации индикатора</string>
+    <string name="error_bluetooth_init">Ошибка инициализации Bluetooth на контроллере</string>
     <string name="error_bluetooth_power">Ошибка настройки мощности Bluetooth</string>
     <string name="error_bluetooth_mtu">Ошибка настройки MTU Bluetooth</string>
-    <string name="error_bluetooth_connected">Сбой соединения Bluetooth</string>
+    <string name="error_bluetooth_connected">Ошибка соединения Bluetooth</string>
 
     <!-- OTA -->
     <string name="ota_title">Обновление прошивки</string>

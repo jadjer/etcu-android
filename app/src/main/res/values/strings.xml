@@ -160,18 +160,19 @@
     <string name="error_servo_overtemp">Servo overheating</string>
     <string name="error_servo_calibrate">Servo calibration error</string>
     <string name="error_servo_power_fail">Servo power failure</string>
-    <string name="error_accel_init">Accelerator initialization fault</string>
-    <string name="error_accel_calibrate">Accelerator calibration fault</string>
-    <string name="error_accel_read">Accelerator sensor read fault</string>
+    <string name="error_accel_init">Accelerator initialization error</string>
+    <string name="error_accel_calibrate">Accelerator calibration error</string>
+    <string name="error_accel_read">Accelerator sensor read error</string>
     <string name="error_accel_mismatch">Accelerator channels mismatch</string>
-    <string name="error_button_init">Button initialization fault</string>
-    <string name="error_button_read">Button state read fault</string>
-    <string name="error_ecu_init">ECU initialization fault</string>
-    <string name="error_indicator_init">Indicator initialization fault</string>
-    <string name="error_bluetooth_init">Bluetooth initialization fault on controller</string>
+    <string name="error_button_init">Button initialization error</string>
+    <string name="error_button_read">Button state read error</string>
+    <string name="error_ecu_init">ECU initialization error</string>
+    <string name="error_ecu_read">ECU read error</string>
+    <string name="error_indicator_init">Indicator initialization error</string>
+    <string name="error_bluetooth_init">Bluetooth initialization error on controller</string>
     <string name="error_bluetooth_power">Bluetooth power setting error</string>
     <string name="error_bluetooth_mtu">Bluetooth MTU setting error</string>
-    <string name="error_bluetooth_connected">Bluetooth connection fault</string>
+    <string name="error_bluetooth_connected">Bluetooth connection error</string>
 
     <!-- OTA -->
     <string name="ota_title">Firmware Update</string>
