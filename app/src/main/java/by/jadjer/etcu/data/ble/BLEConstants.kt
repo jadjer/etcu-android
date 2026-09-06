@@ -24,6 +24,6 @@ object BLEConstants {
 
     const val CONTROL_DATA_SIZE = 12
     const val SYSTEM_INFO_SIZE = 48
-    const val TELEMETRY_SIZE = 31
+    const val TELEMETRY_SIZE = 35
     const val INFO_STR_LEN = 16
 }

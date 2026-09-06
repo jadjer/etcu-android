@@ -9,9 +9,10 @@ data class SystemTelemetry(
 
     val ecu: ECUTelemetry = ECUTelemetry(),
     val servo: ServoTelemetry = ServoTelemetry(),
-    val acceleratorPosition: Int = 0,
-    val throttlePosition: Int = 0,
+    val accelerator: AcceleratorTelemetry = AcceleratorTelemetry(),
+
     val targetSpeed: Int = 0,
+    val throttlePosition: Int = 0,
 
     val systemState: SystemState = SystemState.UNKNOWN,
     val activeErrors: List<SystemError> = emptyList()

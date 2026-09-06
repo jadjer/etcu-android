@@ -142,24 +142,24 @@ fun SettingsScreenContent(
                 label = stringResource(R.string.settings_autoset_delay, controlData.cruise.delaySec),
                 value = controlData.cruise.delaySec,
                 onValueChange = { onAutoSetChange(null, it.toInt(), null, null) },
-                valueRange = 0f..255f,
-                steps = 254
+                valueRange = 10f..60f,
+                steps = 49
             )
 
             ControlSlider(
                 label = stringResource(R.string.settings_autoset_threshold, controlData.cruise.thresholdKmh),
                 value = controlData.cruise.thresholdKmh,
                 onValueChange = { onAutoSetChange(null, null, it.toInt(), null) },
-                valueRange = 0f..255f,
-                steps = 254
+                valueRange = 40f..120f,
+                steps = 79
             )
 
             ControlSlider(
                 label = stringResource(R.string.settings_autoset_tolerance, controlData.cruise.toleranceKmh),
                 value = controlData.cruise.toleranceKmh,
                 onValueChange = { onAutoSetChange(null, null, null, it.toInt()) },
-                valueRange = 0f..255f,
-                steps = 254
+                valueRange = 0f..10f,
+                steps = 9
             )
         }
 

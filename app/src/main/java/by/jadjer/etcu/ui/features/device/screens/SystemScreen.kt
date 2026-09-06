@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.system.SystemState
+import by.jadjer.etcu.domain.model.telemetry.AcceleratorTelemetry
 import by.jadjer.etcu.domain.model.telemetry.SystemTelemetry
 import by.jadjer.etcu.ui.component.StatusIndicator
 import by.jadjer.etcu.ui.component.telemetry.TelemetryGraphDialog
@@ -66,28 +67,31 @@ fun SystemScreenContent(
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        Text(stringResource(R.string.system_telemetry_title), style = MaterialTheme.typography.titleMedium)
+        Text(
+            stringResource(R.string.system_telemetry_title),
+            style = MaterialTheme.typography.titleMedium
+        )
 
         TelemetryRow(
             label = stringResource(R.string.system_state),
             value = stringResource(telemetry.systemState.resId),
             icon = Icons.Default.Info
         )
-        
+
         TelemetryRow(
             label = accLabel,
-            value = telemetry.acceleratorPosition.toString(),
+            value = telemetry.accelerator.position.toString(),
             unit = rawUnit,
             icon = Icons.Default.TwoWheeler,
             onClick = {
                 onValueClick(
                     accLabel,
                     rawUnit,
-                    { it.acceleratorPosition }
+                    { it.accelerator.position }
                 )
             }
         )
-        
+
         TelemetryRow(
             label = thrLabel,
             value = telemetry.throttlePosition.toString(),
@@ -100,13 +104,13 @@ fun SystemScreenContent(
                 )
             }
         )
-        
+
         StatusIndicator(
             label = stringResource(R.string.system_guard),
             isActive = telemetry.isGuardActive,
             icon = Icons.Default.Lock
         )
-        
+
         StatusIndicator(
             label = stringResource(R.string.system_brake),
             isActive = telemetry.isBrakeEnabled
@@ -123,7 +127,11 @@ fun SystemScreenPreview() {
                 isGuardActive = false,
                 isBrakeEnabled = true,
                 systemState = SystemState.NORMAL,
-                acceleratorPosition = 300,
+                accelerator = AcceleratorTelemetry(
+                    hallA = 0,
+                    hallB = 0,
+                    position = 300,
+                ),
                 throttlePosition = 280,
             )
         )

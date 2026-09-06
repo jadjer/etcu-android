@@ -14,6 +14,7 @@ import by.jadjer.etcu.domain.model.telemetry.ServoTelemetry
 import by.jadjer.etcu.domain.model.system.SystemError
 import by.jadjer.etcu.domain.model.system.SystemInfo
 import by.jadjer.etcu.domain.model.system.SystemState
+import by.jadjer.etcu.domain.model.telemetry.AcceleratorTelemetry
 import by.jadjer.etcu.domain.model.telemetry.SystemTelemetry
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -24,25 +25,25 @@ class BLEDataParser {
 
         return try {
             val buffer = bytes.toLittleEndianBuffer()
-            
+
             // CruiseAutoSet (4 bytes)
             val cruise = CruiseAutoSet(
                 enabled = buffer.bool,
                 delaySec = buffer.uByte,
                 thresholdKmh = buffer.uByte,
-                toleranceKmh = buffer.uByte
+                toleranceKmh = buffer.uByte,
             )
-            
+
             // Servo (4 bytes)
             val servo = PositionRange(
                 min = buffer.uShort,
-                max = buffer.uShort
+                max = buffer.uShort,
             )
-            
+
             // Accelerator (4 bytes)
             val accelerator = PositionRange(
                 min = buffer.uShort,
-                max = buffer.uShort
+                max = buffer.uShort,
             )
 
             ControlData(
@@ -84,9 +85,9 @@ class BLEDataParser {
                 isBrakeEnabled = buffer.bool,
                 ecu = buffer.parseEcuTelemetry(),
                 servo = buffer.parseServoTelemetry(),
+                accelerator = buffer.parseAcceleratorTelemetry(),
                 targetSpeed = buffer.uByte,
                 throttlePosition = buffer.uShort,
-                acceleratorPosition = buffer.uShort,
                 systemState = SystemState.fromByte(buffer.get()),
                 activeErrors = SystemError.parseErrors(buffer.uShort)
             )
@@ -115,7 +116,13 @@ class BLEDataParser {
         voltage = uByte,
         current = uShort,
         position = uShort,
-        temperature = uByte
+        temperature = uByte,
+    )
+
+    private fun ByteBuffer.parseAcceleratorTelemetry() = AcceleratorTelemetry(
+        hallA = uShort,
+        hallB = uShort,
+        position = uShort,
     )
 
     fun parseOtaFeedback(bytes: ByteArray): OTAStatus {
