@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.TwoWheeler
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,11 +23,12 @@ import by.jadjer.etcu.ui.component.telemetry.TelemetryGraphDialog
 import by.jadjer.etcu.ui.component.telemetry.TelemetryRow
 import by.jadjer.etcu.ui.component.telemetry.SelectedTelemetry
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
+import by.jadjer.etcu.ui.util.labelResId
 
 @Composable
 fun SystemScreen(viewModel: DeviceViewModel) {
+    val uiState by viewModel.uiState.collectAsState()
     val telemetry by viewModel.telemetry.collectAsState()
-    val history by viewModel.telemetryHistory.collectAsState()
 
     var selectedTelemetry by remember { mutableStateOf<SelectedTelemetry?>(null) }
 
@@ -46,7 +48,7 @@ fun SystemScreen(viewModel: DeviceViewModel) {
             title = selected.label,
             value = selected.selector(telemetry).toString(),
             unit = selected.unit,
-            history = history.map(selected.selector),
+            history = uiState.telemetryHistory.map(selected.selector),
             onDismiss = { selectedTelemetry = null }
         )
     }
@@ -74,7 +76,7 @@ fun SystemScreenContent(
 
         TelemetryRow(
             label = stringResource(R.string.system_state),
-            value = stringResource(telemetry.systemState.resId),
+            value = stringResource(telemetry.systemState.labelResId),
             icon = Icons.Default.Info
         )
 

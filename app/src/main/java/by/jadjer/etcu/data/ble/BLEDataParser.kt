@@ -4,7 +4,6 @@ import by.jadjer.etcu.data.ble.BLEConstants.CONTROL_DATA_SIZE
 import by.jadjer.etcu.data.ble.BLEConstants.INFO_STR_LEN
 import by.jadjer.etcu.data.ble.BLEConstants.SYSTEM_INFO_SIZE
 import by.jadjer.etcu.data.ble.BLEConstants.TELEMETRY_SIZE
-import by.jadjer.etcu.domain.model.control.CruiseAutoSet
 import by.jadjer.etcu.domain.model.control.ControlData
 import by.jadjer.etcu.domain.model.control.PositionRange
 import by.jadjer.etcu.domain.model.telemetry.ECUTelemetry
@@ -26,14 +25,6 @@ class BLEDataParser {
         return try {
             val buffer = bytes.toLittleEndianBuffer()
 
-            // CruiseAutoSet (4 bytes)
-            val cruise = CruiseAutoSet(
-                enabled = buffer.bool,
-                delaySec = buffer.uByte,
-                thresholdKmh = buffer.uByte,
-                toleranceKmh = buffer.uByte,
-            )
-
             // Servo (4 bytes)
             val servo = PositionRange(
                 min = buffer.uShort,
@@ -47,7 +38,6 @@ class BLEDataParser {
             )
 
             ControlData(
-                cruise = cruise,
                 servo = servo,
                 accelerator = accelerator
             )
@@ -88,7 +78,7 @@ class BLEDataParser {
                 accelerator = buffer.parseAcceleratorTelemetry(),
                 targetSpeed = buffer.uByte,
                 throttlePosition = buffer.uShort,
-                systemState = SystemState.fromByte(buffer.get()),
+                systemState = SystemState.fromByte(buffer.uByte),
                 activeErrors = SystemError.parseErrors(buffer.uShort)
             )
         } catch (_: Exception) {
@@ -99,7 +89,7 @@ class BLEDataParser {
     private fun ByteBuffer.parseEcuTelemetry() = ECUTelemetry(
         isConnected = bool,
         isStarted = bool,
-        isClutchEnabled = bool,
+        isNeutral = bool,
         rpm = uShort,
         battery = uByte,
         speed = uByte,
@@ -132,11 +122,6 @@ class BLEDataParser {
 
     fun serializeControlData(data: ControlData): ByteArray {
         return ByteBuffer.allocate(CONTROL_DATA_SIZE).order(ByteOrder.LITTLE_ENDIAN)
-            // CruiseAutoSet
-            .put(if (data.cruise.enabled) 1.toByte() else 0.toByte())
-            .put(data.cruise.delaySec.toByte())
-            .put(data.cruise.thresholdKmh.toByte())
-            .put(data.cruise.toleranceKmh.toByte())
             // Servo
             .putShort(data.servo.min.toShort())
             .putShort(data.servo.max.toShort())
@@ -150,7 +135,7 @@ class BLEDataParser {
         return ByteBuffer.allocate(BLEConstants.OTA_PACKAGE_SIZE).order(ByteOrder.LITTLE_ENDIAN)
             .putInt(chunk.firmwareSize.toInt())
             .putShort(chunk.totalChunks.toShort())
-            .putShort(chunk.chunkNumber.toShort())
+            .putShort(chunk.chunkIndex.toShort())
             .put(chunk.data)
             .array()
     }

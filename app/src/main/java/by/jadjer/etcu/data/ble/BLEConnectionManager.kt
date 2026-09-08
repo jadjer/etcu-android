@@ -5,6 +5,7 @@ import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import by.jadjer.etcu.data.local.BLEPreferenceManager
 import by.jadjer.etcu.domain.model.ble.ConnectionState
 import com.welie.blessed.BluetoothCentralManager
@@ -23,6 +24,7 @@ class BLEConnectionManager(
     app: Application,
     private val preferenceManager: BLEPreferenceManager
 ) {
+    private val TAG = "BLEConnectionManager"
     var peripheralCallback: BluetoothPeripheralCallback? = null
 
     private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
@@ -47,23 +49,27 @@ class BLEConnectionManager(
         }
 
         override fun onConnectedPeripheral(peripheral: BluetoothPeripheral) {
+            Log.i(TAG, "Connected to ${peripheral.address}")
             activePeripheral = peripheral
             _connectionState.value = ConnectionState.CONNECTED_DISCOVERING
         }
 
         override fun onConnectionFailed(peripheral: BluetoothPeripheral, status: HciStatus) {
+            Log.e(TAG, "Connection failed to ${peripheral.address} with status $status")
             activePeripheral = null
             _connectionState.value = ConnectionState.ERROR_CONNECTION
             startAutoReconnectIfNeeded()
         }
 
         override fun onDisconnectedPeripheral(peripheral: BluetoothPeripheral, status: HciStatus) {
+            Log.i(TAG, "Disconnected from ${peripheral.address} with status $status")
             activePeripheral = null
             _connectionState.value = ConnectionState.DISCONNECTED
             startAutoReconnectIfNeeded()
         }
 
         override fun onBluetoothAdapterStateChanged(state: Int) {
+            Log.d(TAG, "Bluetooth adapter state changed to $state")
             if (state == BluetoothAdapter.STATE_OFF) {
                 _connectionState.value = ConnectionState.BLUETOOTH_OFF
                 stopAllJobs()
@@ -77,7 +83,9 @@ class BLEConnectionManager(
     }
 
     fun connect(macAddress: String) {
+        Log.d(TAG, "Connecting to $macAddress")
         if (!central.isBluetoothEnabled) {
+            Log.w(TAG, "Bluetooth is disabled")
             _connectionState.value = ConnectionState.BLUETOOTH_OFF
             return
         }

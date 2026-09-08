@@ -25,12 +25,7 @@ class BLEDataParserTest {
 
     @Test
     fun `parseControlData parses correctly`() {
-        val bytes = ByteBuffer.allocate(12).order(ByteOrder.LITTLE_ENDIAN)
-            // CruiseAutoSet
-            .put(1.toByte()) // enabled
-            .put(5.toByte()) // delay_sec
-            .put(40.toByte()) // threshold_kmh
-            .put(5.toByte()) // tolerance_kmh
+        val bytes = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN)
             // Servo
             .putShort(100.toShort()) // min
             .putShort(600.toShort()) // max
@@ -41,10 +36,6 @@ class BLEDataParserTest {
         
         val result = parser.parseControlData(bytes)
         
-        assertEquals(true, result.cruise.enabled)
-        assertEquals(5, result.cruise.delaySec)
-        assertEquals(40, result.cruise.thresholdKmh)
-        assertEquals(5, result.cruise.toleranceKmh)
         assertEquals(100, result.servo.min)
         assertEquals(600, result.servo.max)
         assertEquals(150, result.accelerator.min)

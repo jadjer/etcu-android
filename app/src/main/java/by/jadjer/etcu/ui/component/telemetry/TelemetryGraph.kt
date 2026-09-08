@@ -10,8 +10,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import by.jadjer.etcu.R
 import by.jadjer.etcu.ui.theme.ETCUTheme
 
 @Composable
@@ -22,7 +24,7 @@ fun TelemetryGraph(
 ) {
     if (data.size < 2) {
         Box(modifier = modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
-            Text("Not enough data", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.telemetry_graph_no_data), style = MaterialTheme.typography.bodyMedium)
         }
         return
     }

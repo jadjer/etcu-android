@@ -3,7 +3,7 @@ package by.jadjer.etcu.domain.model.telemetry
 data class ECUTelemetry(
     val isConnected: Boolean = false,
     val isStarted: Boolean = false,
-    val isClutchEnabled: Boolean = false,
+    val isNeutral: Boolean = false,
 
     val rpm: Int = 0,
     val battery: Int = 0,

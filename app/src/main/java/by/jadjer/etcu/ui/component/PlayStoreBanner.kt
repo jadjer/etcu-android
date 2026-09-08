@@ -57,7 +57,7 @@ fun PlayStoreBanner() {
             
             // Описание
             Text(
-                text = "Electronic Throttle Control Unit",
+                text = stringResource(id = R.string.app_full_name),
                 color = Color.White.copy(alpha = 0.8f),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Light,

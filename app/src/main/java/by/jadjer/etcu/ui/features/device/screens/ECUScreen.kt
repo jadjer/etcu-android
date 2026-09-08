@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.TwoWheeler
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,8 +28,8 @@ import by.jadjer.etcu.ui.features.device.DeviceViewModel
 
 @Composable
 fun EcuScreen(viewModel: DeviceViewModel) {
+    val uiState by viewModel.uiState.collectAsState()
     val telemetry by viewModel.telemetry.collectAsState()
-    val history by viewModel.telemetryHistory.collectAsState()
 
     var selectedTelemetry by remember { mutableStateOf<SelectedTelemetry?>(null) }
 
@@ -48,7 +49,7 @@ fun EcuScreen(viewModel: DeviceViewModel) {
             title = selected.label,
             value = selected.selector(telemetry).toString(),
             unit = selected.unit,
-            history = history.map(selected.selector),
+            history = uiState.telemetryHistory.map(selected.selector),
             onDismiss = { selectedTelemetry = null }
         )
     }
@@ -192,10 +193,10 @@ fun EcuScreenContent(
         )
         
         StatusIndicator(
-            label = stringResource(R.string.ecu_clutch_status),
-            isActive = telemetry.isClutchEnabled,
-            activeText = stringResource(R.string.ecu_clutch_pressed),
-            inactiveText = stringResource(R.string.ecu_clutch_released)
+            label = stringResource(R.string.ecu_neutral_status),
+            isActive = telemetry.isNeutral,
+            activeText = stringResource(R.string.ecu_neutral_on),
+            inactiveText = stringResource(R.string.ecu_neutral_off)
         )
     }
 }
@@ -208,7 +209,7 @@ fun EcuScreenPreview() {
             telemetry = ECUTelemetry(
                 isConnected = true,
                 isStarted = true,
-                isClutchEnabled = false,
+                isNeutral = false,
                 rpm = 2500,
                 battery = 13,
                 speed = 60,

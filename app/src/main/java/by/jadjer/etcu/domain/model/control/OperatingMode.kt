@@ -1,12 +1,10 @@
 package by.jadjer.etcu.domain.model.control
 
-import by.jadjer.etcu.R
-
-enum class OperatingMode(val resId: Int, val servoMax: Int?) {
-    RAIN(R.string.mode_rain, 300),
-    NORMAL(R.string.mode_normal, 600),
-    SPORT(R.string.mode_sport, 900),
-    CUSTOM(R.string.mode_custom, null);
+enum class OperatingMode(val servoMax: Int?) {
+    RAIN(300),
+    NORMAL(600),
+    SPORT(900),
+    CUSTOM(null);
 
     companion object {
         fun fromServoMax(max: Int): OperatingMode {

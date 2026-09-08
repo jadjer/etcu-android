@@ -3,6 +3,7 @@ package by.jadjer.etcu.data.ble
 import android.annotation.SuppressLint
 import android.app.Application
 import android.bluetooth.BluetoothGattCharacteristic
+import android.util.Log
 import by.jadjer.etcu.data.local.BLEPreferenceManager
 import by.jadjer.etcu.domain.model.control.*
 import by.jadjer.etcu.domain.model.telemetry.*
@@ -21,6 +22,7 @@ class BLEManager(
     app: Application,
     preferenceManager: BLEPreferenceManager,
 ) {
+    private val TAG = "BLEManager"
     private val dataParser = BLEDataParser()
     private var negotiatedMTU = BLEConstants.DEFAULT_MTU
 
@@ -40,6 +42,7 @@ class BLEManager(
 
     private val peripheralCallback = object : BluetoothPeripheralCallback() {
         override fun onServicesDiscovered(peripheral: BluetoothPeripheral) {
+            Log.d(TAG, "Services discovered for ${peripheral.address}")
             connectionManager.updateState(AppConnectionState.SERVICES_DISCOVERED)
             connectionManager.updateSavedMac(peripheral.address)
             peripheral.requestMtu(BLEConstants.REQUESTED_MTU)
@@ -47,11 +50,13 @@ class BLEManager(
 
         override fun onMtuChanged(peripheral: BluetoothPeripheral, mtu: Int, status: GattStatus) {
             if (status == GattStatus.SUCCESS) {
+                Log.d(TAG, "MTU changed to $mtu")
                 negotiatedMTU = mtu
                 connectionManager.updateState(AppConnectionState.OTA_SETUP)
                 peripheral.setNotify(BLEConstants.SERVICE_UUID, BLEConstants.TELEMETRY_UUID, true)
                 peripheral.setNotify(BLEConstants.SERVICE_UUID, BLEConstants.OTA_UUID, true)
             } else {
+                Log.e(TAG, "MTU change failed with status $status")
                 connectionManager.updateState(AppConnectionState.ERROR_MTU)
             }
         }
@@ -61,10 +66,14 @@ class BLEManager(
             characteristic: BluetoothGattCharacteristic,
             status: GattStatus
         ) {
-            if (status == GattStatus.SUCCESS && characteristic.uuid == BLEConstants.OTA_UUID) {
-                connectionManager.updateState(AppConnectionState.READING_INFO)
-                peripheral.readCharacteristic(BLEConstants.SERVICE_UUID, BLEConstants.SYSTEM_INFO_UUID)
-            } else if (status != GattStatus.SUCCESS) {
+            if (status == GattStatus.SUCCESS) {
+                Log.d(TAG, "Notification state updated for ${characteristic.uuid}")
+                if (characteristic.uuid == BLEConstants.OTA_UUID) {
+                    connectionManager.updateState(AppConnectionState.READING_INFO)
+                    peripheral.readCharacteristic(BLEConstants.SERVICE_UUID, BLEConstants.SYSTEM_INFO_UUID)
+                }
+            } else {
+                Log.e(TAG, "Notification state update failed for ${characteristic.uuid} with status $status")
                 connectionManager.updateState(AppConnectionState.ERROR_DESCRIPTOR_WRITE)
             }
         }
@@ -76,17 +85,20 @@ class BLEManager(
             status: GattStatus
         ) {
             if (status != GattStatus.SUCCESS) {
+                Log.e(TAG, "Characteristic update failed for ${characteristic.uuid} with status $status")
                 connectionManager.updateState(AppConnectionState.ERROR_READ_CHAR)
                 return
             }
 
             when (characteristic.uuid) {
                 BLEConstants.SYSTEM_INFO_UUID -> {
+                    Log.d(TAG, "System info updated")
                     _systemInfo.value = dataParser.parseSystemInfo(value)
                     connectionManager.updateState(AppConnectionState.READING_SETTINGS)
                     peripheral.readCharacteristic(BLEConstants.SERVICE_UUID, BLEConstants.CONTROL_UUID)
                 }
                 BLEConstants.CONTROL_UUID -> {
+                    Log.d(TAG, "Control data updated")
                     _controlData.value = dataParser.parseControlData(value)
                     connectionManager.updateState(AppConnectionState.READY)
                 }
@@ -102,6 +114,7 @@ class BLEManager(
             status: GattStatus
         ) {
             if (status != GattStatus.SUCCESS) {
+                Log.e(TAG, "Characteristic write failed for ${characteristic.uuid} with status $status")
                 connectionManager.updateState(AppConnectionState.ERROR_WRITE_CHAR)
             } else if (connectionManager.connectionState.value != AppConnectionState.READY) {
                 connectionManager.updateState(AppConnectionState.READY)

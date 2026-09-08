@@ -25,31 +25,28 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
-import by.jadjer.etcu.domain.model.control.CruiseAutoSet
+import by.jadjer.etcu.domain.model.control.ControlConstants
 import by.jadjer.etcu.domain.model.control.ControlData
 import by.jadjer.etcu.domain.model.control.OperatingMode
 import by.jadjer.etcu.domain.model.control.PositionRange
 import by.jadjer.etcu.domain.model.system.SystemInfo
 import by.jadjer.etcu.ui.component.ControlRangeSlider
-import by.jadjer.etcu.ui.component.ControlSlider
-import by.jadjer.etcu.ui.component.ControlSwitch
 import by.jadjer.etcu.ui.component.SettingsGroup
 import by.jadjer.etcu.ui.component.telemetry.TelemetryRow
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
+import by.jadjer.etcu.ui.util.labelResId
 
 @Composable
 fun SettingsScreen(
     viewModel: DeviceViewModel,
     onOtaClick: () -> Unit
 ) {
-    val controlData by viewModel.controlData.collectAsState()
-    val systemInfo by viewModel.systemInfo.collectAsState()
-    val operatingMode by viewModel.operatingMode.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     SettingsScreenContent(
-        controlData = controlData,
-        systemInfo = systemInfo,
-        operatingMode = operatingMode,
+        controlData = uiState.controlData,
+        systemInfo = uiState.systemInfo,
+        operatingMode = uiState.operatingMode,
         onModeChange = { viewModel.updateOperatingMode(it) },
         onAccRangeChange = { min, max ->
             viewModel.updateAccRange(
@@ -62,9 +59,6 @@ fun SettingsScreen(
                 min = min.toInt(),
                 max = max.toInt(),
             )
-        },
-        onAutoSetChange = { enabled, delay, threshold, tolerance ->
-            viewModel.updateAutoSet(enabled, delay, threshold, tolerance)
         },
         onDisconnectClick = { viewModel.disconnect() },
         onForgetClick = { viewModel.forgetDevice() },
@@ -80,7 +74,6 @@ fun SettingsScreenContent(
     onModeChange: (OperatingMode) -> Unit,
     onAccRangeChange: (Float, Float) -> Unit,
     onServoRangeChange: (Float, Float) -> Unit,
-    onAutoSetChange: (Boolean?, Int?, Int?, Int?) -> Unit,
     onDisconnectClick: () -> Unit,
     onForgetClick: () -> Unit,
     onOtaClick: () -> Unit
@@ -126,40 +119,8 @@ fun SettingsScreenContent(
                 currentMin = controlData.accelerator.min,
                 currentMax = controlData.accelerator.max,
                 onRangeChange = onAccRangeChange,
-                valueRange = 0f..1000f,
-                steps = 999
-            )
-        }
-
-        SettingsGroup(title = stringResource(R.string.settings_autoset_settings)) {
-            ControlSwitch(
-                label = stringResource(R.string.settings_autoset_enabled),
-                checked = controlData.cruise.enabled,
-                onCheckedChange = { onAutoSetChange(it, null, null, null) }
-            )
-
-            ControlSlider(
-                label = stringResource(R.string.settings_autoset_delay, controlData.cruise.delaySec),
-                value = controlData.cruise.delaySec,
-                onValueChange = { onAutoSetChange(null, it.toInt(), null, null) },
-                valueRange = 10f..60f,
-                steps = 49
-            )
-
-            ControlSlider(
-                label = stringResource(R.string.settings_autoset_threshold, controlData.cruise.thresholdKmh),
-                value = controlData.cruise.thresholdKmh,
-                onValueChange = { onAutoSetChange(null, null, it.toInt(), null) },
-                valueRange = 40f..120f,
-                steps = 79
-            )
-
-            ControlSlider(
-                label = stringResource(R.string.settings_autoset_tolerance, controlData.cruise.toleranceKmh),
-                value = controlData.cruise.toleranceKmh,
-                onValueChange = { onAutoSetChange(null, null, null, it.toInt()) },
-                valueRange = 0f..10f,
-                steps = 9
+                valueRange = ControlConstants.MIN_VALUE..ControlConstants.MAX_VALUE,
+                steps = ControlConstants.STEPS
             )
         }
 
@@ -172,7 +133,7 @@ fun SettingsScreenContent(
                 Text(stringResource(R.string.settings_operating_mode), style = MaterialTheme.typography.labelLarge)
                 if (operatingMode == OperatingMode.CUSTOM) {
                     Text(
-                        stringResource(OperatingMode.CUSTOM.resId),
+                        stringResource(operatingMode.labelResId),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -186,7 +147,7 @@ fun SettingsScreenContent(
                     FilterChip(
                         selected = operatingMode == mode,
                         onClick = { onModeChange(mode) },
-                        label = { Text(stringResource(mode.resId)) }
+                        label = { Text(stringResource(mode.labelResId)) }
                     )
                 }
             }
@@ -200,8 +161,8 @@ fun SettingsScreenContent(
                 currentMin = controlData.servo.min,
                 currentMax = controlData.servo.max,
                 onRangeChange = onServoRangeChange,
-                valueRange = 0f..1000f,
-                steps = 999
+                valueRange = ControlConstants.MIN_VALUE..ControlConstants.MAX_VALUE,
+                steps = ControlConstants.STEPS
             )
         }
 
@@ -247,7 +208,6 @@ fun SettingsScreenPreview() {
     MaterialTheme {
         SettingsScreenContent(
             controlData = ControlData(
-                cruise = CruiseAutoSet(enabled = true, delaySec = 5, thresholdKmh = 40, toleranceKmh = 5),
                 servo = PositionRange(min = 0, max = 600),
                 accelerator = PositionRange(min = 150, max = 850),
             ),
@@ -260,7 +220,6 @@ fun SettingsScreenPreview() {
             onModeChange = {},
             onAccRangeChange = { _, _ -> },
             onServoRangeChange = { _, _ -> },
-            onAutoSetChange = { _, _, _, _ -> },
             onDisconnectClick = {},
             onForgetClick = {},
             onOtaClick = {}

@@ -1,207 +1,208 @@
 <resources>
-
+    <string name="app_name" translatable="false">ETCU</string>
+    <string name="app_full_name" translatable="false">Electronic Throttle Control Unit</string>
 
     <!-- Navigation -->
     <string name="nav_ecu">ЭБУ</string>
+    <string name="nav_ota" translatable="false">OTA</string>
     <string name="nav_servo">Привод</string>
-    <string name="nav_system">Система</string>
     <string name="nav_settings">Настройки</string>
+    <string name="nav_system">Система</string>
 
     <!-- BLE Connection States -->
-    <string name="ble_state_disconnected">Отключено</string>
-    <string name="ble_state_connecting">Соединение с %s…</string>
-    <string name="ble_state_services_discovered">Службы найдены. Проверка характеристик…</string>
-    <string name="ble_state_error_protocol">Ошибка: Устройство не поддерживает ETCU протокол</string>
-    <string name="ble_state_bluetooth_off">Bluetooth выключен или недоступен</string>
-    <string name="ble_state_invalid_mac">Неверный MAC-адрес</string>
-    <string name="ble_state_scanning">Поиск…</string>
-    <string name="ble_state_connected_discovering">Подключено. Поиск служб…</string>
-    <string name="ble_state_subscribed_reading_info">Подписка подтверждена. Чтение SystemInfo…</string>
+    <string name="ble_state_bluetooth_off">BT Выкл</string>
+    <string name="ble_state_connected_discovering">Поиск…</string>
+    <string name="ble_state_connecting">Соединение…</string>
+    <string name="ble_state_disconnected">Оффлайн</string>
+    <string name="ble_state_error_protocol">Ош: Протокол</string>
+    <string name="ble_state_invalid_mac">Ош: MAC</string>
     <string name="ble_state_ota_setup">Настройка OTA…</string>
-    <string name="ble_state_reading_settings">Чтение настроек…</string>
-    <string name="ble_state_ready">Устройство готово к работе</string>
+    <string name="ble_state_reading_settings">Настройки…</string>
+    <string name="ble_state_ready">Готово</string>
+    <string name="ble_state_scanning">Поиск…</string>
+    <string name="ble_state_services_discovered">Проверка…</string>
+    <string name="ble_state_subscribed_reading_info">Инфо…</string>
 
     <!-- BLE Errors -->
-    <string name="ble_error_connection">Ошибка подключения: %d</string>
-    <string name="ble_error_services">Ошибка поиска служб: %d</string>
-    <string name="ble_error_mtu">Ошибка согласования MTU: %d</string>
-    <string name="ble_error_read_info">Ошибка: Стек Bluetooth отклонил чтение SystemInfo</string>
-    <string name="ble_error_info_not_found">Характеристика SystemInfo не найдена</string>
-    <string name="ble_error_descriptor_write">Ошибка записи дескриптора: %d</string>
-    <string name="ble_error_read_char">Ошибка чтения %1$s: %2$d</string>
-    <string name="ble_error_write_char">Ошибка записи %1$s: %2$d</string>
+    <string name="ble_error_connection">Ошибка: %d</string>
+    <string name="ble_error_descriptor_write">Дескриптор: %d</string>
+    <string name="ble_error_info_not_found">Нет данных</string>
+    <string name="ble_error_mtu">MTU: %d</string>
+    <string name="ble_error_read_char">Чтение: %2$d</string>
+    <string name="ble_error_read_info">Отказ</string>
+    <string name="ble_error_services">Службы: %d</string>
+    <string name="ble_error_write_char">Запись: %2$d</string>
 
     <!-- Connection Stub -->
-    <string name="connecting_stub_message">Пытаемся восстановить связь с вашим устройством…</string>
-    <string name="btn_retry">Повторить попытку</string>
     <string name="btn_reset_device">Сбросить устройство</string>
+    <string name="btn_retry">Повторить попытку</string>
+    <string name="connecting_stub_message">Пытаемся восстановить связь с вашим устройством…</string>
 
     <!-- Scan Screen -->
-    <string name="scan_title">Выберите устройство</string>
+    <string name="btn_bluetooth_settings">Настройки Bluetooth</string>
     <string name="scan_controllers_detected">Обнаруженные контроллеры</string>
     <string name="scan_not_found">Контроллеры не найдены. Убедитесь, что устройство включено.</string>
-    <string name="btn_bluetooth_settings">Настройки Bluetooth</string>
     <string name="scan_signal_info">Сигнал: %1$d dBm</string>
+    <string name="scan_title">Выберите устройство</string>
 
     <!-- ECU Screen -->
+    <string name="ecu_air_temp">Темп. возд. на впуске</string>
+    <string name="ecu_battery">Напряжение АКБ</string>
     <string name="ecu_conn_status">Связь с ЭБУ</string>
     <string name="ecu_connected">Есть связь</string>
+    <string name="ecu_coolant_temp">Темп. охлажд. жидкости</string>
     <string name="ecu_disconnected">Нет связи</string>
+    <string name="ecu_engine_started">Запущен</string>
+    <string name="ecu_engine_status">Двигатель запущен</string>
+    <string name="ecu_engine_stopped">Остановлен</string>
+    <string name="ecu_map">Давление в коллекторе</string>
+    <string name="ecu_neutral_off">На передаче</string>
+    <string name="ecu_neutral_on">Нейтраль</string>
+    <string name="ecu_neutral_status">Статус нейтрали</string>
     <string name="ecu_rpm">Обороты двигателя</string>
     <string name="ecu_speed">Скорость</string>
     <string name="ecu_tps">Положение TPS</string>
-    <string name="ecu_battery">Напряжение АКБ</string>
-    <string name="ecu_map">Давление в коллекторе</string>
-    <string name="ecu_air_temp">Темп. возд. на впуске</string>
-    <string name="ecu_coolant_temp">Темп. охлажд. жидкости</string>
-    <string name="ecu_engine_status">Двигатель запущен</string>
-    <string name="ecu_engine_started">Запущен</string>
-    <string name="ecu_engine_stopped">Остановлен</string>
-    <string name="ecu_clutch_status">Статус сцепления</string>
-    <string name="ecu_clutch_pressed">Нажато</string>
-    <string name="ecu_clutch_released">Отпущено</string>
 
     <!-- Servo Screen -->
     <string name="servo_conn_status">Связь с приводом</string>
-    <string name="servo_enable_status">Привод включен</string>
     <string name="servo_connected">Есть связь</string>
-    <string name="servo_disconnected">Нет связи</string>
-    <string name="servo_enabled">Включен</string>
-    <string name="servo_disabled">Отключен</string>
-    <string name="servo_position">Позиция</string>
     <string name="servo_current">Ток</string>
-    <string name="servo_voltage">Напряжение</string>
-    <string name="servo_temp">Температура</string>
+    <string name="servo_disabled">Отключен</string>
+    <string name="servo_disconnected">Нет связи</string>
+    <string name="servo_enable_status">Привод включен</string>
+    <string name="servo_enabled">Включен</string>
     <string name="servo_motion_status">Движение</string>
     <string name="servo_moving">В движении</string>
+    <string name="servo_position">Позиция</string>
     <string name="servo_static">Статичен</string>
+    <string name="servo_temp">Температура</string>
+    <string name="servo_voltage">Напряжение</string>
 
     <!-- System Screen -->
-    <string name="system_telemetry_title">Текущая телеметрия</string>
-    <string name="system_state">Состояние системы</string>
     <string name="system_accel">Акселератор</string>
-    <string name="system_throttle_target">Дроссель</string>
-    <string name="system_guard">Защита</string>
     <string name="system_brake">Тормоз</string>
+    <string name="system_guard">Защита</string>
+    <string name="system_state">Состояние системы</string>
+    <string name="system_telemetry_title">Текущая телеметрия</string>
+    <string name="system_throttle_target">Дроссель</string>
 
     <!-- Common -->
-    <string name="common_refresh">Обновить</string>
-    <string name="common_errors">Ошибки</string>
     <string name="common_active">Активно</string>
+    <string name="common_errors">Ошибки</string>
     <string name="common_inactive">Неактивно</string>
+    <string name="common_refresh">Обновить</string>
+    <string name="telemetry_graph_no_data">Недостаточно данных</string>
+    <string name="unknown">Неизвестно</string>
 
     <!-- System States -->
-    <string name="sys_state_off">Выключен</string>
-    <string name="sys_state_normal">Нормальный</string>
     <string name="sys_state_calibration">Калибровка</string>
+    <string name="sys_state_normal">Нормальный</string>
+    <string name="sys_state_off">Выключен</string>
     <string name="sys_state_update">Обновление</string>
 
     <!-- Diagnostics -->
-    <string name="diag_title">Статус диагностики:</string>
-    <string name="diag_no_errors">✅ Ошибок не обнаружено</string>
     <string name="diag_error_item">⚠️ %s</string>
+    <string name="diag_no_errors">✅ Ошибок не обнаружено</string>
+    <string name="diag_title">Статус диагностики:</string>
 
     <!-- Units -->
-    <string name="unit_rpm">" об/мин"</string>
+    <string name="label_avg">Сред</string>
+    <string name="label_max">Макс</string>
+    <string name="label_min">Мин</string>
+    <string name="unit_celsius" translatable="false">" °C"</string>
+    <string name="unit_format" translatable="false"> %s</string>
     <string name="unit_kmh">" км/ч"</string>
     <string name="unit_kpa">" кПа"</string>
     <string name="unit_ma">" мА"</string>
-    <string name="unit_v">" В"</string>
     <string name="unit_meters">" м"</string>
-    <string name="label_min">Мин</string>
-    <string name="label_max">Макс</string>
-    <string name="label_avg">Сред</string>
-
+    <string name="unit_percent" translatable="false">" %"</string>
+    <string name="unit_raw_1000" translatable="false">" / 1000"</string>
+    <string name="unit_raw_4095" translatable="false">" / 4095"</string>
+    <string name="unit_rpm">" об/мин"</string>
+    <string name="unit_v">" В"</string>
 
     <!-- Settings Screen -->
-    <string name="settings_device_info">Информация об устройстве</string>
-    <string name="settings_board_version">Версия платы</string>
-    <string name="settings_build_date">Дата прошивки</string>
-    <string name="settings_firmware_version">Версия прошивки</string>
-    <string name="settings_accel_settings">Настройки акселератора</string>
-    <string name="settings_servo_settings">Настройки привода</string>
-    <string name="settings_control">Управление</string>
-    <string name="settings_operating_mode">Режим работы</string>
-    <string name="mode_rain">Дождь (30%)</string>
-    <string name="mode_normal">Нормальный (60%)</string>
-    <string name="mode_sport">Спорт (90%)</string>
-    <string name="mode_custom">Пользовательский</string>
-    <string name="settings_servo_range">Диапазон серво: от %1$d до %2$d</string>
-    <string name="settings_accel_range">Диапазон акселератора: от %1$d до %2$d</string>
-    <string name="settings_autoset_settings">Автоматический круиз</string>
-    <string name="settings_autoset_enabled">Авто-активация</string>
-    <string name="settings_autoset_delay">Задержка активации: %1$d с</string>
-    <string name="settings_autoset_threshold">Порог активации: %1$d км/ч</string>
-    <string name="settings_autoset_tolerance">Допуск скорости: %1$d км/ч</string>
-    <string name="settings_device_settings">Настройки устройства</string>
+    <string name="btn_calibrate">Запустить калибровку</string>
     <string name="btn_disconnect">Отключить устройство</string>
     <string name="btn_forget">Забыть устройство</string>
-    <string name="btn_calibrate">Запустить калибровку</string>
+    <string name="mode_custom">Пользовательский</string>
+    <string name="mode_normal">Нормальный (60%)</string>
+    <string name="mode_rain">Дождь (30%)</string>
+    <string name="mode_sport">Спорт (90%)</string>
+    <string name="settings_accel_range">Диапазон акселератора: от %1$d до %2$d</string>
+    <string name="settings_accel_settings">Настройки акселератора</string>
+    <string name="settings_board_version">Версия платы</string>
+    <string name="settings_build_date">Дата прошивки</string>
+    <string name="settings_control">Управление</string>
+    <string name="settings_device_info">Информация об устройстве</string>
+    <string name="settings_device_settings">Настройки устройства</string>
+    <string name="settings_firmware_version">Версия прошивки</string>
+    <string name="settings_operating_mode">Режим работы</string>
+    <string name="settings_servo_range">Диапазон серво: от %1$d до %2$d</string>
+    <string name="settings_servo_settings">Настройки привода</string>
 
     <!-- System Errors -->
-    <string name="error_guard_lock">Блокировка защиты (Guard Lock)</string>
-    <string name="error_servo_init">Ошибка инициализации сервопривода</string>
-    <string name="error_servo_comms">Ошибка связи с сервоприводом</string>
-    <string name="error_servo_protocol">Ошибка протокола сервопривода</string>
-    <string name="error_servo_checksum">Ошибка контрольной суммы сервопривода</string>
-    <string name="error_servo_read">Ошибка чтения данных сервопривода</string>
-    <string name="error_servo_write">Ошибка записи данных сервопривода</string>
-    <string name="error_servo_mode">Неверный режим работы сервопривода</string>
-    <string name="error_servo_speed">Ошибка скорости сервопривода</string>
-    <string name="error_servo_position">Ошибка позиционирования сервопривода</string>
-    <string name="error_servo_current">Ошибка тока сервопривода</string>
-    <string name="error_servo_torque">Ошибка крутящего момента сервопривода</string>
-    <string name="error_servo_overcurrent">Превышение допустимого тока сервопривода</string>
-    <string name="error_servo_overtemp">Перегрев сервопривода</string>
-    <string name="error_servo_calibrate">Ошибка калибровки сервопривода</string>
-    <string name="error_servo_power_fail">Ошибка питания сервопривода</string>
     <string name="error_accel_init">Ошибка инициализации акселератора</string>
     <string name="error_accel_calibrate">Ошибка калибровки акселератора</string>
-    <string name="error_accel_read">Ошибка чтения датчика акселератора</string>
     <string name="error_accel_mismatch">Рассогласование каналов акселератора</string>
+    <string name="error_accel_read">Ошибка чтения датчика акселератора</string>
+    <string name="error_bluetooth_connected">Ошибка соединения Bluetooth</string>
+    <string name="error_bluetooth_init">Ошибка инициализации Bluetooth на контроллере</string>
+    <string name="error_bluetooth_mtu">Ошибка настройки MTU Bluetooth</string>
+    <string name="error_bluetooth_power">Ошибка настройки мощности Bluetooth</string>
     <string name="error_button_init">Ошибка инициализации кнопок</string>
     <string name="error_button_read">Ошибка чтения состояния кнопок</string>
     <string name="error_ecu_init">Ошибка инициализации ЭБУ (ECU)</string>
     <string name="error_ecu_read">Ошибка чтения данных ЭБУ (ECU)</string>
+    <string name="error_guard_lock">Блокировка защиты (Guard Lock)</string>
     <string name="error_indicator_init">Ошибка инициализации индикатора</string>
-    <string name="error_bluetooth_init">Ошибка инициализации Bluetooth на контроллере</string>
-    <string name="error_bluetooth_power">Ошибка настройки мощности Bluetooth</string>
-    <string name="error_bluetooth_mtu">Ошибка настройки MTU Bluetooth</string>
-    <string name="error_bluetooth_connected">Ошибка соединения Bluetooth</string>
+    <string name="error_servo_calibrate">Ошибка калибровки сервопривода</string>
+    <string name="error_servo_checksum">Ошибка контрольной суммы сервопривода</string>
+    <string name="error_servo_comms">Ошибка связи с сервоприводом</string>
+    <string name="error_servo_current">Ошибка тока сервопривода</string>
+    <string name="error_servo_init">Ошибка инициализации сервопривода</string>
+    <string name="error_servo_mode">Неверный режим работы сервопривода</string>
+    <string name="error_servo_overcurrent">Превышение допустимого тока сервопривода</string>
+    <string name="error_servo_overtemp">Перегрев сервопривода</string>
+    <string name="error_servo_position">Ошибка позиционирования сервопривода</string>
+    <string name="error_servo_power_fail">Ошибка питания сервопривода</string>
+    <string name="error_servo_protocol">Ошибка протокола сервопривода</string>
+    <string name="error_servo_read">Ошибка чтения данных сервопривода</string>
+    <string name="error_servo_speed">Ошибка скорости сервопривода</string>
+    <string name="error_servo_torque">Ошибка крутящего момента сервопривода</string>
+    <string name="error_servo_write">Ошибка записи данных сервопривода</string>
 
     <!-- OTA -->
-    <string name="ota_title">Обновление прошивки</string>
-    <string name="ota_release_notes">Описание релиза</string>
     <string name="btn_check_updates">Проверить обновления</string>
-    <string name="ota_searching">Поиск новой версии…</string>
-    <string name="ota_current_version">Текущая версия: %s</string>
-    <string name="ota_update_available">Доступна новая версия: %s</string>
-    <string name="ota_up_to_date">Прошивка актуальна</string>
+    <string name="btn_done">Готово</string>
     <string name="btn_download_install">Скачать и установить</string>
-    <string name="ota_downloading_progress">Скачивание прошивки: %d%%</string>
-    <string name="ota_uploading_progress">Передача прошивки: %d%%</string>
+    <string name="btn_try_again">Попробовать снова</string>
     <string name="ota_chunk_info">Чанк %1$d из %2$d</string>
-    <string name="ota_firmware_size">Размер прошивки: %1$.2f КБ</string>
+    <string name="ota_chunks_remaining">Осталось: %1$d</string>
     <string name="ota_chunks_total">Всего чанков: %1$d</string>
     <string name="ota_chunks_transferred">Передано: %1$d</string>
-    <string name="ota_chunks_remaining">Осталось: %1$d</string>
-    <string name="ota_success">Обновление успешно завершено!</string>
-    <string name="btn_done">Готово</string>
-    <string name="ota_error_generic">Ошибка: %s</string>
-    <string name="btn_try_again">Попробовать снова</string>
-    <string name="ota_error_no_release">Релиз не найден или отсутствует .bin файл</string>
-    <string name="ota_error_download">Ошибка скачивания прошивки</string>
-    <string name="ota_error_server">Ошибка сервера: %d</string>
-    <string name="ota_error_network">Ошибка сети: %s</string>
-    <string name="ota_error_empty">Пустой ответ от сервера</string>
-    <string name="ota_error_transmission">Ошибка передачи данных: %s</string>
+    <string name="ota_current_version">Текущая версия: %s</string>
+    <string name="ota_downloading_progress">Скачивание прошивки: %d%%</string>
     <string name="ota_error_device_firmware">Ошибка прошивки на устройстве</string>
-    <string name="ota_error_empty_file">Файл прошивки пуст</string>
-    <string name="ota_error_system">Системная ошибка: %s</string>
-    <string name="ota_error_github_rate_limit">Превышен лимит запросов GitHub API. Попробуйте позже.</string>
-    <string name="ota_error_github_generic">Ошибка GitHub API %1$d: %2$s</string>
+    <string name="ota_error_download">Ошибка скачивания прошивки</string>
     <string name="ota_error_download_generic">Ошибка загрузки %1$d: %2$s</string>
+    <string name="ota_error_empty">Пустой ответ от сервера</string>
+    <string name="ota_error_empty_file">Файл прошивки пуст</string>
+    <string name="ota_error_generic">Ошибка: %s</string>
+    <string name="ota_error_github_generic">Ошибка GitHub API %1$d: %2$s</string>
+    <string name="ota_error_github_rate_limit">Превышен лимит запросов GitHub API. Попробуйте позже.</string>
+    <string name="ota_error_network">Ошибка сети: %s</string>
+    <string name="ota_error_no_release">Релиз не найден или отсутствует .bin файл</string>
+    <string name="ota_error_server">Ошибка сервера: %d</string>
+    <string name="ota_error_system">Системная ошибка: %s</string>
+    <string name="ota_error_transmission">Ошибка передачи данных: %s</string>
+    <string name="ota_firmware_size">Размер прошивки: %1$.2f КБ</string>
+    <string name="ota_release_notes">Описание релиза</string>
+    <string name="ota_searching">Поиск новой версии…</string>
+    <string name="ota_success">Обновление успешно завершено!</string>
+    <string name="ota_title">Обновление прошивки</string>
+    <string name="ota_up_to_date">Прошивка актуальна</string>
+    <string name="ota_update_available">Доступна новая версия: %s</string>
+    <string name="ota_uploading_progress">Передача прошивки: %d%%</string>
 
-    <!-- Misc -->
-    <string name="unknown">Неизвестно</string>
 </resources>

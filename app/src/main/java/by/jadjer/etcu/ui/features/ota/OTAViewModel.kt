@@ -180,7 +180,7 @@ class OtaViewModel(
             OTAChunk(
                 firmwareSize = data.size.toLong(),
                 totalChunks = totalChunks,
-                chunkNumber = index,
+                chunkIndex = index,
                 data = payload
             )
         )

@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.system.SystemError
 import by.jadjer.etcu.ui.theme.ETCUTheme
+import by.jadjer.etcu.ui.util.labelResId
 
 @Composable
 fun ErrorsBlock(activeErrors: List<SystemError>) {
@@ -25,7 +26,7 @@ fun ErrorsBlock(activeErrors: List<SystemError>) {
         } else {
             activeErrors.forEach { error ->
                 Box(Modifier.fillMaxWidth().padding(vertical = 4.dp).background(Color(0xFFFFEBEE), RoundedCornerShape(8.dp)).padding(12.dp)) {
-                    Text(stringResource(R.string.diag_error_item, stringResource(error.resId)), color = Color(0xFFC62828), style = MaterialTheme.typography.bodyMedium)
+                    Text(stringResource(R.string.diag_error_item, stringResource(error.labelResId)), color = Color(0xFFC62828), style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }

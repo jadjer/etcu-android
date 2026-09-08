@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,8 +28,8 @@ import by.jadjer.etcu.ui.features.device.DeviceViewModel
 
 @Composable
 fun ServoScreen(viewModel: DeviceViewModel) {
+    val uiState by viewModel.uiState.collectAsState()
     val telemetry by viewModel.telemetry.collectAsState()
-    val history by viewModel.telemetryHistory.collectAsState()
 
     var selectedTelemetry by remember { mutableStateOf<SelectedTelemetry?>(null) }
 
@@ -48,7 +49,7 @@ fun ServoScreen(viewModel: DeviceViewModel) {
             title = selected.label,
             value = selected.selector(telemetry).toString(),
             unit = selected.unit,
-            history = history.map(selected.selector),
+            history = uiState.telemetryHistory.map(selected.selector),
             onDismiss = { selectedTelemetry = null }
         )
     }
