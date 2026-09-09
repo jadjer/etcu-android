@@ -122,7 +122,7 @@
     <string name="unit_v">" В"</string>
 
     <!-- Settings Screen -->
-    <string name="btn_calibrate">Запустить калибровку</string>
+    <string name="btn_calibrate">Калибровка акселератора</string>
     <string name="btn_disconnect">Отключить устройство</string>
     <string name="btn_forget">Забыть устройство</string>
     <string name="mode_custom">Пользовательский</string>
@@ -204,5 +204,19 @@
     <string name="ota_up_to_date">Прошивка актуальна</string>
     <string name="ota_update_available">Доступна новая версия: %s</string>
     <string name="ota_uploading_progress">Передача прошивки: %d%%</string>
+
+    <!-- Calibration Screen -->
+    <string name="cal_title">Калибровка</string>
+    <string name="cal_hall_a">Холл А</string>
+    <string name="cal_hall_b">Холл Б</string>
+    <string name="cal_servo">Привод</string>
+    <string name="cal_detected">Выявленный диапазон</string>
+    <string name="cal_current">Текущий диапазон</string>
+    <string name="cal_btn_reset">Сбросить поиск</string>
+    <string name="cal_btn_apply_auto">Применить найденное</string>
+    <string name="cal_btn_save">Сохранить калибровку</string>
+    <string name="cal_hall_format">%1$d .. %2$d</string>
+    <string name="cal_min">Мин</string>
+    <string name="cal_max">Макс</string>
 
 </resources>

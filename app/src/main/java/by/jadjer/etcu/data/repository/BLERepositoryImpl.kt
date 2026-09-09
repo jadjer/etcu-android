@@ -3,6 +3,7 @@ package by.jadjer.etcu.data.repository
 import by.jadjer.etcu.data.ble.BLEManager
 import by.jadjer.etcu.domain.model.ble.*
 import by.jadjer.etcu.domain.model.control.*
+import by.jadjer.etcu.domain.model.calibration.*
 import by.jadjer.etcu.domain.model.telemetry.*
 import by.jadjer.etcu.domain.model.system.*
 import by.jadjer.etcu.domain.model.ota.*
@@ -15,6 +16,7 @@ class BLERepositoryImpl(
 ) : BLERepository {
     override val connectionState: StateFlow<ConnectionState> = bleManager.connectionState
     override val controlData: StateFlow<ControlData> = bleManager.controlData
+    override val calibrationData: StateFlow<CalibrationData> = bleManager.calibrationData
     override val telemetry: StateFlow<SystemTelemetry> = bleManager.telemetry
     override val systemInfo: StateFlow<SystemInfo> = bleManager.systemInfo
     override val discoveredDevices: StateFlow<List<DiscoveredDevice>> = bleManager.scanner.discoveredDevices
@@ -30,5 +32,6 @@ class BLERepositoryImpl(
     override fun clearLastMac() = bleManager.clearLastMac()
 
     override fun sendControlData(data: ControlData) = bleManager.writeControlData(data)
+    override fun sendCalibrationData(data: CalibrationData) = bleManager.writeCalibrationData(data)
     override fun sendOtaChunk(chunk: OTAChunk) = bleManager.writeOtaChunk(chunk)
 }

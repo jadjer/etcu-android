@@ -122,7 +122,7 @@
     <string name="unit_v">" V"</string>
 
     <!-- Settings Screen -->
-    <string name="btn_calibrate">Start Calibration</string>
+    <string name="btn_calibrate">Accelerator Calibration</string>
     <string name="btn_disconnect">Disconnect Device</string>
     <string name="btn_forget">Forget Device</string>
     <string name="mode_custom">Custom</string>
@@ -204,5 +204,19 @@
     <string name="ota_up_to_date">Firmware is up to date</string>
     <string name="ota_update_available">New version available: %s</string>
     <string name="ota_uploading_progress">Uploading firmware: %d%%</string>
+
+    <!-- Calibration Screen -->
+    <string name="cal_title">Calibration</string>
+    <string name="cal_hall_a">Hall A</string>
+    <string name="cal_hall_b">Hall B</string>
+    <string name="cal_servo">Servo</string>
+    <string name="cal_detected">Detected Range</string>
+    <string name="cal_current">Current Range</string>
+    <string name="cal_btn_reset">Reset Detection</string>
+    <string name="cal_btn_apply_auto">Apply Detected</string>
+    <string name="cal_btn_save">Save Calibration</string>
+    <string name="cal_hall_format">%1$d .. %2$d</string>
+    <string name="cal_min">Min</string>
+    <string name="cal_max">Max</string>
 
 </resources>

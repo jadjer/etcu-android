@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.util.Log
 import by.jadjer.etcu.data.local.BLEPreferenceManager
 import by.jadjer.etcu.domain.model.control.*
+import by.jadjer.etcu.domain.model.calibration.*
 import by.jadjer.etcu.domain.model.telemetry.*
 import by.jadjer.etcu.domain.model.ota.*
 import by.jadjer.etcu.domain.model.system.*
@@ -28,6 +29,9 @@ class BLEManager(
 
     private val _controlData = MutableStateFlow(ControlData())
     val controlData = _controlData.asStateFlow()
+
+    private val _calibrationData = MutableStateFlow(CalibrationData())
+    val calibrationData = _calibrationData.asStateFlow()
 
     private val _telemetry = MutableStateFlow(SystemTelemetry())
     val telemetry = _telemetry.asStateFlow()
@@ -55,6 +59,7 @@ class BLEManager(
                 connectionManager.updateState(AppConnectionState.OTA_SETUP)
                 peripheral.setNotify(BLEConstants.SERVICE_UUID, BLEConstants.TELEMETRY_UUID, true)
                 peripheral.setNotify(BLEConstants.SERVICE_UUID, BLEConstants.OTA_UUID, true)
+                peripheral.setNotify(BLEConstants.SERVICE_UUID, BLEConstants.CONTROL_UUID, true)
             } else {
                 Log.e(TAG, "MTU change failed with status $status")
                 connectionManager.updateState(AppConnectionState.ERROR_MTU)
@@ -100,7 +105,14 @@ class BLEManager(
                 BLEConstants.CONTROL_UUID -> {
                     Log.d(TAG, "Control data updated")
                     _controlData.value = dataParser.parseControlData(value)
-                    connectionManager.updateState(AppConnectionState.READY)
+                    peripheral.readCharacteristic(BLEConstants.SERVICE_UUID, BLEConstants.CALIBRATION_UUID)
+                }
+                BLEConstants.CALIBRATION_UUID -> {
+                    Log.d(TAG, "Calibration data updated")
+                    _calibrationData.value = dataParser.parseCalibrationData(value)
+                    if (connectionManager.connectionState.value == AppConnectionState.READING_SETTINGS) {
+                        connectionManager.updateState(AppConnectionState.READY)
+                    }
                 }
                 BLEConstants.TELEMETRY_UUID -> _telemetry.value = dataParser.parseSystemTelemetry(value)
                 BLEConstants.OTA_UUID -> _otaFeedback.tryEmit(dataParser.parseOtaFeedback(value))
@@ -116,8 +128,14 @@ class BLEManager(
             if (status != GattStatus.SUCCESS) {
                 Log.e(TAG, "Characteristic write failed for ${characteristic.uuid} with status $status")
                 connectionManager.updateState(AppConnectionState.ERROR_WRITE_CHAR)
-            } else if (connectionManager.connectionState.value != AppConnectionState.READY) {
-                connectionManager.updateState(AppConnectionState.READY)
+            } else {
+                when (characteristic.uuid) {
+                    BLEConstants.CONTROL_UUID -> _controlData.value = dataParser.parseControlData(value)
+                    BLEConstants.CALIBRATION_UUID -> _calibrationData.value = dataParser.parseCalibrationData(value)
+                }
+                if (connectionManager.connectionState.value != AppConnectionState.READY) {
+                    connectionManager.updateState(AppConnectionState.READY)
+                }
             }
         }
     }
@@ -142,6 +160,17 @@ class BLEManager(
             BLEConstants.SERVICE_UUID,
             BLEConstants.CONTROL_UUID,
             dataParser.serializeControlData(data),
+            WriteType.WITH_RESPONSE
+        )
+    }
+
+    fun writeCalibrationData(data: CalibrationData) {
+        val peripheral = connectionManager.activePeripheral ?: return
+
+        peripheral.writeCharacteristic(
+            BLEConstants.SERVICE_UUID,
+            BLEConstants.CALIBRATION_UUID,
+            dataParser.serializeCalibrationData(data),
             WriteType.WITH_RESPONSE
         )
     }

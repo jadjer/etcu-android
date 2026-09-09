@@ -1,9 +1,12 @@
 package by.jadjer.etcu.data.ble
 
+import by.jadjer.etcu.data.ble.BLEConstants.CALIBRATION_DATA_SIZE
 import by.jadjer.etcu.data.ble.BLEConstants.CONTROL_DATA_SIZE
 import by.jadjer.etcu.data.ble.BLEConstants.INFO_STR_LEN
 import by.jadjer.etcu.data.ble.BLEConstants.SYSTEM_INFO_SIZE
 import by.jadjer.etcu.data.ble.BLEConstants.TELEMETRY_SIZE
+import by.jadjer.etcu.domain.model.calibration.CalibrationData
+import by.jadjer.etcu.domain.model.calibration.CalibrationRange
 import by.jadjer.etcu.domain.model.control.ControlData
 import by.jadjer.etcu.domain.model.control.PositionRange
 import by.jadjer.etcu.domain.model.telemetry.ECUTelemetry
@@ -43,6 +46,22 @@ class BLEDataParser {
             )
         } catch (_: Exception) {
             ControlData()
+        }
+    }
+
+    fun parseCalibrationData(bytes: ByteArray): CalibrationData {
+        if (bytes.size < CALIBRATION_DATA_SIZE) return CalibrationData()
+
+        return try {
+            val buffer = bytes.toLittleEndianBuffer()
+
+            CalibrationData(
+                hallA = CalibrationRange(min = buffer.uShort, max = buffer.uShort),
+                hallB = CalibrationRange(min = buffer.uShort, max = buffer.uShort),
+                servo = CalibrationRange(min = buffer.uShort, max = buffer.uShort)
+            )
+        } catch (_: Exception) {
+            CalibrationData()
         }
     }
 
@@ -128,6 +147,17 @@ class BLEDataParser {
             // Accelerator
             .putShort(data.accelerator.min.toShort())
             .putShort(data.accelerator.max.toShort())
+            .array()
+    }
+
+    fun serializeCalibrationData(data: CalibrationData): ByteArray {
+        return ByteBuffer.allocate(CALIBRATION_DATA_SIZE).order(ByteOrder.LITTLE_ENDIAN)
+            .putShort(data.hallA.min.toShort())
+            .putShort(data.hallA.max.toShort())
+            .putShort(data.hallB.min.toShort())
+            .putShort(data.hallB.max.toShort())
+            .putShort(data.servo.min.toShort())
+            .putShort(data.servo.max.toShort())
             .array()
     }
 

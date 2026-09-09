@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.CreationExtras
 import by.jadjer.etcu.ETCUApplication
+import by.jadjer.etcu.ui.features.calibration.CalibrationViewModel
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
 import by.jadjer.etcu.ui.features.main.MainViewModel
 import by.jadjer.etcu.ui.features.ota.OtaViewModel
@@ -29,6 +30,9 @@ object ViewModelFactory : ViewModelProvider.Factory {
             modelClass.isAssignableFrom(OtaViewModel::class.java) -> 
                 OtaViewModel(application, container.bleRepository, container.otaRepository) as T
             
+            modelClass.isAssignableFrom(CalibrationViewModel::class.java) ->
+                CalibrationViewModel(container.bleRepository) as T
+
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }
     }

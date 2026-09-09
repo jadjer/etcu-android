@@ -34,9 +34,16 @@ sealed class ScreenItem(val titleResId: Int, val icon: ImageVector, val route: S
         fun fromRoute(route: String?): ScreenItem? {
             return when (route) {
                 MainNavRoutes.Routes.OTA -> OTA
+                MainNavRoutes.Routes.CALIBRATION -> Calibration
                 MainNavRoutes.Routes.ROOT -> null
                 else -> null
             }
         }
     }
+
+    data object Calibration : ScreenItem(
+        R.string.cal_title,
+        Icons.Default.Engineering,
+        MainNavRoutes.Routes.CALIBRATION
+    )
 }

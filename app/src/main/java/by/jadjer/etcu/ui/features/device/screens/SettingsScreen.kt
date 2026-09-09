@@ -39,7 +39,8 @@ import by.jadjer.etcu.ui.util.labelResId
 @Composable
 fun SettingsScreen(
     viewModel: DeviceViewModel,
-    onOtaClick: () -> Unit
+    onOtaClick: () -> Unit,
+    onCalibrateClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -62,7 +63,8 @@ fun SettingsScreen(
         },
         onDisconnectClick = { viewModel.disconnect() },
         onForgetClick = { viewModel.forgetDevice() },
-        onOtaClick = onOtaClick
+        onOtaClick = onOtaClick,
+        onCalibrateClick = onCalibrateClick
     )
 }
 
@@ -76,7 +78,8 @@ fun SettingsScreenContent(
     onServoRangeChange: (Float, Float) -> Unit,
     onDisconnectClick: () -> Unit,
     onForgetClick: () -> Unit,
-    onOtaClick: () -> Unit
+    onOtaClick: () -> Unit,
+    onCalibrateClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -174,6 +177,13 @@ fun SettingsScreenContent(
         )
 
         Button(
+            onClick = onCalibrateClick,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(stringResource(R.string.btn_calibrate))
+        }
+
+        Button(
             onClick = onDisconnectClick,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
@@ -222,7 +232,8 @@ fun SettingsScreenPreview() {
             onServoRangeChange = { _, _ -> },
             onDisconnectClick = {},
             onForgetClick = {},
-            onOtaClick = {}
+            onOtaClick = {},
+            onCalibrateClick = {}
         )
     }
 }

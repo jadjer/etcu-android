@@ -4,6 +4,7 @@ object MainNavRoutes {
     object Routes {
         const val ROOT = "main_root"
         const val OTA = "main_ota"
+        const val CALIBRATION = "main_calibration"
     }
 
     object Tabs {

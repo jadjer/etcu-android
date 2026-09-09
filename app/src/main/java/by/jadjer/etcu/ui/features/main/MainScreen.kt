@@ -38,6 +38,8 @@ import by.jadjer.etcu.ui.features.device.screens.EcuScreen
 import by.jadjer.etcu.ui.features.device.screens.ServoScreen
 import by.jadjer.etcu.ui.features.device.screens.SettingsScreen
 import by.jadjer.etcu.ui.features.device.screens.SystemScreen
+import by.jadjer.etcu.ui.features.calibration.CalibrationViewModel
+import by.jadjer.etcu.ui.features.calibration.screens.CalibrationScreen
 import by.jadjer.etcu.ui.features.ota.OtaScreen
 import by.jadjer.etcu.ui.features.ota.OtaViewModel
 import by.jadjer.etcu.ui.features.scan.ScanScreen
@@ -100,6 +102,7 @@ private fun MainScreenContent(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val currentScreen = ScreenItem.fromRoute(currentRoute)
+    val isFullscreenRoute = currentScreen == ScreenItem.OTA || currentScreen == ScreenItem.Calibration
 
     val coroutineScope = rememberCoroutineScope()
     val telemetry by deviceViewModel.telemetry.collectAsState()
@@ -114,7 +117,7 @@ private fun MainScreenContent(
         Scaffold(
             topBar = { MainTopAppBar(connectionStatus) },
             bottomBar = {
-                if (currentScreen != ScreenItem.OTA) {
+                if (!isFullscreenRoute) {
                     MainNavigationBar(
                         pagerState = pagerState,
                         navItems = navItems,
@@ -128,7 +131,7 @@ private fun MainScreenContent(
                 }
             },
             floatingActionButton = {
-                if (activeErrors.isNotEmpty() && currentScreen != ScreenItem.OTA) {
+                if (activeErrors.isNotEmpty() && !isFullscreenRoute) {
                     ErrorFab(errorCount = activeErrors.size, onClick = { showErrorsSheet = true })
                 }
             }
@@ -177,6 +180,10 @@ fun MainNavigationHost(
                 val otaViewModel: OtaViewModel = viewModel(factory = ViewModelFactory)
                 OtaScreen(viewModel = otaViewModel)
             }
+            composable(MainNavRoutes.Routes.CALIBRATION) {
+                val calibrationViewModel: CalibrationViewModel = viewModel(factory = ViewModelFactory)
+                CalibrationScreen(viewModel = calibrationViewModel)
+            }
         }
     }
 }
@@ -191,7 +198,8 @@ private fun MainTabContent(item: ScreenItem, deviceViewModel: DeviceViewModel) {
             val navController = LocalNavController.current
             SettingsScreen(
                 viewModel = deviceViewModel,
-                onOtaClick = { navController.navigate(MainNavRoutes.Routes.OTA) }
+                onOtaClick = { navController.navigate(MainNavRoutes.Routes.OTA) },
+                onCalibrateClick = { navController.navigate(MainNavRoutes.Routes.CALIBRATION) }
             )
         }
     }

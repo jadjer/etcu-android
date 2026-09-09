@@ -122,7 +122,7 @@
     <string name="unit_v">" В"</string>
 
     <!-- Settings Screen -->
-    <string name="btn_calibrate">Запусціць каліброўку</string>
+    <string name="btn_calibrate">Каліброўка акселератара</string>
     <string name="btn_disconnect">Адключыць прыладу</string>
     <string name="btn_forget">Забыць прыладу</string>
     <string name="mode_custom">Карыстальніцкі</string>
@@ -204,5 +204,19 @@
     <string name="ota_up_to_date">Прашыўка актуальная</string>
     <string name="ota_update_available">Даступная новая версія: %s</string>
     <string name="ota_uploading_progress">Перадача прашыўкі: %d%%</string>
+
+    <!-- Calibration Screen -->
+    <string name="cal_title">Каліброўка</string>
+    <string name="cal_hall_a">Хола А</string>
+    <string name="cal_hall_b">Хола Б</string>
+    <string name="cal_servo">Прывад</string>
+    <string name="cal_detected">Выяўлены дыяпазон</string>
+    <string name="cal_current">Бягучы дыяпазон</string>
+    <string name="cal_btn_reset">Скінуць пошук</string>
+    <string name="cal_btn_apply_auto">Ужыць знойдзенае</string>
+    <string name="cal_btn_save">Захаваць каліброўку</string>
+    <string name="cal_hall_format">%1$d .. %2$d</string>
+    <string name="cal_min">Мін</string>
+    <string name="cal_max">Макс</string>
 
 </resources>
