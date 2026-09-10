@@ -15,6 +15,8 @@ class BLERepositoryImpl(
     private val bleManager: BLEManager
 ) : BLERepository {
     override val connectionState: StateFlow<ConnectionState> = bleManager.connectionState
+    override val connectionDetail: StateFlow<String?> = bleManager.connectionDetail
+    override val isManualForget: StateFlow<Boolean> = bleManager.isManualForget
     override val controlData: StateFlow<ControlData> = bleManager.controlData
     override val calibrationData: StateFlow<CalibrationData> = bleManager.calibrationData
     override val telemetry: StateFlow<SystemTelemetry> = bleManager.telemetry
@@ -22,14 +24,13 @@ class BLERepositoryImpl(
     override val discoveredDevices: StateFlow<List<DiscoveredDevice>> = bleManager.scanner.discoveredDevices
     override val isScanning: StateFlow<Boolean> = bleManager.scanner.isScanning
     override val otaFeedback: SharedFlow<OTAStatus> = bleManager.otaFeedback
-    override val savedMac: StateFlow<String?> = bleManager.savedMac
 
     override fun startScan() = bleManager.scanner.startScan()
     override fun stopScan() = bleManager.scanner.stopScan()
     override fun connect(macAddress: String) = bleManager.connect(macAddress)
-    override fun disconnect() = bleManager.disconnect()
     override fun autoConnect() = bleManager.autoConnect()
-    override fun clearLastMac() = bleManager.clearLastMac()
+    override fun forgetDevice() = bleManager.forgetDevice()
+    override fun isBonded(): Boolean = bleManager.isBonded()
 
     override fun sendControlData(data: ControlData) = bleManager.writeControlData(data)
     override fun sendCalibrationData(data: CalibrationData) = bleManager.writeCalibrationData(data)

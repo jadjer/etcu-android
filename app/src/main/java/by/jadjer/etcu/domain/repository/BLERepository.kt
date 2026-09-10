@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface BLERepository {
     val connectionState: StateFlow<ConnectionState>
+    val connectionDetail: StateFlow<String?>
+    val isManualForget: StateFlow<Boolean>
     val controlData: StateFlow<ControlData>
     val calibrationData: StateFlow<CalibrationData>
     val telemetry: StateFlow<SystemTelemetry>
@@ -18,14 +20,13 @@ interface BLERepository {
     val discoveredDevices: StateFlow<List<DiscoveredDevice>>
     val isScanning: StateFlow<Boolean>
     val otaFeedback: SharedFlow<OTAStatus>
-    val savedMac: StateFlow<String?>
 
     fun startScan()
     fun stopScan()
     fun connect(macAddress: String)
-    fun disconnect()
     fun autoConnect()
-    fun clearLastMac()
+    fun forgetDevice()
+    fun isBonded(): Boolean
     fun sendControlData(data: ControlData)
     fun sendCalibrationData(data: CalibrationData)
     fun sendOtaChunk(chunk: OTAChunk)

@@ -11,14 +11,19 @@ class MainViewModel(
 ) : ViewModel() {
 
     val connectionState: StateFlow<ConnectionState> = bleRepository.connectionState
-    val savedMac: StateFlow<String?> = bleRepository.savedMac
+    val connectionDetail: StateFlow<String?> = bleRepository.connectionDetail
     val telemetry: StateFlow<SystemTelemetry> = bleRepository.telemetry
-
-    fun clearLastMac() {
-        bleRepository.clearLastMac()
-    }
 
     fun retryConnection() {
         bleRepository.autoConnect()
+    }
+    
+    fun forgetDevice() {
+        bleRepository.forgetDevice()
+    }
+
+    fun isBonded(): Boolean {
+        // Device is considered "bonded" only if it's in the system list AND wasn't manually forgotten
+        return bleRepository.isBonded() && !bleRepository.isManualForget.value
     }
 }

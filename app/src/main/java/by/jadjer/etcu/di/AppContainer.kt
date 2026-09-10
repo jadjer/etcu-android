@@ -2,22 +2,21 @@ package by.jadjer.etcu.di
 
 import android.app.Application
 import by.jadjer.etcu.data.ble.BLEManager
-import by.jadjer.etcu.data.local.BLEPreferenceManager
 import by.jadjer.etcu.data.network.GitHubService
 import by.jadjer.etcu.data.repository.BLERepositoryImpl
 import by.jadjer.etcu.data.repository.OTARepositoryImpl
 import by.jadjer.etcu.domain.repository.BLERepository
 import by.jadjer.etcu.domain.repository.OTARepository
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
 class AppContainer(private val app: Application) {
 
-    private val preferenceManager by lazy { BLEPreferenceManager(app) }
-
-    private val bleManager by lazy { BLEManager(app, preferenceManager) }
+    private val bleManager by lazy { BLEManager(app) }
 
     private val githubService by lazy {
         val logging = HttpLoggingInterceptor().apply {
@@ -34,10 +33,15 @@ class AppContainer(private val app: Application) {
             }
             .build()
 
+        val json = Json {
+            ignoreUnknownKeys = true
+            coerceInputValues = true
+        }
+
         Retrofit.Builder()
             .baseUrl("https://api.github.com/")
             .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
             .create(GitHubService::class.java)
     }

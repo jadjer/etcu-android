@@ -17,6 +17,7 @@
     <string name="ble_state_error_protocol">Пам: Пратакол</string>
     <string name="ble_state_invalid_mac">Пам: MAC</string>
     <string name="ble_state_ota_setup">Налада OTA…</string>
+    <string name="ble_state_bonding">Спалучэнне…</string>
     <string name="ble_state_reading_settings">Налады…</string>
     <string name="ble_state_ready">Гатова</string>
     <string name="ble_state_scanning">Пошук…</string>
@@ -25,6 +26,7 @@
 
     <!-- BLE Errors -->
     <string name="ble_error_connection">Памылка: %d</string>
+    <string name="ble_error_bonding">Памылка спалучэння</string>
     <string name="ble_error_descriptor_write">Дэскрыптар: %d</string>
     <string name="ble_error_info_not_found">Няма даных</string>
     <string name="ble_error_mtu">MTU: %d</string>
@@ -149,6 +151,7 @@
     <string name="error_bluetooth_connected">Збой злучэння Bluetooth</string>
     <string name="error_bluetooth_init">Памылка ініцыялізацыі Bluetooth на кантролеры</string>
     <string name="error_bluetooth_mtu">Памылка налады МТU Bluetooth</string>
+    <string name="error_bluetooth_notify">Памылка налады апавяшчэнняў Bluetooth</string>
     <string name="error_bluetooth_power">Памылка налады магутнасці Bluetooth</string>
     <string name="error_button_init">Памылка ініцыялізацыі кнопак</string>
     <string name="error_button_read">Памылка чытання стану кнопак</string>

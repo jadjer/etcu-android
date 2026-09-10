@@ -1,9 +1,11 @@
 package by.jadjer.etcu.data.model
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class GitHubAssetDTO(
-    @SerializedName("name") val name: String,
-    @SerializedName("browser_download_url") val downloadUrl: String,
-    @SerializedName("size") val size: Long
+    @SerialName("name") val name: String,
+    @SerialName("browser_download_url") val downloadUrl: String,
+    @SerialName("size") val size: Long
 )

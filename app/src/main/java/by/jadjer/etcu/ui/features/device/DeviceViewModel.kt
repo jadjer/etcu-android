@@ -68,11 +68,8 @@ class DeviceViewModel(private val repository: BLERepository) : ViewModel() {
             .launchIn(viewModelScope)
     }
 
-    fun disconnect() = repository.disconnect()
-
     fun forgetDevice() {
-        repository.clearLastMac()
-        repository.disconnect()
+        repository.forgetDevice()
     }
 
     fun updateServoRange(min: Int, max: Int) {

@@ -29,6 +29,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import by.jadjer.etcu.di.ViewModelFactory
+import by.jadjer.etcu.domain.model.ble.ConnectionState
 import by.jadjer.etcu.ui.component.ErrorFab
 import by.jadjer.etcu.ui.component.ErrorsBottomSheet
 import by.jadjer.etcu.ui.component.MainNavigationBar
@@ -59,19 +60,21 @@ val LocalPagerScrollEnabled = compositionLocalOf {
 @Composable
 fun MainScreen(viewModel: MainViewModel) {
     val connectionState by viewModel.connectionState.collectAsState()
-    val savedMac by viewModel.savedMac.collectAsState()
-    val connectionStatus = connectionState.toDisplayString(savedMac ?: "")
+    val connectionDetail by viewModel.connectionDetail.collectAsState()
+    
+    val isBonded = remember(connectionState) { viewModel.isBonded() }
+    val connectionStatus = connectionState.toDisplayString(connectionDetail ?: "")
 
     when {
-        !connectionState.isActive && savedMac != null -> {
+        connectionState.isProcessing || (connectionState == ConnectionState.DISCONNECTED && isBonded) -> {
             ConnectingStubScreen(
                 connectionStatus = connectionStatus,
                 connectionState = connectionState,
                 onRetryClick = viewModel::retryConnection,
-                onResetClick = viewModel::clearLastMac
+                onResetClick = viewModel::forgetDevice
             )
         }
-        !connectionState.isActive -> {
+        connectionState == ConnectionState.DISCONNECTED -> {
             val scanViewModel: ScanViewModel = viewModel(factory = ViewModelFactory)
             ScanScreen(viewModel = scanViewModel)
         }

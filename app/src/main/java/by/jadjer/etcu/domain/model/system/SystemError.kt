@@ -14,14 +14,15 @@ enum class SystemError(val bitMask: Int) {
     BLUETOOTH_SET_POWER_ERROR(1 shl 7),
     BLUETOOTH_SET_MTU_ERROR(1 shl 8),
     BLUETOOTH_CONNECTED_ERROR(1 shl 9),
+    BLUETOOTH_SEND_NOTIFY_ERROR(1 shl 10),
 
-    INDICATOR_INIT_ERROR(1 shl 10),
+    INDICATOR_INIT_ERROR(1 shl 11),
 
-    PERIPHERAL_INIT_ERROR(1 shl 11),
+    PERIPHERAL_INIT_ERROR(1 shl 12),
 
-    ACCELERATOR_INIT_ERROR(1 shl 12),
-    ACCELERATOR_READ_ERROR(1 shl 13),
-    ACCELERATOR_MISMATCH(1 shl 14);
+    ACCELERATOR_INIT_ERROR(1 shl 13),
+    ACCELERATOR_READ_ERROR(1 shl 14),
+    ACCELERATOR_MISMATCH(1 shl 15);
 
     companion object {
         fun parseErrors(errorsMask: Int): List<SystemError> {

@@ -61,7 +61,6 @@ fun SettingsScreen(
                 max = max.toInt(),
             )
         },
-        onDisconnectClick = { viewModel.disconnect() },
         onForgetClick = { viewModel.forgetDevice() },
         onOtaClick = onOtaClick,
         onCalibrateClick = onCalibrateClick
@@ -76,7 +75,6 @@ fun SettingsScreenContent(
     onModeChange: (OperatingMode) -> Unit,
     onAccRangeChange: (Float, Float) -> Unit,
     onServoRangeChange: (Float, Float) -> Unit,
-    onDisconnectClick: () -> Unit,
     onForgetClick: () -> Unit,
     onOtaClick: () -> Unit,
     onCalibrateClick: () -> Unit
@@ -184,16 +182,6 @@ fun SettingsScreenContent(
         }
 
         Button(
-            onClick = onDisconnectClick,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondary
-            )
-        ) {
-            Text(stringResource(R.string.btn_disconnect))
-        }
-
-        Button(
             onClick = onForgetClick,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
@@ -230,7 +218,6 @@ fun SettingsScreenPreview() {
             onModeChange = {},
             onAccRangeChange = { _, _ -> },
             onServoRangeChange = { _, _ -> },
-            onDisconnectClick = {},
             onForgetClick = {},
             onOtaClick = {},
             onCalibrateClick = {}

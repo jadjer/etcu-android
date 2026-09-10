@@ -3,8 +3,9 @@ package by.jadjer.etcu.data.ble
 import android.annotation.SuppressLint
 import android.app.Application
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import android.util.Log
-import by.jadjer.etcu.data.local.BLEPreferenceManager
 import by.jadjer.etcu.domain.model.control.*
 import by.jadjer.etcu.domain.model.calibration.*
 import by.jadjer.etcu.domain.model.telemetry.*
@@ -14,18 +15,21 @@ import by.jadjer.etcu.domain.model.ble.*
 import com.welie.blessed.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import by.jadjer.etcu.domain.model.ble.ConnectionState as AppConnectionState
 
 @SuppressLint("MissingPermission")
 class BLEManager(
-    app: Application,
-    preferenceManager: BLEPreferenceManager,
+    app: Application
 ) {
-    private val TAG = "BLEManager"
-    private val dataParser = BLEDataParser()
-    private var negotiatedMTU = BLEConstants.DEFAULT_MTU
+    private val _tag = "BLEManager"
+    private val _dataParser = BLEDataParser()
+    private var _negotiatedMTU = BLEConstants.DEFAULT_MTU
+    
+    private val _bluetoothManager = app.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+    private val _adapter = _bluetoothManager.adapter
 
     private val _controlData = MutableStateFlow(ControlData())
     val controlData = _controlData.asStateFlow()
@@ -42,27 +46,24 @@ class BLEManager(
     private val _otaFeedback = MutableSharedFlow<OTAStatus>(extraBufferCapacity = 1)
     val otaFeedback = _otaFeedback.asSharedFlow()
 
-    private val connectionManager = BLEConnectionManager(app, preferenceManager)
+    private val connectionManager = BLEConnectionManager(app)
 
     private val peripheralCallback = object : BluetoothPeripheralCallback() {
         override fun onServicesDiscovered(peripheral: BluetoothPeripheral) {
-            Log.d(TAG, "Services discovered for ${peripheral.address}")
+            Log.d(_tag, "Services discovered for ${peripheral.address}")
             connectionManager.updateState(AppConnectionState.SERVICES_DISCOVERED)
-            connectionManager.updateSavedMac(peripheral.address)
             peripheral.requestMtu(BLEConstants.REQUESTED_MTU)
         }
 
         override fun onMtuChanged(peripheral: BluetoothPeripheral, mtu: Int, status: GattStatus) {
             if (status == GattStatus.SUCCESS) {
-                Log.d(TAG, "MTU changed to $mtu")
-                negotiatedMTU = mtu
+                Log.d(_tag, "MTU changed to $mtu")
+                _negotiatedMTU = mtu
                 connectionManager.updateState(AppConnectionState.OTA_SETUP)
-                peripheral.setNotify(BLEConstants.SERVICE_UUID, BLEConstants.TELEMETRY_UUID, true)
-                peripheral.setNotify(BLEConstants.SERVICE_UUID, BLEConstants.OTA_UUID, true)
-                peripheral.setNotify(BLEConstants.SERVICE_UUID, BLEConstants.CONTROL_UUID, true)
+                peripheral.startNotify(BLEConstants.SERVICE_UUID, BLEConstants.TELEMETRY_UUID, false)
             } else {
-                Log.e(TAG, "MTU change failed with status $status")
-                connectionManager.updateState(AppConnectionState.ERROR_MTU)
+                Log.e(_tag, "MTU change failed with status $status")
+                connectionManager.updateState(AppConnectionState.ERROR_MTU, status.value.toString())
             }
         }
 
@@ -71,15 +72,23 @@ class BLEManager(
             characteristic: BluetoothGattCharacteristic,
             status: GattStatus
         ) {
-            if (status == GattStatus.SUCCESS) {
-                Log.d(TAG, "Notification state updated for ${characteristic.uuid}")
-                if (characteristic.uuid == BLEConstants.OTA_UUID) {
+            if (status != GattStatus.SUCCESS) {
+                Log.e(_tag, "Notification failed for ${characteristic.uuid}: $status")
+                connectionManager.updateState(AppConnectionState.ERROR_DESCRIPTOR_WRITE, status.value.toString())
+                return
+            }
+
+            when (characteristic.uuid) {
+                BLEConstants.TELEMETRY_UUID -> {
+                    peripheral.startNotify(BLEConstants.SERVICE_UUID, BLEConstants.OTA_UUID, false)
+                }
+                BLEConstants.OTA_UUID -> {
+                    peripheral.startNotify(BLEConstants.SERVICE_UUID, BLEConstants.CONTROL_UUID, false)
+                }
+                BLEConstants.CONTROL_UUID -> {
                     connectionManager.updateState(AppConnectionState.READING_INFO)
                     peripheral.readCharacteristic(BLEConstants.SERVICE_UUID, BLEConstants.SYSTEM_INFO_UUID)
                 }
-            } else {
-                Log.e(TAG, "Notification state update failed for ${characteristic.uuid} with status $status")
-                connectionManager.updateState(AppConnectionState.ERROR_DESCRIPTOR_WRITE)
             }
         }
 
@@ -90,32 +99,27 @@ class BLEManager(
             status: GattStatus
         ) {
             if (status != GattStatus.SUCCESS) {
-                Log.e(TAG, "Characteristic update failed for ${characteristic.uuid} with status $status")
-                connectionManager.updateState(AppConnectionState.ERROR_READ_CHAR)
+                Log.e(_tag, "Read failed for ${characteristic.uuid}: $status")
+                connectionManager.updateState(AppConnectionState.ERROR_READ_CHAR, status.value.toString())
                 return
             }
 
             when (characteristic.uuid) {
                 BLEConstants.SYSTEM_INFO_UUID -> {
-                    Log.d(TAG, "System info updated")
-                    _systemInfo.value = dataParser.parseSystemInfo(value)
+                    _systemInfo.value = _dataParser.parseSystemInfo(value)
                     connectionManager.updateState(AppConnectionState.READING_SETTINGS)
                     peripheral.readCharacteristic(BLEConstants.SERVICE_UUID, BLEConstants.CONTROL_UUID)
                 }
                 BLEConstants.CONTROL_UUID -> {
-                    Log.d(TAG, "Control data updated")
-                    _controlData.value = dataParser.parseControlData(value)
+                    _controlData.value = _dataParser.parseControlData(value)
                     peripheral.readCharacteristic(BLEConstants.SERVICE_UUID, BLEConstants.CALIBRATION_UUID)
                 }
                 BLEConstants.CALIBRATION_UUID -> {
-                    Log.d(TAG, "Calibration data updated")
-                    _calibrationData.value = dataParser.parseCalibrationData(value)
-                    if (connectionManager.connectionState.value == AppConnectionState.READING_SETTINGS) {
-                        connectionManager.updateState(AppConnectionState.READY)
-                    }
+                    _calibrationData.value = _dataParser.parseCalibrationData(value)
+                    connectionManager.updateState(AppConnectionState.READY)
                 }
-                BLEConstants.TELEMETRY_UUID -> _telemetry.value = dataParser.parseSystemTelemetry(value)
-                BLEConstants.OTA_UUID -> _otaFeedback.tryEmit(dataParser.parseOtaFeedback(value))
+                BLEConstants.TELEMETRY_UUID -> _telemetry.value = _dataParser.parseSystemTelemetry(value)
+                BLEConstants.OTA_UUID -> _otaFeedback.tryEmit(_dataParser.parseOtaFeedback(value))
             }
         }
 
@@ -126,15 +130,12 @@ class BLEManager(
             status: GattStatus
         ) {
             if (status != GattStatus.SUCCESS) {
-                Log.e(TAG, "Characteristic write failed for ${characteristic.uuid} with status $status")
-                connectionManager.updateState(AppConnectionState.ERROR_WRITE_CHAR)
+                Log.e(_tag, "Write failed for ${characteristic.uuid}: $status")
+                connectionManager.updateState(AppConnectionState.ERROR_WRITE_CHAR, status.value.toString())
             } else {
                 when (characteristic.uuid) {
-                    BLEConstants.CONTROL_UUID -> _controlData.value = dataParser.parseControlData(value)
-                    BLEConstants.CALIBRATION_UUID -> _calibrationData.value = dataParser.parseCalibrationData(value)
-                }
-                if (connectionManager.connectionState.value != AppConnectionState.READY) {
-                    connectionManager.updateState(AppConnectionState.READY)
+                    BLEConstants.CONTROL_UUID -> _controlData.value = _dataParser.parseControlData(value)
+                    BLEConstants.CALIBRATION_UUID -> _calibrationData.value = _dataParser.parseCalibrationData(value)
                 }
             }
         }
@@ -144,49 +145,49 @@ class BLEManager(
         connectionManager.peripheralCallback = peripheralCallback
     }
 
-    val connectionState: kotlinx.coroutines.flow.StateFlow<AppConnectionState> = connectionManager.connectionState
+    val connectionState: StateFlow<AppConnectionState> = connectionManager.connectionState
+    val connectionDetail: StateFlow<String?> = connectionManager.connectionDetail
+    val isManualForget: StateFlow<Boolean> = connectionManager.isManualForget
     val scanner: BLEScanner = connectionManager.scanner
-    val savedMac: kotlinx.coroutines.flow.StateFlow<String?> = connectionManager.savedMac
 
     fun connect(macAddress: String) = connectionManager.connect(macAddress)
-    fun disconnect() = connectionManager.disconnect()
     fun autoConnect() = connectionManager.autoConnect()
-    fun clearLastMac() = connectionManager.clearLastMac()
+    fun forgetDevice() = connectionManager.forgetDevice()
+
+    fun isBonded(): Boolean {
+        return _adapter?.bondedDevices?.any { it.name?.contains("ETCU", ignoreCase = true) == true } ?: false
+    }
 
     fun writeControlData(data: ControlData) {
         val peripheral = connectionManager.activePeripheral ?: return
-
         peripheral.writeCharacteristic(
             BLEConstants.SERVICE_UUID,
             BLEConstants.CONTROL_UUID,
-            dataParser.serializeControlData(data),
+            _dataParser.serializeControlData(data),
             WriteType.WITH_RESPONSE
         )
     }
 
     fun writeCalibrationData(data: CalibrationData) {
         val peripheral = connectionManager.activePeripheral ?: return
-
         peripheral.writeCharacteristic(
             BLEConstants.SERVICE_UUID,
             BLEConstants.CALIBRATION_UUID,
-            dataParser.serializeCalibrationData(data),
+            _dataParser.serializeCalibrationData(data),
             WriteType.WITH_RESPONSE
         )
     }
 
     fun writeOtaChunk(chunk: OTAChunk) {
         val peripheral = connectionManager.activePeripheral ?: return
-        
-        if (BLEConstants.OTA_PACKAGE_SIZE > (negotiatedMTU - BLEConstants.BLE_HEADER_SIZE)) {
+        if (BLEConstants.OTA_PACKAGE_SIZE > (_negotiatedMTU - BLEConstants.BLE_HEADER_SIZE)) {
             connectionManager.updateState(AppConnectionState.ERROR_MTU)
             return
         }
-
         peripheral.writeCharacteristic(
             BLEConstants.SERVICE_UUID,
             BLEConstants.OTA_UUID,
-            dataParser.serializeOtaChunk(chunk),
+            _dataParser.serializeOtaChunk(chunk),
             WriteType.WITH_RESPONSE
         )
     }

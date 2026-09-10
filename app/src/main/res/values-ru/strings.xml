@@ -17,6 +17,7 @@
     <string name="ble_state_error_protocol">Ош: Протокол</string>
     <string name="ble_state_invalid_mac">Ош: MAC</string>
     <string name="ble_state_ota_setup">Настройка OTA…</string>
+    <string name="ble_state_bonding">Сопряжение…</string>
     <string name="ble_state_reading_settings">Настройки…</string>
     <string name="ble_state_ready">Готово</string>
     <string name="ble_state_scanning">Поиск…</string>
@@ -25,6 +26,7 @@
 
     <!-- BLE Errors -->
     <string name="ble_error_connection">Ошибка: %d</string>
+    <string name="ble_error_bonding">Ошибка сопряжения</string>
     <string name="ble_error_descriptor_write">Дескриптор: %d</string>
     <string name="ble_error_info_not_found">Нет данных</string>
     <string name="ble_error_mtu">MTU: %d</string>
@@ -149,6 +151,7 @@
     <string name="error_bluetooth_connected">Ошибка соединения Bluetooth</string>
     <string name="error_bluetooth_init">Ошибка инициализации Bluetooth на контроллере</string>
     <string name="error_bluetooth_mtu">Ошибка настройки MTU Bluetooth</string>
+    <string name="error_bluetooth_notify">Ошибка настройки уведомлений Bluetooth</string>
     <string name="error_bluetooth_power">Ошибка настройки мощности Bluetooth</string>
     <string name="error_button_init">Ошибка инициализации кнопок</string>
     <string name="error_button_read">Ошибка чтения состояния кнопок</string>

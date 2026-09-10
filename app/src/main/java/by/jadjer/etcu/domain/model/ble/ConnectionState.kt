@@ -1,11 +1,13 @@
 package by.jadjer.etcu.domain.model.ble
 
 enum class ConnectionState {
+    INITIALIZING,
     DISCONNECTED,
     CONNECTING,
     SCANNING,
     CONNECTED_DISCOVERING,
     SERVICES_DISCOVERED,
+    BONDING,
     OTA_SETUP,
     READING_INFO,
     READING_SETTINGS,
@@ -16,6 +18,7 @@ enum class ConnectionState {
     ERROR_CONNECTION,
     ERROR_SERVICES,
     ERROR_MTU,
+    ERROR_BONDING,
     ERROR_DESCRIPTOR_WRITE,
     ERROR_INFO_NOT_FOUND,
     ERROR_READ_CHAR,
@@ -23,24 +26,21 @@ enum class ConnectionState {
 
     val isProcessing: Boolean
         get() = when (this) {
+            INITIALIZING,
             CONNECTING,
-            SCANNING -> true
-
+            SCANNING,
+            CONNECTED_DISCOVERING,
+            SERVICES_DISCOVERED,
+            BONDING,
+            OTA_SETUP,
+            READING_INFO,
+            READING_SETTINGS -> true
             else -> false
         }
 
     val isActive: Boolean
         get() = when (this) {
-            CONNECTED_DISCOVERING,
-            SERVICES_DISCOVERED,
-            OTA_SETUP,
-            READING_INFO,
-            READING_SETTINGS,
-            READY,
-            ERROR_MTU,
-            ERROR_READ_CHAR,
-            ERROR_WRITE_CHAR -> true
-
+            READY -> true
             else -> false
         }
 
@@ -50,12 +50,12 @@ enum class ConnectionState {
             ERROR_CONNECTION,
             ERROR_SERVICES,
             ERROR_MTU,
+            ERROR_BONDING,
             ERROR_DESCRIPTOR_WRITE,
             ERROR_INFO_NOT_FOUND,
             ERROR_READ_CHAR,
             ERROR_WRITE_CHAR,
             INVALID_MAC -> true
-
             else -> false
         }
 }

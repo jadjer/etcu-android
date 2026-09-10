@@ -32,6 +32,7 @@ val SystemError.labelResId: Int
         SystemError.BLUETOOTH_INIT_ERROR -> R.string.error_bluetooth_init
         SystemError.BLUETOOTH_SET_POWER_ERROR -> R.string.error_bluetooth_power
         SystemError.BLUETOOTH_SET_MTU_ERROR -> R.string.error_bluetooth_mtu
+        SystemError.BLUETOOTH_SEND_NOTIFY_ERROR -> R.string.error_bluetooth_notify
         SystemError.BLUETOOTH_CONNECTED_ERROR -> R.string.error_bluetooth_connected
         SystemError.INDICATOR_INIT_ERROR -> R.string.error_indicator_init
         SystemError.PERIPHERAL_INIT_ERROR -> R.string.error_button_init

@@ -12,11 +12,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
@@ -25,30 +22,28 @@ import kotlin.time.Duration.Companion.milliseconds
 class BLEScanner(
     private val central: BluetoothCentralManager
 ) {
-    private val scannerScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var scanJob: Job? = null
 
     private val _discoveredDevices = MutableStateFlow<Map<String, DiscoveredDevice>>(emptyMap())
-    val discoveredDevices: StateFlow<List<DiscoveredDevice>> = _discoveredDevices
-        .map { it.values.sortedByDescending { device -> device.rssi }.toList() }
-        .stateIn(
-            scope = scannerScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    val discoveredDevices: StateFlow<List<DiscoveredDevice>> = MutableStateFlow<List<DiscoveredDevice>>(emptyList()).also { stateFlow ->
+        scope.launch {
+            _discoveredDevices.collect { map ->
+                stateFlow.value = map.values.sortedByDescending { it.rssi }
+            }
+        }
+    }
 
     private val _isScanning = MutableStateFlow(false)
     val isScanning = _isScanning.asStateFlow()
 
     fun handleDiscoveredPeripheral(peripheral: BluetoothPeripheral, scanResult: ScanResult) {
-        val name = peripheral.name
-
         _discoveredDevices.update { currentMap ->
             val existing = currentMap[peripheral.address]
             if (existing != null && existing.rssi == scanResult.rssi) return@update currentMap
             
             currentMap + (peripheral.address to DiscoveredDevice(
-                name = name,
+                name = peripheral.name,
                 macAddress = peripheral.address,
                 rssi = scanResult.rssi,
                 isPaired = peripheral.bondState == BondState.BONDED
@@ -63,14 +58,14 @@ class BLEScanner(
         _isScanning.value = true
         
         try {
-            central.scanForPeripheralsWithServices(arrayOf(BLEConstants.SERVICE_UUID))
-        } catch (_: SecurityException) {
+            central.scanForPeripheralsWithServices(setOf(BLEConstants.SERVICE_UUID))
+        } catch (_: Exception) {
             _isScanning.value = false
             return
         }
 
         scanJob?.cancel()
-        scanJob = scannerScope.launch {
+        scanJob = scope.launch {
             delay(timeout.milliseconds)
             stopScan()
         }

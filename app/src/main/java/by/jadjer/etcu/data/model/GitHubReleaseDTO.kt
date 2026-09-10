@@ -1,10 +1,12 @@
 package by.jadjer.etcu.data.model
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class GitHubReleaseDTO(
-    @SerializedName("tag_name") val tagName: String,
-    @SerializedName("name") val name: String,
-    @SerializedName("body") val body: String?,
-    @SerializedName("assets") val assets: List<GitHubAssetDTO>
+    @SerialName("tag_name") val tagName: String,
+    @SerialName("name") val name: String,
+    @SerialName("body") val body: String?,
+    @SerialName("assets") val assets: List<GitHubAssetDTO>
 )

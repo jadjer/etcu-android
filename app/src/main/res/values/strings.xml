@@ -17,6 +17,7 @@
     <string name="ble_state_error_protocol">Protocol Error</string>
     <string name="ble_state_invalid_mac">Bad MAC</string>
     <string name="ble_state_ota_setup">OTA Setup…</string>
+    <string name="ble_state_bonding">Bonding…</string>
     <string name="ble_state_reading_settings">Settings…</string>
     <string name="ble_state_ready">Ready</string>
     <string name="ble_state_scanning">Scanning…</string>
@@ -25,6 +26,7 @@
 
     <!-- BLE Errors -->
     <string name="ble_error_connection">Error: %d</string>
+    <string name="ble_error_bonding">Bonding Failed</string>
     <string name="ble_error_descriptor_write">Descriptor: %d</string>
     <string name="ble_error_info_not_found">No Info</string>
     <string name="ble_error_mtu">MTU: %d</string>
@@ -149,6 +151,7 @@
     <string name="error_bluetooth_connected">Bluetooth connection error</string>
     <string name="error_bluetooth_init">Bluetooth initialization error on controller</string>
     <string name="error_bluetooth_mtu">Bluetooth MTU setting error</string>
+    <string name="error_bluetooth_notify">Bluetooth notification setting error</string>
     <string name="error_bluetooth_power">Bluetooth power setting error</string>
     <string name="error_button_init">Button initialization error</string>
     <string name="error_button_read">Button state read error</string>
