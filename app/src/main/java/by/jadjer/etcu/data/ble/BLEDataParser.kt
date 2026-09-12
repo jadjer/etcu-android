@@ -129,8 +129,8 @@ class BLEDataParser {
         isConnected = bool,
         isEnabled = bool,
         isMoved = bool,
-        voltage = uByte,
         current = uShort,
+        voltage = float,
         position = uShort,
         temperature = uByte,
     )

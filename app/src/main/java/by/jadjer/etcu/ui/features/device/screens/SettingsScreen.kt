@@ -328,16 +328,16 @@ fun SettingsScreenContent(
                 currentMin = controlData.cruise.rpm_min,
                 currentMax = controlData.cruise.rpm_max,
                 onRangeChange = onCruiseRpmChange,
-                valueRange = 1000f..10000f,
-                steps = 899
+                valueRange = 0f..10000f,
+                steps = 9999
             )
             ControlRangeSlider(
                 label = "Рабочая скорость: ${controlData.cruise.speed_min} - ${controlData.cruise.speed_max} км/ч",
                 currentMin = controlData.cruise.speed_min,
                 currentMax = controlData.cruise.speed_max,
                 onRangeChange = onCruiseSpeedChange,
-                valueRange = 40f..160f,
-                steps = 119
+                valueRange = 0f..250f,
+                steps = 249
             )
             ControlSlider(
                 label = "Лимит торможения:  ${controlData.cruise.limiter_left}",

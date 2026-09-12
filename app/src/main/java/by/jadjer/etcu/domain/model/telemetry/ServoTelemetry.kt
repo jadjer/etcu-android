@@ -6,7 +6,7 @@ data class ServoTelemetry(
     val isMoved: Boolean = false,
 
     val current: Int = 0,
-    val voltage: Int = 0,
+    val voltage: Float = 0.0f,
     val position: Int = 0,
     val temperature: Int = 0
 )

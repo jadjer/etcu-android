@@ -127,7 +127,7 @@ fun ServoScreenContent(
                 onValueClick(
                     voltLabel,
                     voltUnit
-                ) { it.servo.voltage }
+                ) { it.servo.voltage.toInt() }
             }
         )
 
@@ -164,7 +164,7 @@ fun ServoScreenPreview() {
                 isConnected = true,
                 position = 512,
                 current = 450,
-                voltage = 12,
+                voltage = 12.2f,
                 temperature = 38,
                 isMoved = true
             )
