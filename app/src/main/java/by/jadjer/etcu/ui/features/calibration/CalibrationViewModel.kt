@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import by.jadjer.etcu.domain.model.calibration.CalibrationData
 import by.jadjer.etcu.domain.model.calibration.CalibrationRange
 import by.jadjer.etcu.domain.model.control.ControlConstants
-import by.jadjer.etcu.domain.model.control.PositionRange
 import by.jadjer.etcu.domain.repository.BLERepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -85,13 +84,10 @@ class CalibrationViewModel(private val repository: BLERepository) : ViewModel() 
             }
             .launchIn(viewModelScope)
 
-        // Set servo to full range for calibration
         repository.sendControlData(
             originalControlData.copy(
-                servo = PositionRange(
-                    min = ControlConstants.MIN_VALUE.toInt(),
-                    max = ControlConstants.MAX_VALUE.toInt()
-                )
+                servo_min = ControlConstants.MIN_VALUE.toInt(),
+                servo_max = ControlConstants.MAX_VALUE.toInt(),
             )
         )
     }

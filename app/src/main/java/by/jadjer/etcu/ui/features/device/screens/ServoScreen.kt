@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.DeviceThermostat
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.LocationSearching
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
@@ -89,6 +90,8 @@ fun ServoScreenContent(
             inactiveText = stringResource(R.string.servo_disabled)
         )
 
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
         TelemetryRow(
             label = posLabel,
             value = telemetry.position.toString(),
@@ -97,9 +100,8 @@ fun ServoScreenContent(
             onClick = {
                 onValueClick(
                     posLabel,
-                    posUnit,
-                    { it.servo.position }
-                )
+                    posUnit
+                ) { it.servo.position }
             }
         )
 
@@ -111,12 +113,11 @@ fun ServoScreenContent(
             onClick = {
                 onValueClick(
                     curLabel,
-                    curUnit,
-                    { it.servo.current }
-                )
+                    curUnit
+                ) { it.servo.current }
             }
         )
-        
+
         TelemetryRow(
             label = voltLabel,
             value = telemetry.voltage.toString(),
@@ -125,12 +126,11 @@ fun ServoScreenContent(
             onClick = {
                 onValueClick(
                     voltLabel,
-                    voltUnit,
-                    { it.servo.voltage }
-                )
+                    voltUnit
+                ) { it.servo.voltage }
             }
         )
-        
+
         TelemetryRow(
             label = tempLabel,
             value = telemetry.temperature.toString(),
@@ -139,11 +139,12 @@ fun ServoScreenContent(
             onClick = {
                 onValueClick(
                     tempLabel,
-                    tempUnit,
-                    { it.servo.temperature }
-                )
+                    tempUnit
+                ) { it.servo.temperature }
             }
         )
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
         StatusIndicator(
             label = stringResource(R.string.servo_motion_status),

@@ -94,6 +94,8 @@ fun EcuScreenContent(
             inactiveText = stringResource(R.string.ecu_engine_stopped)
         )
 
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
         TelemetryRow(
             label = rpmLabel,
             value = telemetry.rpm.toString(),
@@ -191,7 +193,9 @@ fun EcuScreenContent(
                 )
             }
         )
-        
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
         StatusIndicator(
             label = stringResource(R.string.ecu_neutral_status),
             isActive = telemetry.isNeutral,

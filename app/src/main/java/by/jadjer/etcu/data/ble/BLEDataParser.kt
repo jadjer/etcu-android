@@ -8,15 +8,15 @@ import by.jadjer.etcu.data.ble.BLEConstants.TELEMETRY_SIZE
 import by.jadjer.etcu.domain.model.calibration.CalibrationData
 import by.jadjer.etcu.domain.model.calibration.CalibrationRange
 import by.jadjer.etcu.domain.model.control.ControlData
-import by.jadjer.etcu.domain.model.control.PositionRange
-import by.jadjer.etcu.domain.model.telemetry.ECUTelemetry
+import by.jadjer.etcu.domain.model.control.Cruise
 import by.jadjer.etcu.domain.model.ota.OTAChunk
 import by.jadjer.etcu.domain.model.ota.OTAStatus
-import by.jadjer.etcu.domain.model.telemetry.ServoTelemetry
 import by.jadjer.etcu.domain.model.system.SystemError
 import by.jadjer.etcu.domain.model.system.SystemInfo
 import by.jadjer.etcu.domain.model.system.SystemState
 import by.jadjer.etcu.domain.model.telemetry.AcceleratorTelemetry
+import by.jadjer.etcu.domain.model.telemetry.ECUTelemetry
+import by.jadjer.etcu.domain.model.telemetry.ServoTelemetry
 import by.jadjer.etcu.domain.model.telemetry.SystemTelemetry
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -28,21 +28,12 @@ class BLEDataParser {
         return try {
             val buffer = bytes.toLittleEndianBuffer()
 
-            // Servo (4 bytes)
-            val servo = PositionRange(
-                min = buffer.uShort,
-                max = buffer.uShort,
-            )
-
-            // Accelerator (4 bytes)
-            val accelerator = PositionRange(
-                min = buffer.uShort,
-                max = buffer.uShort,
-            )
-
             ControlData(
-                servo = servo,
-                accelerator = accelerator
+                cruise = buffer.parseCruise(),
+                servo_min = buffer.uShort,
+                servo_max = buffer.uShort,
+                accelerator_min = buffer.uShort,
+                accelerator_max = buffer.uShort,
             )
         } catch (_: Exception) {
             ControlData()
@@ -105,6 +96,22 @@ class BLEDataParser {
         }
     }
 
+    private fun ByteBuffer.parseCruise() = Cruise(
+        p = float,
+        i = float,
+        d = float,
+        integralMin = float,
+        integralMax = float,
+        filterAlpha = float,
+        fadeDuration = float,
+        rpm_min = uShort,
+        rpm_max = uShort,
+        speed_min = uByte,
+        speed_max = uByte,
+        limiter_left = uShort,
+        limiter_right = uShort,
+    )
+
     private fun ByteBuffer.parseEcuTelemetry() = ECUTelemetry(
         isConnected = bool,
         isStarted = bool,
@@ -141,12 +148,26 @@ class BLEDataParser {
 
     fun serializeControlData(data: ControlData): ByteArray {
         return ByteBuffer.allocate(CONTROL_DATA_SIZE).order(ByteOrder.LITTLE_ENDIAN)
+            // Cruise
+            .putFloat(data.cruise.p)
+            .putFloat(data.cruise.i)
+            .putFloat(data.cruise.d)
+            .putFloat(data.cruise.integralMin)
+            .putFloat(data.cruise.integralMax)
+            .putFloat(data.cruise.filterAlpha)
+            .putFloat(data.cruise.fadeDuration)
+            .putShort(data.cruise.rpm_min.toShort())
+            .putShort(data.cruise.rpm_max.toShort())
+            .put(data.cruise.speed_min.toByte())
+            .put(data.cruise.speed_max.toByte())
+            .putShort(data.cruise.limiter_left.toShort())
+            .putShort(data.cruise.limiter_right.toShort())
             // Servo
-            .putShort(data.servo.min.toShort())
-            .putShort(data.servo.max.toShort())
+            .putShort(data.servo_min.toShort())
+            .putShort(data.servo_max.toShort())
             // Accelerator
-            .putShort(data.accelerator.min.toShort())
-            .putShort(data.accelerator.max.toShort())
+            .putShort(data.accelerator_min.toShort())
+            .putShort(data.accelerator_max.toShort())
             .array()
     }
 
@@ -180,5 +201,4 @@ class BLEDataParser {
     private val ByteBuffer.bool get() = get().toInt() != 0
     private val ByteBuffer.uByte get() = get().toInt() and 0xFF
     private val ByteBuffer.uShort get() = short.toInt() and 0xFFFF
-//    private val ByteBuffer.uInt get() = int.toLong() and 0xFFFFFFFFL
 }

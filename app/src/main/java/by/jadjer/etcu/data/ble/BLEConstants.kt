@@ -18,12 +18,7 @@ object BLEConstants {
     const val OTA_HEADER_SIZE = 8
     const val OTA_PAYLOAD_SIZE = 500
     const val OTA_PACKAGE_SIZE = OTA_HEADER_SIZE + OTA_PAYLOAD_SIZE
-
-    // SharedPreferences
-    const val PREFS_NAME = "ble_prefs"
-    const val KEY_LAST_MAC = "last_mac"
-
-    const val CONTROL_DATA_SIZE = 8
+    const val CONTROL_DATA_SIZE = 46
     const val CALIBRATION_DATA_SIZE = 12
     const val SYSTEM_INFO_SIZE = 48
     const val TELEMETRY_SIZE = 35

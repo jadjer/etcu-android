@@ -1,15 +1,24 @@
 package by.jadjer.etcu.ui.features.device.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.TwoWheeler
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -19,9 +28,10 @@ import by.jadjer.etcu.domain.model.system.SystemState
 import by.jadjer.etcu.domain.model.telemetry.AcceleratorTelemetry
 import by.jadjer.etcu.domain.model.telemetry.SystemTelemetry
 import by.jadjer.etcu.ui.component.StatusIndicator
+import by.jadjer.etcu.ui.component.telemetry.SelectedTelemetry
 import by.jadjer.etcu.ui.component.telemetry.TelemetryGraphDialog
 import by.jadjer.etcu.ui.component.telemetry.TelemetryRow
-import by.jadjer.etcu.ui.component.telemetry.SelectedTelemetry
+import by.jadjer.etcu.ui.features.device.DeviceUiState
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
 import by.jadjer.etcu.ui.util.labelResId
 
@@ -33,7 +43,7 @@ fun SystemScreen(viewModel: DeviceViewModel) {
     var selectedTelemetry by remember { mutableStateOf<SelectedTelemetry?>(null) }
 
     SystemScreenContent(
-        telemetry = telemetry,
+        uiState = uiState,
         onValueClick = { label, unit, selector ->
             selectedTelemetry = SelectedTelemetry(
                 label = label,
@@ -56,9 +66,10 @@ fun SystemScreen(viewModel: DeviceViewModel) {
 
 @Composable
 fun SystemScreenContent(
-    telemetry: SystemTelemetry,
+    uiState: DeviceUiState,
     onValueClick: (String, String, (SystemTelemetry) -> Int) -> Unit = { _, _, _ -> }
 ) {
+    val telemetry = uiState.telemetry
     val accLabel = stringResource(R.string.system_accel)
     val thrLabel = stringResource(R.string.system_throttle_target)
     val rawUnit = stringResource(R.string.unit_raw_1000)
@@ -67,11 +78,12 @@ fun SystemScreenContent(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(rememberScrollState()),
     ) {
         Text(
             stringResource(R.string.system_telemetry_title),
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(bottom = 8.dp)
         )
 
         TelemetryRow(
@@ -80,39 +92,36 @@ fun SystemScreenContent(
             icon = Icons.Default.Info
         )
 
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
         TelemetryRow(
             label = accLabel,
             value = telemetry.accelerator.position.toString(),
             unit = rawUnit,
             icon = Icons.Default.TwoWheeler,
-            onClick = {
-                onValueClick(
-                    accLabel,
-                    rawUnit,
-                    { it.accelerator.position }
-                )
-            }
+            onClick = { onValueClick(accLabel, rawUnit) { it.accelerator.position } }
         )
-
         TelemetryRow(
             label = thrLabel,
             value = telemetry.throttlePosition.toString(),
             unit = rawUnit,
-            onClick = {
-                onValueClick(
-                    thrLabel,
-                    rawUnit,
-                    { it.throttlePosition }
-                )
-            }
+            onClick = { onValueClick(thrLabel, rawUnit) { it.throttlePosition } }
         )
+        TelemetryRow(
+            label = "Target Speed",
+            value = telemetry.targetSpeed.toString(),
+            unit = stringResource(R.string.unit_kmh),
+            icon = Icons.Default.Speed,
+            onClick = { onValueClick("Target Speed", "km/h") { it.targetSpeed } }
+        )
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
         StatusIndicator(
             label = stringResource(R.string.system_guard),
             isActive = telemetry.isGuardActive,
             icon = Icons.Default.Lock
         )
-
         StatusIndicator(
             label = stringResource(R.string.system_brake),
             isActive = telemetry.isBrakeEnabled
@@ -125,16 +134,19 @@ fun SystemScreenContent(
 fun SystemScreenPreview() {
     MaterialTheme {
         SystemScreenContent(
-            telemetry = SystemTelemetry(
-                isGuardActive = false,
-                isBrakeEnabled = true,
-                systemState = SystemState.NORMAL,
-                accelerator = AcceleratorTelemetry(
-                    hallA = 0,
-                    hallB = 0,
-                    position = 300,
-                ),
-                throttlePosition = 280,
+            uiState = DeviceUiState(
+                telemetry = SystemTelemetry(
+                    isGuardActive = false,
+                    isBrakeEnabled = true,
+                    systemState = SystemState.NORMAL,
+                    accelerator = AcceleratorTelemetry(
+                        hallA = 500,
+                        hallB = 510,
+                        position = 300,
+                    ),
+                    throttlePosition = 280,
+                    targetSpeed = 60
+                )
             )
         )
     }

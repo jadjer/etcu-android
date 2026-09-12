@@ -24,6 +24,7 @@ import kotlin.time.Duration.Companion.milliseconds
 data class DeviceUiState(
     val controlData: ControlData = ControlData(),
     val systemInfo: SystemInfo = SystemInfo(),
+    val telemetry: SystemTelemetry = SystemTelemetry(),
     val operatingMode: OperatingMode = OperatingMode.CUSTOM,
     val telemetryHistory: List<SystemTelemetry> = emptyList()
 )
@@ -36,14 +37,13 @@ class DeviceViewModel(private val repository: BLERepository) : ViewModel() {
     private val _controlData = MutableStateFlow(ControlData())
 
     val uiState: StateFlow<DeviceUiState> = combine(
-        _controlData,
-        repository.systemInfo,
-        _telemetryHistory
-    ) { controlData, systemInfo, history ->
+        _controlData, repository.systemInfo, telemetry, _telemetryHistory
+    ) { controlData, systemInfo, telemetry, history ->
         DeviceUiState(
             controlData = controlData,
             systemInfo = systemInfo,
-            operatingMode = OperatingMode.fromServoMax(controlData.servo.max),
+            telemetry = telemetry,
+            operatingMode = OperatingMode.fromServoMax(controlData.servo_max),
             telemetryHistory = history
         )
     }.stateIn(
@@ -55,17 +55,13 @@ class DeviceViewModel(private val repository: BLERepository) : ViewModel() {
     private var updateJob: Job? = null
 
     init {
-        repository.controlData
-            .onEach { _controlData.value = it }
-            .launchIn(viewModelScope)
+        repository.controlData.onEach { _controlData.value = it }.launchIn(viewModelScope)
 
-        telemetry
-            .onEach { t ->
-                _telemetryHistory.update { history ->
-                    (history + t).takeLast(1000)
-                }
+        telemetry.onEach { t ->
+            _telemetryHistory.update { history ->
+                (history + t).takeLast(1000)
             }
-            .launchIn(viewModelScope)
+        }.launchIn(viewModelScope)
     }
 
     fun forgetDevice() {
@@ -73,22 +69,84 @@ class DeviceViewModel(private val repository: BLERepository) : ViewModel() {
     }
 
     fun updateServoRange(min: Int, max: Int) {
-        val updated = _controlData.value.copy(servo = _controlData.value.servo.copy(min = min, max = max))
+        val updated = _controlData.value.copy(servo_min = min, servo_max = max)
         _controlData.value = updated
         scheduleUpdate(updated)
     }
 
     fun updateOperatingMode(mode: OperatingMode) {
         mode.servoMax?.let { max ->
-            val updated = _controlData.value.copy(servo = _controlData.value.servo.copy(max = max))
+            val updated = _controlData.value.copy(servo_max = max)
             _controlData.value = updated
             scheduleUpdate(updated)
         }
     }
 
     fun updateAccRange(min: Int, max: Int) {
+        val updated = _controlData.value.copy(accelerator_min = min, accelerator_max = max)
+        _controlData.value = updated
+        scheduleUpdate(updated)
+    }
+
+    fun updateCruisePID(p: Float, i: Float, d: Float) {
         val updated = _controlData.value.copy(
-            accelerator = _controlData.value.accelerator.copy(min = min, max = max)
+            cruise = _controlData.value.cruise.copy(p = p, i = i, d = d)
+        )
+        _controlData.value = updated
+        scheduleUpdate(updated)
+    }
+
+    fun updateCruiseIntegralLimits(min: Float, max: Float) {
+        val updated = _controlData.value.copy(
+            cruise = _controlData.value.cruise.copy(integralMin = min, integralMax = max)
+        )
+        _controlData.value = updated
+        scheduleUpdate(updated)
+    }
+
+    fun updateCruiseRPMRange(min: Int, max: Int) {
+        val updated = _controlData.value.copy(
+            cruise = _controlData.value.cruise.copy(rpm_min = min, rpm_max = max)
+        )
+        _controlData.value = updated
+        scheduleUpdate(updated)
+    }
+
+    fun updateCruiseSpeedRange(min: Int, max: Int) {
+        val updated = _controlData.value.copy(
+            cruise = _controlData.value.cruise.copy(speed_min = min, speed_max = max)
+        )
+        _controlData.value = updated
+        scheduleUpdate(updated)
+    }
+
+    fun updateCruiseLimiterLeft(left: Int) {
+        val updated = _controlData.value.copy(
+            cruise = _controlData.value.cruise.copy(limiter_left = left)
+        )
+        _controlData.value = updated
+        scheduleUpdate(updated)
+    }
+
+    fun updateCruiseLimiterRight(right: Int) {
+        val updated = _controlData.value.copy(
+            cruise = _controlData.value.cruise.copy(limiter_right = right)
+        )
+        _controlData.value = updated
+        scheduleUpdate(updated)
+    }
+
+    fun updateCruiseFilterAlpha(filterAlpha: Float) {
+        val updated = _controlData.value.copy(
+            cruise = _controlData.value.cruise.copy(filterAlpha = filterAlpha)
+        )
+        _controlData.value = updated
+        scheduleUpdate(updated)
+    }
+
+    fun updateCruiseFadeDuration(fadeDuration: Float) {
+        val updated = _controlData.value.copy(
+            cruise = _controlData.value.cruise.copy(fadeDuration = fadeDuration)
         )
         _controlData.value = updated
         scheduleUpdate(updated)
