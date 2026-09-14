@@ -16,6 +16,7 @@ interface BLERepository {
     val controlData: StateFlow<ControlData>
     val calibrationData: StateFlow<CalibrationData>
     val telemetry: StateFlow<SystemTelemetry>
+    val history: StateFlow<TelemetryHistory>
     val systemInfo: StateFlow<SystemInfo>
     val discoveredDevices: StateFlow<List<DiscoveredDevice>>
     val isScanning: StateFlow<Boolean>

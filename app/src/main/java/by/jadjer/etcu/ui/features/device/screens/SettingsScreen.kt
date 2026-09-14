@@ -21,6 +21,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -35,8 +38,7 @@ import by.jadjer.etcu.domain.model.control.OperatingMode
 import by.jadjer.etcu.domain.model.system.SystemInfo
 import by.jadjer.etcu.ui.component.ControlRangeSlider
 import by.jadjer.etcu.ui.component.ControlSlider
-import by.jadjer.etcu.ui.component.SettingsGroup
-import by.jadjer.etcu.ui.component.telemetry.TelemetryRow
+import by.jadjer.etcu.ui.component.StatusRow
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
 import by.jadjer.etcu.ui.util.labelResId
 
@@ -79,11 +81,11 @@ fun SettingsScreen(
                 max.toInt()
             )
         },
-        onCruiseLimiterLeftChange = { value ->
-            viewModel.updateCruiseLimiterLeft(value.toInt())
+        onCruiseLimiterUpChange = { value ->
+            viewModel.updateCruiseLimiterUp(value.toInt())
         },
-        onCruiseLimiterRightChange = { value ->
-            viewModel.updateCruiseLimiterRight(value.toInt())
+        onCruiseLimiterDownChange = { value ->
+            viewModel.updateCruiseLimiterDown(value.toInt())
         },
         onCruiseIntegralChange = { left, right ->
             viewModel.updateCruiseIntegralLimits(left, right)
@@ -108,16 +110,14 @@ fun SettingsScreenContent(
     onModeChange: (OperatingMode) -> Unit,
     onAccRangeChange: (Float, Float) -> Unit,
     onServoRangeChange: (Float, Float) -> Unit,
-
     onCruisePidChange: (Float, Float, Float) -> Unit,
     onCruiseRpmChange: (Float, Float) -> Unit,
     onCruiseSpeedChange: (Float, Float) -> Unit,
-    onCruiseLimiterLeftChange: (Float) -> Unit,
-    onCruiseLimiterRightChange: (Float) -> Unit,
+    onCruiseLimiterUpChange: (Float) -> Unit,
+    onCruiseLimiterDownChange: (Float) -> Unit,
     onCruiseIntegralChange: (Float, Float) -> Unit,
     onCruiseFilterAlphaChange: (Float) -> Unit,
     onCruiseFadeDurationChange: (Float) -> Unit,
-
     onForgetClick: () -> Unit,
     onOtaClick: () -> Unit,
     onCalibrateClick: () -> Unit
@@ -127,265 +127,317 @@ fun SettingsScreenContent(
             .fillMaxSize()
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Column {
-            Text(
-                stringResource(R.string.settings_device_info),
-                style = MaterialTheme.typography.titleLarge
-            )
-            TelemetryRow(
-                label = stringResource(R.string.settings_board_version),
-                value = systemInfo.boardVersion.ifEmpty { stringResource(R.string.unknown) }
-            )
-            TelemetryRow(
-                label = stringResource(R.string.settings_build_date),
-                value = systemInfo.buildDate.ifEmpty { stringResource(R.string.unknown) }
-            )
-            TelemetryRow(
-                label = stringResource(R.string.settings_firmware_version),
-                value = systemInfo.firmwareVersion.ifEmpty { "0.0.0" }
-            )
-        }
+        DeviceInfoSection(systemInfo = systemInfo)
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        HorizontalDivider()
 
         Text(stringResource(R.string.settings_control), style = MaterialTheme.typography.titleLarge)
 
-        SettingsGroup(title = stringResource(R.string.settings_accel_settings)) {
-            ControlRangeSlider(
-                label = stringResource(
-                    R.string.settings_accel_range,
-                    controlData.accelerator_min,
-                    controlData.accelerator_max
-                ),
-                currentMin = controlData.accelerator_min,
-                currentMax = controlData.accelerator_max,
-                onRangeChange = onAccRangeChange,
-                valueRange = ControlConstants.MIN_VALUE..ControlConstants.MAX_VALUE,
-                steps = ControlConstants.STEPS
-            )
-        }
+        AcceleratorSettingsSection(
+            acceleratorMin = controlData.acceleratorMin,
+            acceleratorMax = controlData.acceleratorMax,
+            onRangeChange = onAccRangeChange
+        )
 
-        SettingsGroup(title = stringResource(R.string.settings_servo_settings)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+        HorizontalDivider()
+
+        ServoSettingsSection(
+            servoMin = controlData.servoMin,
+            servoMax = controlData.servoMax,
+            operatingMode = operatingMode,
+            onModeChange = onModeChange,
+            onRangeChange = onServoRangeChange
+        )
+
+        HorizontalDivider()
+
+        CruiseSettingsSection(
+            cruise = controlData.cruise,
+            onPidChange = onCruisePidChange,
+            onIntegralChange = onCruiseIntegralChange,
+            onFilterAlphaChange = onCruiseFilterAlphaChange,
+            onFadeDurationChange = onCruiseFadeDurationChange,
+            onRpmChange = onCruiseRpmChange,
+            onSpeedChange = onCruiseSpeedChange,
+            onLimiterUpChange = onCruiseLimiterUpChange,
+            onLimiterDownChange = onCruiseLimiterDownChange
+        )
+
+        HorizontalDivider()
+
+        DeviceActionsSection(
+            onCalibrateClick = onCalibrateClick,
+            onForgetClick = onForgetClick,
+            onOtaClick = onOtaClick
+        )
+    }
+}
+
+@Composable
+private fun DeviceInfoSection(systemInfo: SystemInfo) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            stringResource(R.string.settings_device_info),
+            style = MaterialTheme.typography.titleLarge
+        )
+        StatusRow(
+            label = stringResource(R.string.settings_board_version),
+            value = systemInfo.boardVersion.ifEmpty { stringResource(R.string.unknown) }
+        )
+        StatusRow(
+            label = stringResource(R.string.settings_build_date),
+            value = systemInfo.buildDate.ifEmpty { stringResource(R.string.unknown) }
+        )
+        StatusRow(
+            label = stringResource(R.string.settings_firmware_version),
+            value = systemInfo.firmwareVersion.ifEmpty { "0.0.0" }
+        )
+    }
+}
+
+@Composable
+private fun AcceleratorSettingsSection(
+    acceleratorMin: Int,
+    acceleratorMax: Int,
+    onRangeChange: (Float, Float) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(stringResource(R.string.settings_accel_settings), style = MaterialTheme.typography.titleMedium)
+        ControlRangeSlider(
+            label = stringResource(
+                R.string.settings_accel_range,
+                acceleratorMin,
+                acceleratorMax
+            ),
+            currentMin = acceleratorMin,
+            currentMax = acceleratorMax,
+            onRangeChange = onRangeChange,
+            valueRange = ControlConstants.MIN_VALUE..ControlConstants.MAX_VALUE,
+            steps = ControlConstants.STEPS
+        )
+    }
+}
+
+@Composable
+private fun ServoSettingsSection(
+    servoMin: Int,
+    servoMax: Int,
+    operatingMode: OperatingMode,
+    onModeChange: (OperatingMode) -> Unit,
+    onRangeChange: (Float, Float) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(stringResource(R.string.settings_servo_settings), style = MaterialTheme.typography.titleMedium)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                stringResource(R.string.settings_operating_mode),
+                style = MaterialTheme.typography.labelLarge
+            )
+            if (operatingMode == OperatingMode.CUSTOM) {
                 Text(
-                    stringResource(R.string.settings_operating_mode),
-                    style = MaterialTheme.typography.labelLarge
+                    stringResource(operatingMode.labelResId),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
                 )
-                if (operatingMode == OperatingMode.CUSTOM) {
-                    Text(
-                        stringResource(operatingMode.labelResId),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
             }
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OperatingMode.entries.filter { it != OperatingMode.CUSTOM }.forEach { mode ->
-                    FilterChip(
-                        selected = operatingMode == mode,
-                        onClick = { onModeChange(mode) },
-                        label = { Text(stringResource(mode.labelResId)) }
-                    )
-                }
+        }
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OperatingMode.entries.filter { it != OperatingMode.CUSTOM }.forEach { mode ->
+                FilterChip(
+                    selected = operatingMode == mode,
+                    onClick = { onModeChange(mode) },
+                    label = { Text(stringResource(mode.labelResId)) }
+                )
             }
+        }
 
-            ControlRangeSlider(
-                label = stringResource(
-                    R.string.settings_servo_range,
-                    controlData.servo_min,
-                    controlData.servo_max
-                ),
-                currentMin = controlData.servo_min,
-                currentMax = controlData.servo_max,
-                onRangeChange = onServoRangeChange,
-                valueRange = ControlConstants.MIN_VALUE..ControlConstants.MAX_VALUE,
-                steps = ControlConstants.STEPS
+        ControlRangeSlider(
+            label = stringResource(
+                R.string.settings_servo_range,
+                servoMin,
+                servoMax
+            ),
+            currentMin = servoMin,
+            currentMax = servoMax,
+            onRangeChange = onRangeChange,
+            valueRange = ControlConstants.MIN_VALUE..ControlConstants.MAX_VALUE,
+            steps = ControlConstants.STEPS
+        )
+    }
+}
+
+@Composable
+private fun CruiseSettingsSection(
+    cruise: Cruise,
+    onPidChange: (Float, Float, Float) -> Unit,
+    onIntegralChange: (Float, Float) -> Unit,
+    onFilterAlphaChange: (Float) -> Unit,
+    onFadeDurationChange: (Float) -> Unit,
+    onRpmChange: (Float, Float) -> Unit,
+    onSpeedChange: (Float, Float) -> Unit,
+    onLimiterUpChange: (Float) -> Unit,
+    onLimiterDownChange: (Float) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(stringResource(R.string.cruise_settings_title), style = MaterialTheme.typography.titleMedium)
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            CruiseTextField(
+                value = cruise.p,
+                label = stringResource(R.string.cruise_p),
+                onValueChange = { onPidChange(it, cruise.i, cruise.d) },
+                modifier = Modifier.weight(1f)
+            )
+            CruiseTextField(
+                value = cruise.i,
+                label = stringResource(R.string.cruise_i),
+                onValueChange = { onPidChange(cruise.p, it, cruise.d) },
+                modifier = Modifier.weight(1f)
+            )
+            CruiseTextField(
+                value = cruise.d,
+                label = stringResource(R.string.cruise_d),
+                onValueChange = { onPidChange(cruise.p, cruise.i, it) },
+                modifier = Modifier.weight(1f)
             )
         }
 
-        SettingsGroup(title = "Настройки круиз-контроля") {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedTextField(
-                    value = controlData.cruise.p.toString(),
-                    onValueChange = { newValue ->
-                        newValue.toFloatOrNull()?.let {
-                            onCruisePidChange(
-                                it,
-                                controlData.cruise.i,
-                                controlData.cruise.d
-                            )
-                        }
-                    },
-                    label = { Text("P") },
-                    modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    singleLine = true,
-                )
-                OutlinedTextField(
-                    value = controlData.cruise.i.toString(),
-                    onValueChange = { newValue ->
-                        newValue.toFloatOrNull()?.let {
-                            onCruisePidChange(
-                                controlData.cruise.p,
-                                it,
-                                controlData.cruise.d
-                            )
-                        }
-                    },
-                    label = { Text("I") },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-                )
-                OutlinedTextField(
-                    value = controlData.cruise.d.toString(),
-                    onValueChange = { newValue ->
-                        newValue.toFloatOrNull()?.let {
-                            onCruisePidChange(
-                                controlData.cruise.p,
-                                controlData.cruise.i,
-                                it
-                            )
-                        }
-                    },
-                    label = { Text("D") },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedTextField(
-                    value = controlData.cruise.integralMin.toString(),
-                    onValueChange = { newValue ->
-                        newValue.toFloatOrNull()
-                            ?.let { onCruiseIntegralChange(it, controlData.cruise.integralMax) }
-                    },
-                    label = { Text("Integral Min") },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-                )
-                OutlinedTextField(
-                    value = controlData.cruise.integralMax.toString(),
-                    onValueChange = { newValue ->
-                        newValue.toFloatOrNull()
-                            ?.let { onCruiseIntegralChange(controlData.cruise.integralMin, it) }
-                    },
-                    label = { Text("Integral Max") },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedTextField(
-                    value = controlData.cruise.filterAlpha.toString(),
-                    onValueChange = { newValue ->
-                        newValue.toFloatOrNull()?.let { onCruiseFilterAlphaChange(it) }
-                    },
-                    label = { Text("Speed filter alpha") },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-                )
-                OutlinedTextField(
-                    value = controlData.cruise.fadeDuration.toString(),
-                    onValueChange = { newValue ->
-                        newValue.toFloatOrNull()?.let { onCruiseFadeDurationChange(it) }
-                    },
-                    label = { Text("Fade duration (sec)") },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-                )
-            }
-
-            HorizontalDivider()
-
-            ControlRangeSlider(
-                label = "Ограничение RPM: ${controlData.cruise.rpm_min} - ${controlData.cruise.rpm_max}",
-                currentMin = controlData.cruise.rpm_min,
-                currentMax = controlData.cruise.rpm_max,
-                onRangeChange = onCruiseRpmChange,
-                valueRange = 0f..10000f,
-                steps = 9999
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            CruiseTextField(
+                value = cruise.integralMin,
+                label = stringResource(R.string.cruise_integral_min),
+                onValueChange = { onIntegralChange(it, cruise.integralMax) },
+                modifier = Modifier.weight(1f)
             )
-            ControlRangeSlider(
-                label = "Рабочая скорость: ${controlData.cruise.speed_min} - ${controlData.cruise.speed_max} км/ч",
-                currentMin = controlData.cruise.speed_min,
-                currentMax = controlData.cruise.speed_max,
-                onRangeChange = onCruiseSpeedChange,
-                valueRange = 0f..250f,
-                steps = 249
-            )
-            ControlSlider(
-                label = "Лимит торможения:  ${controlData.cruise.limiter_left}",
-                value = controlData.cruise.limiter_left,
-                onValueChange = onCruiseLimiterLeftChange,
-                valueRange = 0f..1000f,
-                steps = 999
-            )
-            ControlSlider(
-                label = "Лимит ускорения: ${controlData.cruise.limiter_right}",
-                value = controlData.cruise.limiter_right,
-                onValueChange = onCruiseLimiterRightChange,
-                valueRange = 0f..1000f,
-                steps = 999
+            CruiseTextField(
+                value = cruise.integralMax,
+                label = stringResource(R.string.cruise_integral_max),
+                onValueChange = { onIntegralChange(cruise.integralMin, it) },
+                modifier = Modifier.weight(1f)
             )
         }
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            CruiseTextField(
+                value = cruise.filterAlpha,
+                label = stringResource(R.string.cruise_filter_alpha),
+                onValueChange = onFilterAlphaChange,
+                modifier = Modifier.weight(1f)
+            )
+            CruiseTextField(
+                value = cruise.fadeDuration,
+                label = stringResource(R.string.cruise_fade_duration),
+                onValueChange = onFadeDurationChange,
+                modifier = Modifier.weight(1f)
+            )
+        }
 
+        ControlRangeSlider(
+            label = stringResource(R.string.cruise_rpm_limit, cruise.rpmMin, cruise.rpmMax),
+            currentMin = cruise.rpmMin,
+            currentMax = cruise.rpmMax,
+            onRangeChange = onRpmChange,
+            valueRange = 0f..10000f,
+            steps = 9999
+        )
+        ControlRangeSlider(
+            label = stringResource(R.string.cruise_speed_range, cruise.speedMin, cruise.speedMax),
+            currentMin = cruise.speedMin,
+            currentMax = cruise.speedMax,
+            onRangeChange = onSpeedChange,
+            valueRange = 0f..250f,
+            steps = 249
+        )
+        ControlSlider(
+            label = stringResource(R.string.cruise_limiter_brake, cruise.limiterDown),
+            value = cruise.limiterDown,
+            onValueChange = onLimiterDownChange,
+            valueRange = 0f..1000f,
+            steps = 999
+        )
+        ControlSlider(
+            label = stringResource(R.string.cruise_limiter_accel, cruise.limiterUp),
+            value = cruise.limiterUp,
+            onValueChange = onLimiterUpChange,
+            valueRange = 0f..1000f,
+            steps = 999
+        )
+    }
+}
+
+@Composable
+private fun CruiseTextField(
+    value: Float,
+    label: String,
+    onValueChange: (Float) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var textValue by remember(value) { mutableStateOf(value.toString()) }
+
+    OutlinedTextField(
+        value = textValue,
+        onValueChange = { newValue ->
+            textValue = newValue
+            newValue.toFloatOrNull()?.let { onValueChange(it) }
+        },
+        label = { Text(label) },
+        modifier = modifier,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+        singleLine = true,
+    )
+}
+
+@Composable
+private fun DeviceActionsSection(
+    onCalibrateClick: () -> Unit,
+    onForgetClick: () -> Unit,
+    onOtaClick: () -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             stringResource(R.string.settings_device_settings),
             style = MaterialTheme.typography.titleLarge
         )
+        Button(
+            onClick = onCalibrateClick,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(stringResource(R.string.btn_calibrate))
+        }
 
-        Column {
-            Button(
-                onClick = onCalibrateClick,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(stringResource(R.string.btn_calibrate))
-            }
+        Button(
+            onClick = onForgetClick,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.error
+            )
+        ) {
+            Text(stringResource(R.string.btn_forget))
+        }
 
-            Button(
-                onClick = onForgetClick,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
-                )
-            ) {
-                Text(stringResource(R.string.btn_forget))
-            }
-
-            OutlinedButton(
-                onClick = onOtaClick,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.btn_check_updates))
-            }
+        OutlinedButton(
+            onClick = onOtaClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.btn_check_updates))
         }
     }
 }
@@ -400,17 +452,17 @@ fun SettingsScreenPreview() {
                     p = 10.0f,
                     i = 0.5f,
                     d = 2.0f,
-                    rpm_min = 2500,
-                    rpm_max = 7000,
-                    speed_min = 40,
-                    speed_max = 160,
-                    limiter_left = -250,
-                    limiter_right = 250,
+                    rpmMin = 2500,
+                    rpmMax = 7000,
+                    speedMin = 40,
+                    speedMax = 160,
+                    limiterUp = -250,
+                    limiterDown = 250,
                 ),
-                servo_min = 0,
-                servo_max = 600,
-                accelerator_min = 150,
-                accelerator_max = 850,
+                servoMin = 0,
+                servoMax = 600,
+                acceleratorMin = 150,
+                acceleratorMax = 850,
             ),
             systemInfo = SystemInfo(
                 boardVersion = "v2.1",
@@ -427,8 +479,8 @@ fun SettingsScreenPreview() {
             onCruiseFilterAlphaChange = { _ -> },
             onCruiseFadeDurationChange = { _ -> },
             onCruiseIntegralChange = { _, _ -> },
-            onCruiseLimiterLeftChange = { _ -> },
-            onCruiseLimiterRightChange = { _ -> },
+            onCruiseLimiterUpChange = { _ -> },
+            onCruiseLimiterDownChange = { _ -> },
             onForgetClick = {},
             onOtaClick = {},
             onCalibrateClick = {}

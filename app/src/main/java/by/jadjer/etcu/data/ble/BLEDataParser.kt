@@ -15,8 +15,10 @@ import by.jadjer.etcu.domain.model.system.SystemError
 import by.jadjer.etcu.domain.model.system.SystemInfo
 import by.jadjer.etcu.domain.model.system.SystemState
 import by.jadjer.etcu.domain.model.telemetry.AcceleratorTelemetry
-import by.jadjer.etcu.domain.model.telemetry.ECUTelemetry
+import by.jadjer.etcu.domain.model.telemetry.CruiseTelemetry
+import by.jadjer.etcu.domain.model.telemetry.EcuTelemetry
 import by.jadjer.etcu.domain.model.telemetry.ServoTelemetry
+import by.jadjer.etcu.domain.model.telemetry.SystemStatusTelemetry
 import by.jadjer.etcu.domain.model.telemetry.SystemTelemetry
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -30,10 +32,10 @@ class BLEDataParser {
 
             ControlData(
                 cruise = buffer.parseCruise(),
-                servo_min = buffer.uShort,
-                servo_max = buffer.uShort,
-                accelerator_min = buffer.uShort,
-                accelerator_max = buffer.uShort,
+                servoMin = buffer.uShort,
+                servoMax = buffer.uShort,
+                acceleratorMin = buffer.uShort,
+                acceleratorMax = buffer.uShort,
             )
         } catch (_: Exception) {
             ControlData()
@@ -80,16 +82,28 @@ class BLEDataParser {
         return try {
             val buffer = bytes.toLittleEndianBuffer()
 
+            val isGuardActive = buffer.bool
+            val isBrakeEnabled = buffer.bool
+            val throttlePosition = buffer.uShort
+            val ecu = buffer.parseEcuTelemetry()
+            val servo = buffer.parseServoTelemetry()
+            val cruise = buffer.parseCruiseTelemetry()
+            val accelerator = buffer.parseAcceleratorTelemetry()
+            val systemState = SystemState.fromByte(buffer.uByte)
+            val activeErrors = SystemError.parseErrors(buffer.uShort)
+
             SystemTelemetry(
-                isGuardActive = buffer.bool,
-                isBrakeEnabled = buffer.bool,
-                ecu = buffer.parseEcuTelemetry(),
-                servo = buffer.parseServoTelemetry(),
-                accelerator = buffer.parseAcceleratorTelemetry(),
-                targetSpeed = buffer.uByte,
-                throttlePosition = buffer.uShort,
-                systemState = SystemState.fromByte(buffer.uByte),
-                activeErrors = SystemError.parseErrors(buffer.uShort)
+                status = SystemStatusTelemetry(
+                    isGuardActive = isGuardActive,
+                    isBrakeEnabled = isBrakeEnabled,
+                    throttlePosition = throttlePosition,
+                    systemState = systemState,
+                    activeErrors = activeErrors
+                ),
+                ecu = ecu,
+                servo = servo,
+                cruise = cruise,
+                accelerator = accelerator
             )
         } catch (_: Exception) {
             SystemTelemetry()
@@ -104,20 +118,20 @@ class BLEDataParser {
         integralMax = float,
         filterAlpha = float,
         fadeDuration = float,
-        rpm_min = uShort,
-        rpm_max = uShort,
-        speed_min = uByte,
-        speed_max = uByte,
-        limiter_left = uShort,
-        limiter_right = uShort,
+        rpmMin = uShort,
+        rpmMax = uShort,
+        speedMin = uByte,
+        speedMax = uByte,
+        limiterUp = uShort,
+        limiterDown = uShort,
     )
 
-    private fun ByteBuffer.parseEcuTelemetry() = ECUTelemetry(
+    private fun ByteBuffer.parseEcuTelemetry() = EcuTelemetry(
         isConnected = bool,
         isStarted = bool,
         isNeutral = bool,
         rpm = uShort,
-        battery = uByte,
+        battery = float,
         speed = uByte,
         map = uByte,
         tps = uShort,
@@ -129,10 +143,20 @@ class BLEDataParser {
         isConnected = bool,
         isEnabled = bool,
         isMoved = bool,
-        current = uShort,
         voltage = float,
+        current = uShort,
         position = uShort,
         temperature = uByte,
+    )
+
+    private fun ByteBuffer.parseCruiseTelemetry() = CruiseTelemetry(
+        isEnabled = bool,
+        isActivated = bool,
+        error = float,
+        correction = float,
+        targetSpeed = uByte,
+        basePosition = uShort,
+        targetPosition = uShort,
     )
 
     private fun ByteBuffer.parseAcceleratorTelemetry() = AcceleratorTelemetry(
@@ -156,18 +180,18 @@ class BLEDataParser {
             .putFloat(data.cruise.integralMax)
             .putFloat(data.cruise.filterAlpha)
             .putFloat(data.cruise.fadeDuration)
-            .putShort(data.cruise.rpm_min.toShort())
-            .putShort(data.cruise.rpm_max.toShort())
-            .put(data.cruise.speed_min.toByte())
-            .put(data.cruise.speed_max.toByte())
-            .putShort(data.cruise.limiter_left.toShort())
-            .putShort(data.cruise.limiter_right.toShort())
+            .putShort(data.cruise.rpmMin.toShort())
+            .putShort(data.cruise.rpmMax.toShort())
+            .put(data.cruise.speedMin.toByte())
+            .put(data.cruise.speedMax.toByte())
+            .putShort(data.cruise.limiterUp.toShort())
+            .putShort(data.cruise.limiterDown.toShort())
             // Servo
-            .putShort(data.servo_min.toShort())
-            .putShort(data.servo_max.toShort())
+            .putShort(data.servoMin.toShort())
+            .putShort(data.servoMax.toShort())
             // Accelerator
-            .putShort(data.accelerator_min.toShort())
-            .putShort(data.accelerator_max.toShort())
+            .putShort(data.acceleratorMin.toShort())
+            .putShort(data.acceleratorMax.toShort())
             .array()
     }
 

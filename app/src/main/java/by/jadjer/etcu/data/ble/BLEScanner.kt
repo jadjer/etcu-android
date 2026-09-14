@@ -12,8 +12,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
@@ -26,13 +29,13 @@ class BLEScanner(
     private var scanJob: Job? = null
 
     private val _discoveredDevices = MutableStateFlow<Map<String, DiscoveredDevice>>(emptyMap())
-    val discoveredDevices: StateFlow<List<DiscoveredDevice>> = MutableStateFlow<List<DiscoveredDevice>>(emptyList()).also { stateFlow ->
-        scope.launch {
-            _discoveredDevices.collect { map ->
-                stateFlow.value = map.values.sortedByDescending { it.rssi }
-            }
-        }
-    }
+    val discoveredDevices: StateFlow<List<DiscoveredDevice>> = _discoveredDevices
+        .map { map -> map.values.sortedByDescending { it.rssi } }
+        .stateIn(
+            scope = scope,
+            started = SharingStarted.Eagerly,
+            initialValue = emptyList()
+        )
 
     private val _isScanning = MutableStateFlow(false)
     val isScanning = _isScanning.asStateFlow()

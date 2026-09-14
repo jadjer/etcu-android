@@ -10,6 +10,7 @@ object MainNavRoutes {
     object Tabs {
         const val ECU = "tab_ecu"
         const val SERVO = "tab_servo"
+        const val CRUISE = "tab_cruise"
         const val SYSTEM = "tab_system"
         const val SETTINGS = "tab_settings"
     }

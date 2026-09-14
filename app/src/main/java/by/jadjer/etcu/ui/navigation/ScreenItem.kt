@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Engineering
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.TwoWheeler
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -20,6 +21,12 @@ sealed class ScreenItem(val titleResId: Int, val icon: ImageVector, val route: S
         MainNavRoutes.Tabs.SERVO
     )
 
+    data object Cruise : ScreenItem(
+        R.string.nav_cruise,
+        Icons.Default.Speed,
+        MainNavRoutes.Tabs.CRUISE
+    )
+
     data object System :
         ScreenItem(R.string.nav_system, Icons.Default.Dns, MainNavRoutes.Tabs.SYSTEM)
 
@@ -30,7 +37,7 @@ sealed class ScreenItem(val titleResId: Int, val icon: ImageVector, val route: S
         ScreenItem(R.string.nav_ota, Icons.Default.SystemUpdate, MainNavRoutes.Routes.OTA)
 
     companion object {
-        val mainItems = listOf(ECU, Servo, System, Settings)
+        val mainItems = listOf(ECU, Servo, Cruise, System, Settings)
         fun fromRoute(route: String?): ScreenItem? {
             return when (route) {
                 MainNavRoutes.Routes.OTA -> OTA

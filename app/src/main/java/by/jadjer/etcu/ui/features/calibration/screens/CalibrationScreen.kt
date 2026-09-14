@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.calibration.CalibrationData
 import by.jadjer.etcu.domain.model.calibration.CalibrationRange
-import by.jadjer.etcu.ui.component.SettingsGroup
 import by.jadjer.etcu.ui.features.calibration.CalibrationUiState
 import by.jadjer.etcu.ui.features.calibration.CalibrationViewModel
 
@@ -125,48 +124,55 @@ private fun CalibrationGroup(
     editingRange: CalibrationRange,
     onRangeChange: (Int, Int) -> Unit
 ) {
-    SettingsGroup(title = title) {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(
-                text = stringResource(R.string.servo_position) + ": $currentValue",
-                style = MaterialTheme.typography.bodyLarge
-            )
-            
-            detectedRange?.let {
-                Text(
-                    text = stringResource(R.string.cal_detected) + ": " + 
-                        stringResource(R.string.cal_hall_format, it.min, it.max),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(title, style = MaterialTheme.typography.titleMedium)
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedTextField(
-                    value = editingRange.min.toString(),
-                    onValueChange = { newValue ->
-                        newValue.toIntOrNull()?.let { onRangeChange(it, editingRange.max) }
-                    },
-                    label = { Text(stringResource(R.string.cal_min)) },
-                    modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true
-                )
-                OutlinedTextField(
-                    value = editingRange.max.toString(),
-                    onValueChange = { newValue ->
-                        newValue.toIntOrNull()?.let { onRangeChange(editingRange.min, it) }
-                    },
-                    label = { Text(stringResource(R.string.cal_max)) },
-                    modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true
-                )
-            }
+        Text(
+            text = stringResource(R.string.cal_value_format, stringResource(R.string.servo_position), currentValue),
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        detectedRange?.let {
+            Text(
+                text = stringResource(
+                    R.string.cal_range_format,
+                    stringResource(R.string.cal_detected),
+                    stringResource(R.string.cal_hall_format, it.min, it.max)
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedTextField(
+                value = editingRange.min.toString(),
+                onValueChange = { newValue ->
+                    newValue.toIntOrNull()?.let { onRangeChange(it, editingRange.max) }
+                },
+                label = { Text(stringResource(R.string.cal_min)) },
+                modifier = Modifier.weight(1f),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true
+            )
+            OutlinedTextField(
+                value = editingRange.max.toString(),
+                onValueChange = { newValue ->
+                    newValue.toIntOrNull()?.let { onRangeChange(editingRange.min, it) }
+                },
+                label = { Text(stringResource(R.string.cal_max)) },
+                modifier = Modifier.weight(1f),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true
+            )
+        }
+        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
     }
 }
 

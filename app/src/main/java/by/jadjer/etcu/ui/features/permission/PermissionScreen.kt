@@ -14,9 +14,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import by.jadjer.etcu.R
 
 @Composable
 fun PermissionsScreen(onPermissionsGranted: () -> Unit) {
@@ -53,13 +55,13 @@ fun PermissionsScreen(onPermissionsGranted: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = "Требуется доступ к Bluetooth",
+            text = stringResource(R.string.perm_title),
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = "Для работы с BLE устройствами приложению необходимы разрешения на сканирование и подключение.",
+            text = stringResource(R.string.perm_desc),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
@@ -78,7 +80,7 @@ fun PermissionsScreen(onPermissionsGranted: () -> Unit) {
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = if (isPermanentlyDenied) "Открыть настройки" else "Предоставить доступ")
+            Text(text = if (isPermanentlyDenied) stringResource(R.string.perm_btn_settings) else stringResource(R.string.perm_btn_grant))
         }
     }
 }

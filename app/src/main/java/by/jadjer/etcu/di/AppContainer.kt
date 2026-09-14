@@ -7,6 +7,9 @@ import by.jadjer.etcu.data.repository.BLERepositoryImpl
 import by.jadjer.etcu.data.repository.OTARepositoryImpl
 import by.jadjer.etcu.domain.repository.BLERepository
 import by.jadjer.etcu.domain.repository.OTARepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -17,6 +20,7 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 class AppContainer(private val app: Application) {
 
     private val bleManager by lazy { BLEManager(app) }
+    private val appScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     private val githubService by lazy {
         val logging = HttpLoggingInterceptor().apply {
@@ -46,6 +50,6 @@ class AppContainer(private val app: Application) {
             .create(GitHubService::class.java)
     }
 
-    val bleRepository: BLERepository by lazy { BLERepositoryImpl(bleManager) }
+    val bleRepository: BLERepository by lazy { BLERepositoryImpl(bleManager, appScope) }
     val otaRepository: OTARepository by lazy { OTARepositoryImpl(githubService, app) }
 }

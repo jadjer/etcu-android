@@ -18,12 +18,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
-import by.jadjer.etcu.domain.model.telemetry.ECUTelemetry
+import by.jadjer.etcu.domain.model.telemetry.EcuTelemetry
 import by.jadjer.etcu.domain.model.telemetry.SystemTelemetry
 import by.jadjer.etcu.ui.component.StatusIndicator
-import by.jadjer.etcu.ui.component.telemetry.TelemetryGraphDialog
-import by.jadjer.etcu.ui.component.telemetry.TelemetryRow
-import by.jadjer.etcu.ui.component.telemetry.SelectedTelemetry
+import by.jadjer.etcu.ui.component.StatusRow
+import by.jadjer.etcu.ui.component.history.HistoryGroup
+import by.jadjer.etcu.ui.component.history.StatusGraphDialog
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
 
 @Composable
@@ -31,34 +31,48 @@ fun EcuScreen(viewModel: DeviceViewModel) {
     val uiState by viewModel.uiState.collectAsState()
     val telemetry by viewModel.telemetry.collectAsState()
 
-    var selectedTelemetry by remember { mutableStateOf<SelectedTelemetry?>(null) }
+    var showDialog by remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
 
     EcuScreenContent(
         telemetry = telemetry.ecu,
         onValueClick = { label, unit, selector ->
-            selectedTelemetry = SelectedTelemetry(
-                label = label,
-                unit = unit,
-                selector = selector
-            )
+            showDialog = {
+                val group = HistoryGroup(
+                    history = uiState.telemetryHistory.ecu,
+                    selector = selector,
+                    currentValue = selector(telemetry.ecu)
+                )
+                EcuStatusGraphDialog(label, unit, group) { showDialog = null }
+            }
         }
     )
 
-    selectedTelemetry?.let { selected ->
-        TelemetryGraphDialog(
-            title = selected.label,
-            value = selected.selector(telemetry).toString(),
-            unit = selected.unit,
-            history = uiState.telemetryHistory.map(selected.selector),
-            onDismiss = { selectedTelemetry = null }
-        )
-    }
+    showDialog?.invoke()
+}
+
+@Composable
+private fun EcuStatusGraphDialog(
+    label: String,
+    unit: String,
+    group: HistoryGroup<EcuTelemetry>,
+    onDismiss: () -> Unit
+) {
+    val startTime = group.history.firstOrNull()?.timestamp ?: 0L
+    StatusGraphDialog(
+        title = label,
+        value = "%.1f".format(group.currentValue),
+        unit = unit,
+        history = group.history,
+        selector = { record -> group.selector(record.data) },
+        startTime = startTime,
+        onDismiss = onDismiss
+    )
 }
 
 @Composable
 fun EcuScreenContent(
-    telemetry: ECUTelemetry,
-    onValueClick: (String, String, (SystemTelemetry) -> Int) -> Unit = { _, _, _ -> }
+    telemetry: EcuTelemetry,
+    onValueClick: (String, String, (EcuTelemetry) -> Float) -> Unit = { _, _, _ -> }
 ) {
     val rpmLabel = stringResource(R.string.ecu_rpm)
     val rpmUnit = stringResource(R.string.unit_rpm)
@@ -78,7 +92,8 @@ fun EcuScreenContent(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         StatusIndicator(
             label = stringResource(R.string.ecu_conn_status),
@@ -94,107 +109,65 @@ fun EcuScreenContent(
             inactiveText = stringResource(R.string.ecu_engine_stopped)
         )
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        HorizontalDivider()
 
-        TelemetryRow(
+        StatusRow(
             label = rpmLabel,
             value = telemetry.rpm.toString(),
             unit = rpmUnit,
             icon = Icons.Default.Timer,
-            onClick = {
-                onValueClick(
-                    rpmLabel,
-                    rpmUnit,
-                    { it.ecu.rpm }
-                )
-            }
+            onClick = { onValueClick(rpmLabel, rpmUnit) { it.rpm.toFloat() } }
         )
         
-        TelemetryRow(
+        StatusRow(
             label = speedLabel,
             value = telemetry.speed.toString(),
             unit = speedUnit,
             icon = Icons.Default.Speed,
-            onClick = {
-                onValueClick(
-                    speedLabel,
-                    speedUnit,
-                    { it.ecu.speed }
-                )
-            }
+            onClick = { onValueClick(speedLabel, speedUnit) { it.speed.toFloat() } }
         )
         
-        TelemetryRow(
+        StatusRow(
             label = tpsLabel,
             value = telemetry.tps.toString(),
             unit = tpsUnit,
             icon = Icons.Default.TwoWheeler,
-            onClick = {
-                onValueClick(
-                    tpsLabel,
-                    tpsUnit,
-                    { it.ecu.tps }
-                )
-            }
+            onClick = { onValueClick(tpsLabel, tpsUnit) { it.tps.toFloat() } }
         )
 
-        TelemetryRow(
+        StatusRow(
             label = batteryLabel,
-            value = telemetry.battery.toString(),
+            value = "%.1f".format(telemetry.battery),
             unit = batteryUnit,
             icon = Icons.Default.FlashOn,
-            onClick = {
-                onValueClick(
-                    batteryLabel,
-                    batteryUnit,
-                    { it.ecu.battery }
-                )
-            }
+            onClick = { onValueClick(batteryLabel, batteryUnit) { it.battery / 10.0f } }
         )
 
-        TelemetryRow(
+        StatusRow(
             label = mapLabel,
             value = telemetry.map.toString(),
             unit = mapUnit,
             icon = Icons.Default.Cloud,
-            onClick = {
-                onValueClick(
-                    mapLabel,
-                    mapUnit,
-                    { it.ecu.map }
-                )
-            }
+            onClick = { onValueClick(mapLabel, mapUnit) { it.map.toFloat() } }
         )
 
-        TelemetryRow(
+        StatusRow(
             label = airTempLabel,
             value = telemetry.airTemp.toString(),
             unit = celsiusUnit,
             icon = Icons.Default.Thermostat,
-            onClick = {
-                onValueClick(
-                    airTempLabel,
-                    celsiusUnit,
-                    { it.ecu.airTemp }
-                )
-            }
+            onClick = { onValueClick(airTempLabel, celsiusUnit) { it.airTemp.toFloat() } }
         )
 
-        TelemetryRow(
+        StatusRow(
             label = coolantTempLabel,
             value = telemetry.coolantTemp.toString(),
             unit = celsiusUnit,
             icon = Icons.Default.Thermostat,
-            onClick = {
-                onValueClick(
-                    coolantTempLabel,
-                    celsiusUnit,
-                    { it.ecu.coolantTemp }
-                )
-            }
+            onClick = { onValueClick(coolantTempLabel, celsiusUnit) { it.coolantTemp.toFloat() } }
         )
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        HorizontalDivider()
 
         StatusIndicator(
             label = stringResource(R.string.ecu_neutral_status),
@@ -210,12 +183,12 @@ fun EcuScreenContent(
 fun EcuScreenPreview() {
     MaterialTheme {
         EcuScreenContent(
-            telemetry = ECUTelemetry(
+            telemetry = EcuTelemetry(
                 isConnected = true,
                 isStarted = true,
                 isNeutral = false,
                 rpm = 2500,
-                battery = 13,
+                battery = 13.0f,
                 speed = 60,
                 map = 56,
                 tps = 150,

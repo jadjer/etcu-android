@@ -4,6 +4,7 @@
 
     <!-- Navigation -->
     <string name="nav_ecu">ECU</string>
+    <string name="nav_cruise">Cruise</string>
     <string name="nav_ota" translatable="false">OTA</string>
     <string name="nav_servo">Servo</string>
     <string name="nav_settings">Settings</string>
@@ -80,13 +81,27 @@
     <string name="servo_temp">Temperature</string>
     <string name="servo_voltage">Voltage</string>
 
+    <!-- Cruise Screen -->
+    <string name="cruise_status_title">Cruise Control</string>
+    <string name="cruise_enabled">Cruise Enabled</string>
+    <string name="cruise_disabled">Cruise Disabled</string>
+    <string name="cruise_activated">Cruise Active</string>
+    <string name="cruise_inactive">Cruise Inactive</string>
+    <string name="cruise_error">PID Error</string>
+    <string name="cruise_correction">Correction</string>
+    <string name="cruise_target_speed">Target Speed</string>
+    <string name="cruise_base_pos">Base Position</string>
+    <string name="cruise_target_pos">Target Position</string>
+
     <!-- System Screen -->
     <string name="system_accel">Accelerator</string>
     <string name="system_brake">Brake</string>
     <string name="system_guard">Guard</string>
     <string name="system_state">System State</string>
-    <string name="system_telemetry_title">Current Telemetry</string>
+    <string name="system_status_title">System Status</string>
     <string name="system_throttle_target">Throttle</string>
+    <string name="system_target_speed">Target Speed</string>
+    <string name="system_safety_title">Safety</string>
 
     <!-- Common -->
     <string name="common_active">Active</string>
@@ -142,6 +157,20 @@
     <string name="settings_operating_mode">Operating Mode</string>
     <string name="settings_servo_range">Servo range: from %1$d to %2$d</string>
     <string name="settings_servo_settings">Servo Settings</string>
+
+    <!-- Cruise Settings -->
+    <string name="cruise_settings_title">Cruise Control Settings</string>
+    <string name="cruise_p" translatable="false">P</string>
+    <string name="cruise_i" translatable="false">I</string>
+    <string name="cruise_d" translatable="false">D</string>
+    <string name="cruise_integral_min">Integral Min</string>
+    <string name="cruise_integral_max">Integral Max</string>
+    <string name="cruise_filter_alpha">Speed filter alpha</string>
+    <string name="cruise_fade_duration">Fade duration (sec)</string>
+    <string name="cruise_rpm_limit">RPM limit: %1$d - %2$d</string>
+    <string name="cruise_speed_range">Operating speed: %1$d - %2$d km/h</string>
+    <string name="cruise_limiter_brake">Braking limit: %1$d</string>
+    <string name="cruise_limiter_accel">Acceleration limit: %1$d</string>
 
     <!-- System Errors -->
     <string name="error_accel_init">Accelerator initialization error</string>
@@ -219,7 +248,14 @@
     <string name="cal_btn_apply_auto">Apply Detected</string>
     <string name="cal_btn_save">Save Calibration</string>
     <string name="cal_hall_format">%1$d .. %2$d</string>
+    <string name="cal_value_format">%1$s: %2$d</string>
+    <string name="cal_range_format" translatable="false">%1$s: %2$s</string>
     <string name="cal_min">Min</string>
     <string name="cal_max">Max</string>
 
+    <!-- Permissions -->
+    <string name="perm_title">Bluetooth Access Required</string>
+    <string name="perm_desc">To work with BLE devices, the application needs permissions for scanning and connecting.</string>
+    <string name="perm_btn_grant">Grant Access</string>
+    <string name="perm_btn_settings">Open Settings</string>
 </resources>

@@ -1,8 +1,9 @@
-package by.jadjer.etcu.ui.component.telemetry
+package by.jadjer.etcu.ui.component.history
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -11,37 +12,54 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import by.jadjer.etcu.R
+import by.jadjer.etcu.domain.model.telemetry.HistoryRecord
+import by.jadjer.etcu.domain.model.telemetry.SystemTelemetry
 import by.jadjer.etcu.ui.theme.ETCUTheme
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
-fun TelemetryGraphDialog(
+fun <T> StatusGraphDialog(
     title: String,
     value: String,
     unit: String,
-    history: List<Int>,
+    history: List<HistoryRecord<T>>,
+    selector: (HistoryRecord<T>) -> Float,
+    startTime: Long = 0,
     onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
-        TelemetryGraphDialogContent(
+        StatusGraphDialogContent(
             title = title,
             value = value,
             unit = unit,
             history = history,
+            selector = selector,
+            startTime = startTime,
             onDismiss = onDismiss
         )
     }
 }
 
 @Composable
-fun TelemetryGraphDialogContent(
+fun <T> StatusGraphDialogContent(
     title: String,
     value: String,
     unit: String,
-    history: List<Int>,
+    history: List<HistoryRecord<T>>,
+    selector: (HistoryRecord<T>) -> Float,
+    startTime: Long = 0,
     onDismiss: () -> Unit
 ) {
-    val minVal = history.minOrNull()
-    val maxVal = history.maxOrNull()
+    val data = remember(history, selector) { history.map(selector) }
+    val minVal = data.minOrNull()
+    val maxVal = data.maxOrNull()
+
+    val timeFormat = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
+    val sessionStartStr = remember(startTime) {
+        if (startTime > 0) timeFormat.format(Date(startTime)) else "-"
+    }
 
     Card(
         modifier = Modifier
@@ -61,6 +79,14 @@ fun TelemetryGraphDialogContent(
                 fontWeight = FontWeight.Bold
             )
 
+            if (startTime > 0) {
+                Text(
+                    text = "Session started at: $sessionStartStr",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
 
             Row(
@@ -76,7 +102,7 @@ fun TelemetryGraphDialogContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = minVal?.toString() ?: "-",
+                        text = minVal?.let { "%.1f".format(it) } ?: "-",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -110,7 +136,7 @@ fun TelemetryGraphDialogContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = maxVal?.toString() ?: "-",
+                        text = maxVal?.let { "%.1f".format(it) } ?: "-",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -119,8 +145,9 @@ fun TelemetryGraphDialogContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TelemetryGraph(
-                data = history,
+            StatusGraph(
+                history = history,
+                selector = selector,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
@@ -140,13 +167,19 @@ fun TelemetryGraphDialogContent(
 
 @Preview(showBackground = true)
 @Composable
-private fun TelemetryGraphDialogPreview() {
+private fun StatusGraphDialogPreview() {
+    val now = System.currentTimeMillis()
     ETCUTheme {
-        TelemetryGraphDialogContent(
+        StatusGraphDialogContent(
             title = "Engine RPM",
             value = "2500",
             unit = "RPM",
-            history = listOf(1000, 1500, 2000, 2500, 2200, 2400, 2500, 2300, 2100, 2000),
+            history = listOf(
+                HistoryRecord(SystemTelemetry(), now),
+                HistoryRecord(SystemTelemetry(), now + 1000),
+                HistoryRecord(SystemTelemetry(), now + 2000),
+            ),
+            selector = { 2500f },
             onDismiss = {}
         )
     }

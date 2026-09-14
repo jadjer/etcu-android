@@ -126,7 +126,7 @@ private fun ConnectionIndicator(state: ConnectionState) {
 fun ConnectingStubScreenPreview() {
     ETCUTheme {
         ConnectingStubScreen(
-            connectionStatus = "Connecting to device...",
+            connectionStatus = stringResource(R.string.ble_state_connecting),
             connectionState = ConnectionState.CONNECTING,
             onRetryClick = {},
             onResetClick = {}

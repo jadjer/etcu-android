@@ -197,7 +197,7 @@ fun ScanScreenPreview() {
                 ),
                 DiscoveredDevice(
                     isPaired = false,
-                    name = "Unknown",
+                    name = stringResource(R.string.unknown),
                     macAddress = "77:88:99:00:11:22",
                     rssi = -85,
                 )

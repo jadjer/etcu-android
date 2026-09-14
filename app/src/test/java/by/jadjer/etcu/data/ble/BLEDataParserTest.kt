@@ -3,7 +3,6 @@ package by.jadjer.etcu.data.ble
 import by.jadjer.etcu.domain.model.calibration.CalibrationData
 import by.jadjer.etcu.domain.model.calibration.CalibrationRange
 import by.jadjer.etcu.domain.model.control.ControlData
-import by.jadjer.etcu.domain.model.control.PositionRange
 import by.jadjer.etcu.domain.model.ota.OTAChunk
 import by.jadjer.etcu.domain.model.ota.OTAStatus
 import by.jadjer.etcu.domain.model.system.SystemState
@@ -24,21 +23,21 @@ class BLEDataParserTest {
 
     @Test
     fun `parseControlData parses correctly`() {
-        val bytes = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN)
-            // Servo
-            .putShort(100.toShort()) // min
-            .putShort(600.toShort()) // max
-            // Accel
-            .putShort(150.toShort()) // min
-            .putShort(850.toShort()) // max
-            .array()
+        // CONTROL_DATA_SIZE = 43
+        val buffer = ByteBuffer.allocate(43).order(ByteOrder.LITTLE_ENDIAN)
+        buffer.position(35) // Skip cruise
+        buffer.putShort(100.toShort()) // min
+        buffer.putShort(600.toShort()) // max
+        buffer.putShort(150.toShort()) // min
+        buffer.putShort(850.toShort()) // max
+        val bytes = buffer.array()
 
         val result = parser.parseControlData(bytes)
 
-        assertEquals(100, result.servo.min)
-        assertEquals(600, result.servo.max)
-        assertEquals(150, result.accelerator.min)
-        assertEquals(850, result.accelerator.max)
+        assertEquals(100, result.servoMin)
+        assertEquals(600, result.servoMax)
+        assertEquals(150, result.acceleratorMin)
+        assertEquals(850, result.acceleratorMax)
     }
 
     @Test
@@ -75,50 +74,59 @@ class BLEDataParserTest {
 
     @Test
     fun `parseSystemTelemetry parses correctly`() {
-        val bytes = ByteBuffer.allocate(35).order(ByteOrder.LITTLE_ENDIAN)
-            .put(1.toByte()) // isGuardActive
-            .put(0.toByte()) // isBrakeEnabled
-            // ECU Telemetry (12 bytes)
-            .put(1.toByte()) // isConnected
-            .put(1.toByte()) // isStarted
-            .put(0.toByte()) // isNeutral
-            .putShort(3000.toShort()) // rpm
-            .put(14.toByte()) // battery
-            .put(60.toByte()) // speed
-            .put(90.toByte()) // map
-            .putShort(2500.toShort()) // tps
-            .put(45.toByte()) // airTemp
-            .put(85.toByte()) // coolantTemp
-            // Servo Telemetry (9 bytes)
-            .put(1.toByte()) // isConnected
-            .put(1.toByte()) // isEnabled
-            .put(0.toByte()) // isMoved
-            .put(12.toByte()) // voltage
-            .putShort(500.toShort()) // current
-            .putShort(1500.toShort()) // position
-            .put(50.toByte()) // temperature
-            // Accelerator Telemetry (6 bytes)
-            .putShort(1000.toShort()) // hallA
-            .putShort(2000.toShort()) // hallB
-            .putShort(1500.toShort()) // position
-            // System level fields
-            .put(100.toByte()) // targetSpeed
-            .putShort(300.toShort()) // throttlePosition
-            .put(SystemState.NORMAL.value.toByte()) // systemState
-            .putShort(0.toShort()) // activeErrors (None)
-            .array()
-
+        // TELEMETRY_SIZE = 55
+        val buffer = ByteBuffer.allocate(55).order(ByteOrder.LITTLE_ENDIAN)
+        buffer.put(1.toByte()) // isGuardActive
+        buffer.put(0.toByte()) // isBrakeEnabled
+        buffer.putShort(300.toShort()) // throttlePosition
+        // ECU Telemetry (15 bytes)
+        buffer.put(1.toByte()) // isConnected
+        buffer.put(1.toByte()) // isStarted
+        buffer.put(0.toByte()) // isNeutral
+        buffer.putShort(3000.toShort()) // rpm
+        buffer.putFloat(14.5f) // battery
+        buffer.put(60.toByte()) // speed
+        buffer.put(90.toByte()) // map
+        buffer.putShort(2500.toShort()) // tps
+        buffer.put(45.toByte()) // airTemp
+        buffer.put(85.toByte()) // coolantTemp
+        // Servo Telemetry (12 bytes)
+        buffer.put(1.toByte()) // isConnected
+        buffer.put(1.toByte()) // isEnabled
+        buffer.put(0.toByte()) // isMoved
+        buffer.putFloat(12.2f) // voltage
+        buffer.putShort(500.toShort()) // current
+        buffer.putShort(1500.toShort()) // position
+        buffer.put(50.toByte()) // temperature
+        // Cruise Telemetry (15 bytes)
+        buffer.put(1.toByte()) // isEnabled
+        buffer.put(0.toByte()) // isActivated
+        buffer.putFloat(1.5f) // error
+        buffer.putFloat(2.5f) // correction
+        buffer.put(100.toByte()) // targetSpeed
+        buffer.putShort(1200.toShort()) // basePosition
+        buffer.putShort(1300.toShort()) // targetPosition
+        // Accelerator Telemetry (6 bytes)
+        buffer.putShort(1000.toShort()) // hallA
+        buffer.putShort(2000.toShort()) // hallB
+        buffer.putShort(1500.toShort()) // position
+        // System level fields
+        buffer.put(SystemState.NORMAL.value.toByte()) // systemState
+        buffer.putShort(0.toShort()) // activeErrors (None)
+        
+        val bytes = buffer.array()
         val result = parser.parseSystemTelemetry(bytes)
 
-        assertEquals(true, result.isGuardActive)
-        assertEquals(false, result.isBrakeEnabled)
+        assertEquals(true, result.status.isGuardActive)
+        assertEquals(false, result.status.isBrakeEnabled)
+        assertEquals(300, result.status.throttlePosition)
 
         // ECU
         assertEquals(true, result.ecu.isConnected)
         assertEquals(true, result.ecu.isStarted)
         assertEquals(false, result.ecu.isNeutral)
         assertEquals(3000, result.ecu.rpm)
-        assertEquals(14, result.ecu.battery)
+        assertEquals(14.5f, result.ecu.battery)
         assertEquals(60, result.ecu.speed)
         assertEquals(90, result.ecu.map)
         assertEquals(2500, result.ecu.tps)
@@ -129,10 +137,14 @@ class BLEDataParserTest {
         assertEquals(true, result.servo.isConnected)
         assertEquals(true, result.servo.isEnabled)
         assertEquals(false, result.servo.isMoved)
-        assertEquals(12, result.servo.voltage)
+        assertEquals(12.2f, result.servo.voltage)
         assertEquals(500, result.servo.current)
         assertEquals(1500, result.servo.position)
         assertEquals(50, result.servo.temperature)
+
+        // Cruise
+        assertEquals(true, result.cruise.isEnabled)
+        assertEquals(100, result.cruise.targetSpeed)
 
         // Accelerator
         assertEquals(1000, result.accelerator.hallA)
@@ -140,10 +152,8 @@ class BLEDataParserTest {
         assertEquals(1500, result.accelerator.position)
 
         // General
-        assertEquals(100, result.targetSpeed)
-        assertEquals(300, result.throttlePosition)
-        assertEquals(SystemState.NORMAL, result.systemState)
-        assertEquals(emptyList(), result.activeErrors)
+        assertEquals(SystemState.NORMAL, result.status.systemState)
+        assertEquals(emptyList(), result.status.activeErrors)
     }
 
     @Test
@@ -156,12 +166,15 @@ class BLEDataParserTest {
     @Test
     fun `serializeControlData serializes correctly`() {
         val data = ControlData(
-            servo = PositionRange(100, 600),
-            accelerator = PositionRange(150, 850)
+            servoMin = 100,
+            servoMax = 600,
+            acceleratorMin = 150,
+            acceleratorMax = 850
         )
         val bytes = parser.serializeControlData(data)
         val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
-
+        
+        buffer.position(35) // Skip cruise
         assertEquals(100, buffer.short.toInt() and 0xFFFF)
         assertEquals(600, buffer.short.toInt() and 0xFFFF)
         assertEquals(150, buffer.short.toInt() and 0xFFFF)

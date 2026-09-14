@@ -1,4 +1,4 @@
-package by.jadjer.etcu.ui.component.telemetry
+package by.jadjer.etcu.ui.component
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -16,7 +16,7 @@ import by.jadjer.etcu.R
 import by.jadjer.etcu.ui.theme.ETCUTheme
 
 @Composable
-fun TelemetryRow(
+fun StatusRow(
     label: String,
     value: String,
     modifier: Modifier = Modifier,
@@ -55,9 +55,9 @@ fun TelemetryRow(
 
 @Preview(showBackground = true)
 @Composable
-private fun TelemetryRowPreview() {
+private fun StatusRowPreview() {
     ETCUTheme {
-        TelemetryRow(
+        StatusRow(
             label = "RPM",
             value = "2500",
             unit = "rpm",

@@ -12,6 +12,7 @@ class MainViewModel(
 
     val connectionState: StateFlow<ConnectionState> = bleRepository.connectionState
     val connectionDetail: StateFlow<String?> = bleRepository.connectionDetail
+    val isManualForget: StateFlow<Boolean> = bleRepository.isManualForget
     val telemetry: StateFlow<SystemTelemetry> = bleRepository.telemetry
 
     fun retryConnection() {
@@ -23,7 +24,6 @@ class MainViewModel(
     }
 
     fun isBonded(): Boolean {
-        // Device is considered "bonded" only if it's in the system list AND wasn't manually forgotten
         return bleRepository.isBonded() && !bleRepository.isManualForget.value
     }
 }

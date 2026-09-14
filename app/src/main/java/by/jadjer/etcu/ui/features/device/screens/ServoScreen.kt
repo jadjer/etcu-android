@@ -1,5 +1,6 @@
 package by.jadjer.etcu.ui.features.device.screens
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -22,9 +23,10 @@ import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.telemetry.ServoTelemetry
 import by.jadjer.etcu.domain.model.telemetry.SystemTelemetry
 import by.jadjer.etcu.ui.component.StatusIndicator
-import by.jadjer.etcu.ui.component.telemetry.TelemetryGraphDialog
-import by.jadjer.etcu.ui.component.telemetry.TelemetryRow
-import by.jadjer.etcu.ui.component.telemetry.SelectedTelemetry
+import by.jadjer.etcu.ui.component.StatusRow
+import by.jadjer.etcu.ui.component.StatusRow
+import by.jadjer.etcu.ui.component.history.HistoryGroup
+import by.jadjer.etcu.ui.component.history.StatusGraphDialog
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
 
 @Composable
@@ -32,34 +34,48 @@ fun ServoScreen(viewModel: DeviceViewModel) {
     val uiState by viewModel.uiState.collectAsState()
     val telemetry by viewModel.telemetry.collectAsState()
 
-    var selectedTelemetry by remember { mutableStateOf<SelectedTelemetry?>(null) }
+    var showDialog by remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
 
     ServoScreenContent(
         telemetry = telemetry.servo,
         onValueClick = { label, unit, selector ->
-            selectedTelemetry = SelectedTelemetry(
-                label = label,
-                unit = unit,
-                selector = selector
-            )
+            showDialog = {
+                val group = HistoryGroup(
+                    history = uiState.telemetryHistory.servo,
+                    selector = selector,
+                    currentValue = selector(telemetry.servo)
+                )
+                ServoStatusGraphDialog(label, unit, group) { showDialog = null }
+            }
         }
     )
 
-    selectedTelemetry?.let { selected ->
-        TelemetryGraphDialog(
-            title = selected.label,
-            value = selected.selector(telemetry).toString(),
-            unit = selected.unit,
-            history = uiState.telemetryHistory.map(selected.selector),
-            onDismiss = { selectedTelemetry = null }
-        )
-    }
+    showDialog?.invoke()
+}
+
+@Composable
+private fun ServoStatusGraphDialog(
+    label: String,
+    unit: String,
+    group: HistoryGroup<ServoTelemetry>,
+    onDismiss: () -> Unit
+) {
+    val startTime = group.history.firstOrNull()?.timestamp ?: 0L
+    StatusGraphDialog(
+        title = label,
+        value = "%.1f".format(group.currentValue),
+        unit = unit,
+        history = group.history,
+        selector = { record -> group.selector(record.data) },
+        startTime = startTime,
+        onDismiss = onDismiss
+    )
 }
 
 @Composable
 fun ServoScreenContent(
     telemetry: ServoTelemetry,
-    onValueClick: (String, String, (SystemTelemetry) -> Int) -> Unit = { _, _, _ -> }
+    onValueClick: (String, String, (ServoTelemetry) -> Float) -> Unit = { _, _, _ -> }
 ) {
     val posLabel = stringResource(R.string.servo_position)
     val posUnit = stringResource(R.string.unit_raw_4095)
@@ -74,7 +90,8 @@ fun ServoScreenContent(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         StatusIndicator(
             label = stringResource(R.string.servo_conn_status),
@@ -90,61 +107,41 @@ fun ServoScreenContent(
             inactiveText = stringResource(R.string.servo_disabled)
         )
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        HorizontalDivider()
 
-        TelemetryRow(
+        StatusRow(
             label = posLabel,
             value = telemetry.position.toString(),
             unit = posUnit,
             icon = Icons.Default.LocationSearching,
-            onClick = {
-                onValueClick(
-                    posLabel,
-                    posUnit
-                ) { it.servo.position }
-            }
+            onClick = { onValueClick(posLabel, posUnit) { it.position.toFloat() } }
         )
 
-        TelemetryRow(
+        StatusRow(
             label = curLabel,
             value = telemetry.current.toString(),
             unit = curUnit,
             icon = Icons.Default.Bolt,
-            onClick = {
-                onValueClick(
-                    curLabel,
-                    curUnit
-                ) { it.servo.current }
-            }
+            onClick = { onValueClick(curLabel, curUnit) { it.current.toFloat() } }
         )
 
-        TelemetryRow(
+        StatusRow(
             label = voltLabel,
-            value = telemetry.voltage.toString(),
+            value = "%.1f".format(telemetry.voltage),
             unit = voltUnit,
             icon = Icons.Default.FlashOn,
-            onClick = {
-                onValueClick(
-                    voltLabel,
-                    voltUnit
-                ) { it.servo.voltage.toInt() }
-            }
+            onClick = { onValueClick(voltLabel, voltUnit) { it.voltage } }
         )
 
-        TelemetryRow(
+        StatusRow(
             label = tempLabel,
             value = telemetry.temperature.toString(),
             unit = tempUnit,
             icon = Icons.Default.DeviceThermostat,
-            onClick = {
-                onValueClick(
-                    tempLabel,
-                    tempUnit
-                ) { it.servo.temperature }
-            }
+            onClick = { onValueClick(tempLabel, tempUnit) { it.temperature.toFloat() } }
         )
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        HorizontalDivider()
 
         StatusIndicator(
             label = stringResource(R.string.servo_motion_status),

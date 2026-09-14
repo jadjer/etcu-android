@@ -86,8 +86,8 @@ class CalibrationViewModel(private val repository: BLERepository) : ViewModel() 
 
         repository.sendControlData(
             originalControlData.copy(
-                servo_min = ControlConstants.MIN_VALUE.toInt(),
-                servo_max = ControlConstants.MAX_VALUE.toInt(),
+                servoMin = ControlConstants.MIN_VALUE.toInt(),
+                servoMax = ControlConstants.MAX_VALUE.toInt(),
             )
         )
     }

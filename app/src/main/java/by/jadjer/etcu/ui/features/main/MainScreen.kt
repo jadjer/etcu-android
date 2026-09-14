@@ -35,6 +35,7 @@ import by.jadjer.etcu.ui.component.ErrorsBottomSheet
 import by.jadjer.etcu.ui.component.MainNavigationBar
 import by.jadjer.etcu.ui.component.MainTopAppBar
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
+import by.jadjer.etcu.ui.features.device.screens.CruiseScreen
 import by.jadjer.etcu.ui.features.device.screens.EcuScreen
 import by.jadjer.etcu.ui.features.device.screens.ServoScreen
 import by.jadjer.etcu.ui.features.device.screens.SettingsScreen
@@ -61,8 +62,9 @@ val LocalPagerScrollEnabled = compositionLocalOf {
 fun MainScreen(viewModel: MainViewModel) {
     val connectionState by viewModel.connectionState.collectAsState()
     val connectionDetail by viewModel.connectionDetail.collectAsState()
+    val isManualForget by viewModel.isManualForget.collectAsState()
     
-    val isBonded = remember(connectionState) { viewModel.isBonded() }
+    val isBonded = remember(connectionState, isManualForget) { viewModel.isBonded() }
     val connectionStatus = connectionState.toDisplayString(connectionDetail ?: "")
 
     when {
@@ -109,7 +111,7 @@ private fun MainScreenContent(
 
     val coroutineScope = rememberCoroutineScope()
     val telemetry by deviceViewModel.telemetry.collectAsState()
-    val activeErrors = telemetry.activeErrors
+    val activeErrors = telemetry.status.activeErrors
 
     val navItems = ScreenItem.mainItems
     val pagerState = rememberPagerState(pageCount = { navItems.size })
@@ -196,6 +198,7 @@ private fun MainTabContent(item: ScreenItem, deviceViewModel: DeviceViewModel) {
     when (item.route) {
         MainNavRoutes.Tabs.ECU -> EcuScreen(deviceViewModel)
         MainNavRoutes.Tabs.SERVO -> ServoScreen(deviceViewModel)
+        MainNavRoutes.Tabs.CRUISE -> CruiseScreen(deviceViewModel)
         MainNavRoutes.Tabs.SYSTEM -> SystemScreen(deviceViewModel)
         MainNavRoutes.Tabs.SETTINGS -> {
             val navController = LocalNavController.current
