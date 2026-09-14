@@ -26,7 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
-import by.jadjer.etcu.domain.model.telemetry.EcuTelemetry
+import by.jadjer.etcu.domain.model.telemetry.ECUTelemetry
 import by.jadjer.etcu.ui.component.StatusIndicator
 import by.jadjer.etcu.ui.component.StatusRow
 import by.jadjer.etcu.ui.component.history.HistoryGroup
@@ -59,8 +59,8 @@ fun EcuScreen(viewModel: DeviceViewModel) {
 
 @Composable
 fun EcuScreenContent(
-    telemetry: EcuTelemetry,
-    onValueClick: (String, String, (EcuTelemetry) -> Float) -> Unit
+    telemetry: ECUTelemetry,
+    onValueClick: (String, String, (ECUTelemetry) -> Float) -> Unit
 ) {
     val rpmLabel = stringResource(R.string.ecu_rpm)
     val rpmUnit = stringResource(R.string.unit_rpm)
@@ -171,7 +171,7 @@ fun EcuScreenContent(
 fun EcuScreenPreview() {
     MaterialTheme {
         EcuScreenContent(
-            telemetry = EcuTelemetry(
+            telemetry = ECUTelemetry(
                 isConnected = true,
                 isStarted = true,
                 isNeutral = false,

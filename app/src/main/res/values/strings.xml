@@ -169,8 +169,8 @@
     <string name="cruise_fade_duration">Fade duration (sec)</string>
     <string name="cruise_rpm_limit">RPM limit: %1$d - %2$d</string>
     <string name="cruise_speed_range">Operating speed: %1$d - %2$d km/h</string>
-    <string name="cruise_limiter_brake">Braking limit: %1$d</string>
-    <string name="cruise_limiter_accel">Acceleration limit: %1$d</string>
+    <string name="cruise_limiter_brake">Braking limit:</string>
+    <string name="cruise_limiter_accel">Acceleration limit:</string>
 
     <!-- System Errors -->
     <string name="error_accel_init">Accelerator initialization error</string>

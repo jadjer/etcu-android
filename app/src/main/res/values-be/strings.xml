@@ -157,8 +157,8 @@
     <string name="cruise_fade_duration">Дліт. згасання (сек)</string>
     <string name="cruise_rpm_limit">Агр. RPM: %1$d - %2$d</string>
     <string name="cruise_speed_range">Раб. хуткасць: %1$d - %2$d км/г</string>
-    <string name="cruise_limiter_brake">Ліміт тармажэння: %1$d</string>
-    <string name="cruise_limiter_accel">Ліміт паскарэння: %1$d</string>
+    <string name="cruise_limiter_brake">Ліміт тармажэння:</string>
+    <string name="cruise_limiter_accel">Ліміт паскарэння:</string>
 
     <!-- System Errors -->
     <string name="error_accel_init">Памылка ініцыялізацыі акселератара</string>

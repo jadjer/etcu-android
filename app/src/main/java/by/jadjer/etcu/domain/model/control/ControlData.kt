@@ -4,10 +4,6 @@ data class Cruise(
     val p: Float = 0.0f,
     val i: Float = 0.0f,
     val d: Float = 0.0f,
-    val integralMin: Float = 0.0f,
-    val integralMax: Float = 0.0f,
-    val filterAlpha: Float = 0.0f,
-    val fadeDuration: Float = 0.0f,
     val rpmMin: Int = 0,
     val rpmMax: Int = 0,
     val speedMin: Int = 0,
@@ -17,7 +13,6 @@ data class Cruise(
 )
 
 data class ControlData(
-
     val cruise: Cruise = Cruise(),
     val servoMin: Int = 0,
     val servoMax: Int = 0,

@@ -95,6 +95,16 @@ fun CruiseScreenContent(
         )
 
         StatusRow(
+            label = "Current speed",
+            value = telemetry.currentSpeed.toString(),
+            unit = speedUnit,
+            icon = Icons.Default.Speed,
+            onClick = { onValueClick(targetSpeedLabel, speedUnit) { it.currentSpeed.toFloat() } }
+        )
+
+        HorizontalDivider()
+
+        StatusRow(
             label = errorLabel,
             value = "%.2f".format(telemetry.error),
             unit = floatUnit,
@@ -110,22 +120,30 @@ fun CruiseScreenContent(
             onClick = { onValueClick(corrLabel, floatUnit) { it.correction } }
         )
 
+        StatusRow(
+            label = "Derivative",
+            value = "%.2f".format(telemetry.derivative),
+            unit = floatUnit,
+            icon = Icons.AutoMirrored.Filled.ShowChart,
+            onClick = { onValueClick(corrLabel, floatUnit) { it.derivative } }
+        )
+
         HorizontalDivider()
 
         StatusRow(
-            label = basePosLabel,
-            value = telemetry.basePosition.toString(),
+            label = "Last position",
+            value = telemetry.lastPosition.toString(),
             unit = posUnit,
             icon = Icons.Default.LocationSearching,
-            onClick = { onValueClick(basePosLabel, posUnit) { it.basePosition.toFloat() } }
+            onClick = { onValueClick(basePosLabel, posUnit) { it.lastPosition.toFloat() } }
         )
 
         StatusRow(
-            label = targetPosLabel,
-            value = telemetry.targetPosition.toString(),
+            label = "Current position",
+            value = telemetry.currentPosition.toString(),
             unit = posUnit,
             icon = Icons.Default.Timeline,
-            onClick = { onValueClick(targetPosLabel, posUnit) { it.targetPosition.toFloat() } }
+            onClick = { onValueClick(targetPosLabel, posUnit) { it.currentPosition.toFloat() } }
         )
     }
 }
@@ -138,11 +156,16 @@ fun CruiseScreenPreview() {
             telemetry = CruiseTelemetry(
                 isEnabled = true,
                 isActivated = true,
-                targetSpeed = 60,
+
                 error = 1.5f,
                 correction = 10.0f,
-                basePosition = 300,
-                targetPosition = 310
+                derivative = 5.0f,
+
+                targetSpeed = 60,
+                currentSpeed = 58,
+
+                lastPosition = 285,
+                currentPosition = 310
             ),
             onValueClick = { _, _, _ -> }
         )

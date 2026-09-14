@@ -16,7 +16,7 @@ import by.jadjer.etcu.domain.model.system.SystemInfo
 import by.jadjer.etcu.domain.model.system.SystemState
 import by.jadjer.etcu.domain.model.telemetry.AcceleratorTelemetry
 import by.jadjer.etcu.domain.model.telemetry.CruiseTelemetry
-import by.jadjer.etcu.domain.model.telemetry.EcuTelemetry
+import by.jadjer.etcu.domain.model.telemetry.ECUTelemetry
 import by.jadjer.etcu.domain.model.telemetry.ServoTelemetry
 import by.jadjer.etcu.domain.model.telemetry.SystemStatusTelemetry
 import by.jadjer.etcu.domain.model.telemetry.SystemTelemetry
@@ -114,10 +114,6 @@ class BLEDataParser {
         p = float,
         i = float,
         d = float,
-        integralMin = float,
-        integralMax = float,
-        filterAlpha = float,
-        fadeDuration = float,
         rpmMin = uShort,
         rpmMax = uShort,
         speedMin = uByte,
@@ -126,15 +122,15 @@ class BLEDataParser {
         limiterDown = uShort,
     )
 
-    private fun ByteBuffer.parseEcuTelemetry() = EcuTelemetry(
+    private fun ByteBuffer.parseEcuTelemetry() = ECUTelemetry(
         isConnected = bool,
         isStarted = bool,
         isNeutral = bool,
         rpm = uShort,
-        battery = float,
         speed = uByte,
         map = uByte,
         tps = uShort,
+        battery = float,
         airTemp = uByte,
         coolantTemp = uByte,
     )
@@ -143,8 +139,8 @@ class BLEDataParser {
         isConnected = bool,
         isEnabled = bool,
         isMoved = bool,
-        voltage = float,
         current = uShort,
+        voltage = float,
         position = uShort,
         temperature = uByte,
     )
@@ -154,9 +150,11 @@ class BLEDataParser {
         isActivated = bool,
         error = float,
         correction = float,
+        derivative = float,
         targetSpeed = uByte,
-        basePosition = uShort,
-        targetPosition = uShort,
+        currentSpeed = uByte,
+        lastPosition = uShort,
+        currentPosition = uShort,
     )
 
     private fun ByteBuffer.parseAcceleratorTelemetry() = AcceleratorTelemetry(
@@ -176,10 +174,6 @@ class BLEDataParser {
             .putFloat(data.cruise.p)
             .putFloat(data.cruise.i)
             .putFloat(data.cruise.d)
-            .putFloat(data.cruise.integralMin)
-            .putFloat(data.cruise.integralMax)
-            .putFloat(data.cruise.filterAlpha)
-            .putFloat(data.cruise.fadeDuration)
             .putShort(data.cruise.rpmMin.toShort())
             .putShort(data.cruise.rpmMax.toShort())
             .put(data.cruise.speedMin.toByte())

@@ -95,14 +95,6 @@ class DeviceViewModel(private val _repository: BLERepository) : ViewModel() {
         scheduleUpdate(updated)
     }
 
-    fun updateCruiseIntegralLimits(min: Float, max: Float) {
-        val updated = _controlData.value.copy(
-            cruise = _controlData.value.cruise.copy(integralMin = min, integralMax = max)
-        )
-        _controlData.value = updated
-        scheduleUpdate(updated)
-    }
-
     fun updateCruiseRPMRange(min: Int, max: Int) {
         val updated = _controlData.value.copy(
             cruise = _controlData.value.cruise.copy(rpmMin = min, rpmMax = max)
@@ -130,22 +122,6 @@ class DeviceViewModel(private val _repository: BLERepository) : ViewModel() {
     fun updateCruiseLimiterDown(right: Int) {
         val updated = _controlData.value.copy(
             cruise = _controlData.value.cruise.copy(limiterDown = right)
-        )
-        _controlData.value = updated
-        scheduleUpdate(updated)
-    }
-
-    fun updateCruiseFilterAlpha(filterAlpha: Float) {
-        val updated = _controlData.value.copy(
-            cruise = _controlData.value.cruise.copy(filterAlpha = filterAlpha)
-        )
-        _controlData.value = updated
-        scheduleUpdate(updated)
-    }
-
-    fun updateCruiseFadeDuration(fadeDuration: Float) {
-        val updated = _controlData.value.copy(
-            cruise = _controlData.value.cruise.copy(fadeDuration = fadeDuration)
         )
         _controlData.value = updated
         scheduleUpdate(updated)

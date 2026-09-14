@@ -157,8 +157,8 @@
     <string name="cruise_fade_duration">Длит. затухания (сек)</string>
     <string name="cruise_rpm_limit">Огр. RPM: %1$d - %2$d</string>
     <string name="cruise_speed_range">Раб. скорость: %1$d - %2$d км/ч</string>
-    <string name="cruise_limiter_brake">Лимит торможения: %1$d</string>
-    <string name="cruise_limiter_accel">Лимит ускорения: %1$d</string>
+    <string name="cruise_limiter_brake">Лимит торможения:</string>
+    <string name="cruise_limiter_accel">Лимит ускорения:</string>
 
     <!-- System Errors -->
     <string name="error_accel_init">Ошибка инициализации акселератора</string>

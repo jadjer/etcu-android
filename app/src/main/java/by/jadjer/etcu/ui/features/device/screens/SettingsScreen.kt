@@ -37,7 +37,6 @@ import by.jadjer.etcu.domain.model.control.Cruise
 import by.jadjer.etcu.domain.model.control.OperatingMode
 import by.jadjer.etcu.domain.model.system.SystemInfo
 import by.jadjer.etcu.ui.component.ControlRangeSlider
-import by.jadjer.etcu.ui.component.ControlSlider
 import by.jadjer.etcu.ui.component.StatusRow
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
 import by.jadjer.etcu.ui.util.labelResId
@@ -87,15 +86,6 @@ fun SettingsScreen(
         onCruiseLimiterDownChange = { value ->
             viewModel.updateCruiseLimiterDown(value.toInt())
         },
-        onCruiseIntegralChange = { left, right ->
-            viewModel.updateCruiseIntegralLimits(left, right)
-        },
-        onCruiseFilterAlphaChange = { filterAlpha ->
-            viewModel.updateCruiseFilterAlpha(filterAlpha)
-        },
-        onCruiseFadeDurationChange = { fadeDuration ->
-            viewModel.updateCruiseFadeDuration(fadeDuration)
-        },
         onForgetClick = { viewModel.forgetDevice() },
         onOtaClick = onOtaClick,
         onCalibrateClick = onCalibrateClick
@@ -115,9 +105,6 @@ fun SettingsScreenContent(
     onCruiseSpeedChange: (Float, Float) -> Unit,
     onCruiseLimiterUpChange: (Float) -> Unit,
     onCruiseLimiterDownChange: (Float) -> Unit,
-    onCruiseIntegralChange: (Float, Float) -> Unit,
-    onCruiseFilterAlphaChange: (Float) -> Unit,
-    onCruiseFadeDurationChange: (Float) -> Unit,
     onForgetClick: () -> Unit,
     onOtaClick: () -> Unit,
     onCalibrateClick: () -> Unit
@@ -156,9 +143,6 @@ fun SettingsScreenContent(
         CruiseSettingsSection(
             cruise = controlData.cruise,
             onPidChange = onCruisePidChange,
-            onIntegralChange = onCruiseIntegralChange,
-            onFilterAlphaChange = onCruiseFilterAlphaChange,
-            onFadeDurationChange = onCruiseFadeDurationChange,
             onRpmChange = onCruiseRpmChange,
             onSpeedChange = onCruiseSpeedChange,
             onLimiterUpChange = onCruiseLimiterUpChange,
@@ -279,9 +263,6 @@ private fun ServoSettingsSection(
 private fun CruiseSettingsSection(
     cruise: Cruise,
     onPidChange: (Float, Float, Float) -> Unit,
-    onIntegralChange: (Float, Float) -> Unit,
-    onFilterAlphaChange: (Float) -> Unit,
-    onFadeDurationChange: (Float) -> Unit,
     onRpmChange: (Float, Float) -> Unit,
     onSpeedChange: (Float, Float) -> Unit,
     onLimiterUpChange: (Float) -> Unit,
@@ -319,33 +300,15 @@ private fun CruiseSettingsSection(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             CruiseTextField(
-                value = cruise.integralMin,
-                label = stringResource(R.string.cruise_integral_min),
-                onValueChange = { onIntegralChange(it, cruise.integralMax) },
+                value = cruise.limiterDown.toFloat(),
+                label = stringResource(R.string.cruise_limiter_brake),
+                onValueChange = { onLimiterDownChange(it) },
                 modifier = Modifier.weight(1f)
             )
             CruiseTextField(
-                value = cruise.integralMax,
-                label = stringResource(R.string.cruise_integral_max),
-                onValueChange = { onIntegralChange(cruise.integralMin, it) },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            CruiseTextField(
-                value = cruise.filterAlpha,
-                label = stringResource(R.string.cruise_filter_alpha),
-                onValueChange = onFilterAlphaChange,
-                modifier = Modifier.weight(1f)
-            )
-            CruiseTextField(
-                value = cruise.fadeDuration,
-                label = stringResource(R.string.cruise_fade_duration),
-                onValueChange = onFadeDurationChange,
+                value = cruise.limiterUp.toFloat(),
+                label = stringResource(R.string.cruise_limiter_accel),
+                onValueChange = { onLimiterUpChange(it) },
                 modifier = Modifier.weight(1f)
             )
         }
@@ -365,20 +328,6 @@ private fun CruiseSettingsSection(
             onRangeChange = onSpeedChange,
             valueRange = 0f..250f,
             steps = 249
-        )
-        ControlSlider(
-            label = stringResource(R.string.cruise_limiter_brake, cruise.limiterDown),
-            value = cruise.limiterDown,
-            onValueChange = onLimiterDownChange,
-            valueRange = 0f..1000f,
-            steps = 999
-        )
-        ControlSlider(
-            label = stringResource(R.string.cruise_limiter_accel, cruise.limiterUp),
-            value = cruise.limiterUp,
-            onValueChange = onLimiterUpChange,
-            valueRange = 0f..1000f,
-            steps = 999
         )
     }
 }
@@ -476,9 +425,6 @@ fun SettingsScreenPreview() {
             onCruisePidChange = { _, _, _ -> },
             onCruiseRpmChange = { _, _ -> },
             onCruiseSpeedChange = { _, _ -> },
-            onCruiseFilterAlphaChange = { _ -> },
-            onCruiseFadeDurationChange = { _ -> },
-            onCruiseIntegralChange = { _, _ -> },
             onCruiseLimiterUpChange = { _ -> },
             onCruiseLimiterDownChange = { _ -> },
             onForgetClick = {},

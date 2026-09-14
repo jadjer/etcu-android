@@ -1,15 +1,15 @@
 package by.jadjer.etcu.domain.model.telemetry
 
-data class EcuTelemetry(
+data class ECUTelemetry(
     val isConnected: Boolean = false,
     val isStarted: Boolean = false,
     val isNeutral: Boolean = false,
 
     val rpm: Int = 0,
-    val battery: Float = 0.0f,
     val speed: Int = 0,
     val map: Int = 0,
     val tps: Int = 0,
+    val battery: Float = 0.0f,
     val airTemp: Int = 0,
     val coolantTemp: Int = 0,
 )
