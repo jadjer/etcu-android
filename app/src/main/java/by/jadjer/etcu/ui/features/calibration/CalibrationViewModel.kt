@@ -25,20 +25,20 @@ data class CalibrationUiState(
     val servoPosition: Int = 0
 )
 
-class CalibrationViewModel(private val repository: BLERepository) : ViewModel() {
+class CalibrationViewModel(private val _repository: BLERepository) : ViewModel() {
 
     private val _detectedHallA = MutableStateFlow(CalibrationRange(min = 4095, max = 0))
     private val _detectedHallB = MutableStateFlow(CalibrationRange(min = 4095, max = 0))
     private val _editingCalibration = MutableStateFlow(CalibrationData())
 
-    private val originalControlData = repository.controlData.value
+    private val _originalControlData = _repository.controlData.value
 
     val uiState: StateFlow<CalibrationUiState> = combine(
-        repository.calibrationData,
+        _repository.calibrationData,
         _editingCalibration,
         _detectedHallA,
         _detectedHallB,
-        repository.telemetry
+        _repository.telemetry
     ) { current, editing, detA, detB, telemetry ->
         CalibrationUiState(
             currentCalibration = current,
@@ -56,10 +56,10 @@ class CalibrationViewModel(private val repository: BLERepository) : ViewModel() 
     )
 
     init {
-        repository.calibrationData
+        _repository.calibrationData
             .onEach { _editingCalibration.value = it }
             .launchIn(viewModelScope)
-        repository.telemetry
+        _repository.telemetry
             .onEach { t ->
                 val a = t.accelerator.hallA
                 val b = t.accelerator.hallB
@@ -84,8 +84,8 @@ class CalibrationViewModel(private val repository: BLERepository) : ViewModel() 
             }
             .launchIn(viewModelScope)
 
-        repository.sendControlData(
-            originalControlData.copy(
+        _repository.sendControlData(
+            _originalControlData.copy(
                 servoMin = ControlConstants.MIN_VALUE.toInt(),
                 servoMax = ControlConstants.MAX_VALUE.toInt(),
             )
@@ -93,7 +93,7 @@ class CalibrationViewModel(private val repository: BLERepository) : ViewModel() 
     }
 
     override fun onCleared() {
-        repository.sendControlData(originalControlData)
+        _repository.sendControlData(_originalControlData)
     }
 
     fun resetDetection() {
@@ -134,6 +134,6 @@ class CalibrationViewModel(private val repository: BLERepository) : ViewModel() 
     }
 
     fun saveCalibration() {
-        repository.sendCalibrationData(_editingCalibration.value)
+        _repository.sendCalibrationData(_editingCalibration.value)
     }
 }

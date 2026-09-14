@@ -20,7 +20,6 @@ import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.telemetry.CruiseTelemetry
 import by.jadjer.etcu.ui.component.StatusIndicator
 import by.jadjer.etcu.ui.component.StatusRow
-import by.jadjer.etcu.ui.component.StatusRow
 import by.jadjer.etcu.ui.component.history.HistoryGroup
 import by.jadjer.etcu.ui.component.history.StatusGraphDialog
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
@@ -41,7 +40,7 @@ fun CruiseScreen(viewModel: DeviceViewModel) {
                     selector = selector,
                     currentValue = selector(telemetry.cruise)
                 )
-                CruiseStatusGraphDialog(label, unit, group) { showDialog = null }
+                StatusGraphDialog(label, unit, group) { showDialog = null }
             }
         }
     )
@@ -50,35 +49,16 @@ fun CruiseScreen(viewModel: DeviceViewModel) {
 }
 
 @Composable
-private fun CruiseStatusGraphDialog(
-    label: String,
-    unit: String,
-    group: HistoryGroup<CruiseTelemetry>,
-    onDismiss: () -> Unit
-) {
-    val startTime = group.history.firstOrNull()?.timestamp ?: 0L
-    StatusGraphDialog(
-        title = label,
-        value = "%.1f".format(group.currentValue),
-        unit = unit,
-        history = group.history,
-        selector = { record -> group.selector(record.data) },
-        startTime = startTime,
-        onDismiss = onDismiss
-    )
-}
-
-@Composable
 fun CruiseScreenContent(
     telemetry: CruiseTelemetry,
-    onValueClick: (String, String, (CruiseTelemetry) -> Float) -> Unit = { _, _, _ -> }
+    onValueClick: (String, String, (CruiseTelemetry) -> Float) -> Unit
 ) {
     val errorLabel = stringResource(R.string.cruise_error)
     val corrLabel = stringResource(R.string.cruise_correction)
     val targetSpeedLabel = stringResource(R.string.cruise_target_speed)
     val basePosLabel = stringResource(R.string.cruise_base_pos)
     val targetPosLabel = stringResource(R.string.cruise_target_pos)
-    
+
     val speedUnit = stringResource(R.string.unit_kmh)
     val posUnit = stringResource(R.string.unit_raw_1000)
     val floatUnit = ""
@@ -163,7 +143,8 @@ fun CruiseScreenPreview() {
                 correction = 10.0f,
                 basePosition = 300,
                 targetPosition = 310
-            )
+            ),
+            onValueClick = { _, _, _ -> }
         )
     }
 }

@@ -22,21 +22,22 @@ import java.util.Locale
 @Composable
 fun <T> StatusGraphDialog(
     title: String,
-    value: String,
     unit: String,
-    history: List<HistoryRecord<T>>,
-    selector: (HistoryRecord<T>) -> Float,
-    startTime: Long = 0,
+    group: HistoryGroup<T>,
     onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
+        val selector = remember(group.selector) { 
+            { record: HistoryRecord<T> -> group.selector(record.data) }
+        }
+        
         StatusGraphDialogContent(
             title = title,
-            value = value,
+            value = "%.1f".format(group.currentValue),
             unit = unit,
-            history = history,
+            history = group.history,
             selector = selector,
-            startTime = startTime,
+            startTime = group.history.firstOrNull()?.timestamp ?: 0L,
             onDismiss = onDismiss
         )
     }
@@ -53,8 +54,8 @@ fun <T> StatusGraphDialogContent(
     onDismiss: () -> Unit
 ) {
     val data = remember(history, selector) { history.map(selector) }
-    val minVal = data.minOrNull()
-    val maxVal = data.maxOrNull()
+    val minVal = remember(data) { data.minOrNull() }
+    val maxVal = remember(data) { data.maxOrNull() }
 
     val timeFormat = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
     val sessionStartStr = remember(startTime) {

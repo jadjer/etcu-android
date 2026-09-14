@@ -7,23 +7,23 @@ import by.jadjer.etcu.domain.repository.BLERepository
 import kotlinx.coroutines.flow.StateFlow
 
 class MainViewModel(
-    private val bleRepository: BLERepository
+    private val _bleRepository: BLERepository
 ) : ViewModel() {
 
-    val connectionState: StateFlow<ConnectionState> = bleRepository.connectionState
-    val connectionDetail: StateFlow<String?> = bleRepository.connectionDetail
-    val isManualForget: StateFlow<Boolean> = bleRepository.isManualForget
-    val telemetry: StateFlow<SystemTelemetry> = bleRepository.telemetry
+    val connectionState: StateFlow<ConnectionState> = _bleRepository.connectionState
+    val connectionDetail: StateFlow<String?> = _bleRepository.connectionDetail
+    val isManualForget: StateFlow<Boolean> = _bleRepository.isManualForget
+    val telemetry: StateFlow<SystemTelemetry> = _bleRepository.telemetry
 
     fun retryConnection() {
-        bleRepository.autoConnect()
+        _bleRepository.autoConnect()
     }
     
     fun forgetDevice() {
-        bleRepository.forgetDevice()
+        _bleRepository.forgetDevice()
     }
 
     fun isBonded(): Boolean {
-        return bleRepository.isBonded() && !bleRepository.isManualForget.value
+        return _bleRepository.isBonded() && !_bleRepository.isManualForget.value
     }
 }

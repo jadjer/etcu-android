@@ -6,18 +6,18 @@ import by.jadjer.etcu.domain.model.control.ControlData
 import by.jadjer.etcu.domain.model.ota.OTAChunk
 import by.jadjer.etcu.domain.model.ota.OTAStatus
 import by.jadjer.etcu.domain.model.system.SystemState
+import org.junit.Test
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class BLEDataParserTest {
 
-    private val parser = BLEDataParser()
+    private val _parser = BLEDataParser()
 
     @Test
     fun `parseControlData returns default on short array`() {
-        val result = parser.parseControlData(byteArrayOf(1, 2, 3))
+        val result = _parser.parseControlData(byteArrayOf(1, 2, 3))
         assertEquals(ControlData(), result)
     }
 
@@ -32,7 +32,7 @@ class BLEDataParserTest {
         buffer.putShort(850.toShort()) // max
         val bytes = buffer.array()
 
-        val result = parser.parseControlData(bytes)
+        val result = _parser.parseControlData(bytes)
 
         assertEquals(100, result.servoMin)
         assertEquals(600, result.servoMax)
@@ -48,7 +48,7 @@ class BLEDataParserTest {
             .putShort(1200.toShort()).putShort(2200.toShort()) // Servo
             .array()
 
-        val result = parser.parseCalibrationData(bytes)
+        val result = _parser.parseCalibrationData(bytes)
 
         assertEquals(1000, result.hallA.min)
         assertEquals(2000, result.hallA.max)
@@ -65,7 +65,7 @@ class BLEDataParserTest {
         "V1.0".toByteArray().copyInto(bytes, 16)
         "FW-2.0".toByteArray().copyInto(bytes, 32)
 
-        val result = parser.parseSystemInfo(bytes)
+        val result = _parser.parseSystemInfo(bytes)
 
         assertEquals("2026-08-29", result.buildDate)
         assertEquals("V1.0", result.boardVersion)
@@ -115,7 +115,7 @@ class BLEDataParserTest {
         buffer.putShort(0.toShort()) // activeErrors (None)
         
         val bytes = buffer.array()
-        val result = parser.parseSystemTelemetry(bytes)
+        val result = _parser.parseSystemTelemetry(bytes)
 
         assertEquals(true, result.status.isGuardActive)
         assertEquals(false, result.status.isBrakeEnabled)
@@ -158,9 +158,9 @@ class BLEDataParserTest {
 
     @Test
     fun `parseOtaFeedback parses correctly`() {
-        assertEquals(OTAStatus.READY_FOR_NEXT, parser.parseOtaFeedback(byteArrayOf(1)))
-        assertEquals(OTAStatus.COMPLETED, parser.parseOtaFeedback(byteArrayOf(2)))
-        assertEquals(OTAStatus.ERROR, parser.parseOtaFeedback(byteArrayOf(0)))
+        assertEquals(OTAStatus.READY_FOR_NEXT, _parser.parseOtaFeedback(byteArrayOf(1)))
+        assertEquals(OTAStatus.COMPLETED, _parser.parseOtaFeedback(byteArrayOf(2)))
+        assertEquals(OTAStatus.ERROR, _parser.parseOtaFeedback(byteArrayOf(0)))
     }
 
     @Test
@@ -171,7 +171,7 @@ class BLEDataParserTest {
             acceleratorMin = 150,
             acceleratorMax = 850
         )
-        val bytes = parser.serializeControlData(data)
+        val bytes = _parser.serializeControlData(data)
         val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
         
         buffer.position(35) // Skip cruise
@@ -188,7 +188,7 @@ class BLEDataParserTest {
             hallB = CalibrationRange(1100, 2100),
             servo = CalibrationRange(1200, 2200)
         )
-        val bytes = parser.serializeCalibrationData(data)
+        val bytes = _parser.serializeCalibrationData(data)
         val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
 
         assertEquals(1000, buffer.short.toInt() and 0xFFFF)
@@ -208,7 +208,7 @@ class BLEDataParserTest {
             chunkIndex = 5,
             data = chunkData
         )
-        val bytes = parser.serializeOtaChunk(chunk)
+        val bytes = _parser.serializeOtaChunk(chunk)
         val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
 
         assertEquals(10000, buffer.int)

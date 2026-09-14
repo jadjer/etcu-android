@@ -17,12 +17,12 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
-class AppContainer(private val app: Application) {
+class AppContainer(private val _app: Application) {
 
-    private val bleManager by lazy { BLEManager(app) }
-    private val appScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val _bleManager by lazy { BLEManager(_app) }
+    private val _appScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
-    private val githubService by lazy {
+    private val _githubService by lazy {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
@@ -50,6 +50,6 @@ class AppContainer(private val app: Application) {
             .create(GitHubService::class.java)
     }
 
-    val bleRepository: BLERepository by lazy { BLERepositoryImpl(bleManager, appScope) }
-    val otaRepository: OTARepository by lazy { OTARepositoryImpl(githubService, app) }
+    val bleRepository: BLERepository by lazy { BLERepositoryImpl(_bleManager, _appScope) }
+    val otaRepository: OTARepository by lazy { OTARepositoryImpl(_githubService, _app) }
 }

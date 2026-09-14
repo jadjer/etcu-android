@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,14 +33,14 @@ fun <T> StatusGraph(
         return
     }
 
-    val data = history.map(selector)
-    val maxVal = data.maxOrNull() ?: 1f
-    val minVal = data.minOrNull() ?: 0f
-    val valRange = if (maxVal == minVal) 1f else maxVal - minVal
+    val data = remember(history, selector) { history.map(selector) }
+    val maxVal = remember(data) { data.maxOrNull() ?: 1f }
+    val minVal = remember(data) { data.minOrNull() ?: 0f }
+    val valRange = remember(maxVal, minVal) { if (maxVal == minVal) 1f else maxVal - minVal }
 
     val startTime = history.first().timestamp
     val endTime = history.last().timestamp
-    val timeRange = if (endTime == startTime) 1L else endTime - startTime
+    val timeRange = remember(startTime, endTime) { if (endTime == startTime) 1L else endTime - startTime }
 
     Canvas(modifier = modifier.fillMaxWidth().height(200.dp)) {
         val width = size.width
@@ -47,7 +48,7 @@ fun <T> StatusGraph(
 
         val path = Path().apply {
             history.forEachIndexed { index, record ->
-                val value = selector(record)
+                val value: Float = data[index]
                 val x = ((record.timestamp - startTime).toFloat() / timeRange) * width
                 val y = height - ((value - minVal) / valRange * height)
                 if (index == 0) moveTo(x, y) else lineTo(x, y)

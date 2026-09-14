@@ -6,20 +6,20 @@ import by.jadjer.etcu.domain.model.ble.DiscoveredDevice
 import by.jadjer.etcu.domain.repository.BLERepository
 import kotlinx.coroutines.flow.StateFlow
 
-class ScanViewModel(private val repository: BLERepository) : ViewModel() {
+class ScanViewModel(private val _repository: BLERepository) : ViewModel() {
 
-    val connectionState: StateFlow<ConnectionState> = repository.connectionState
-    val isScanning: StateFlow<Boolean> = repository.isScanning
+    val connectionState: StateFlow<ConnectionState> = _repository.connectionState
+    val isScanning: StateFlow<Boolean> = _repository.isScanning
 
-    val discoveredDevices: StateFlow<List<DiscoveredDevice>> = repository.discoveredDevices
+    val discoveredDevices: StateFlow<List<DiscoveredDevice>> = _repository.discoveredDevices
 
-    fun startScanning() = repository.startScan()
+    fun startScanning() = _repository.startScan()
 
-    fun stopScanning() = repository.stopScan()
+    fun stopScanning() = _repository.stopScan()
 
     fun connect(device: DiscoveredDevice) {
         stopScanning()
-        repository.connect(device.macAddress)
+        _repository.connect(device.macAddress)
     }
 
     override fun onCleared() {

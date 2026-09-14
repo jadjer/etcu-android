@@ -35,39 +35,39 @@ sealed class OTAState {
 }
 
 class OtaViewModel(
-    private val app: Application,
-    private val bleRepository: BLERepository,
-    private val otaRepository: OTARepository
+    private val _app: Application,
+    private val _bleRepository: BLERepository,
+    private val _otaRepository: OTARepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<OTAState>(OTAState.Idle)
     val state = _state.asStateFlow()
 
-    private var firmwareData: ByteArray? = null
-    private var totalChunks = 0
-    private var currentChunkIndex = 0
-    private var hasCheckedUpdates = false
+    private var _firmwareData: ByteArray? = null
+    private var _totalChunks = 0
+    private var _currentChunkIndex = 0
+    private var _hasCheckedUpdates = false
 
     init {
-        bleRepository.connectionState
+        _bleRepository.connectionState
             .onEach { state -> if (!state.isActive) resetOtaState() }
             .launchIn(viewModelScope)
 
-        bleRepository.otaFeedback
+        _bleRepository.otaFeedback
             .onEach { handleFeedback(it) }
             .launchIn(viewModelScope)
 
-        bleRepository.connectionState
+        _bleRepository.connectionState
             .onEach { connState ->
                 if (connState.isError && _state.value is OTAState.Uploading) {
-                    _state.value = OTAState.Error(app.getString(R.string.ota_error_transmission, connState.toString()))
+                    _state.value = OTAState.Error(_app.getString(R.string.ota_error_transmission, connState.toString()))
                 }
             }
             .launchIn(viewModelScope)
 
-        combine(bleRepository.connectionState, bleRepository.systemInfo) { state, info ->
-            if (state.isActive && info.firmwareVersion != "0.0.0" && _state.value == OTAState.Idle && !hasCheckedUpdates) {
-                hasCheckedUpdates = true
+        combine(_bleRepository.connectionState, _bleRepository.systemInfo) { state, info ->
+            if (state.isActive && info.firmwareVersion != "0.0.0" && _state.value == OTAState.Idle && !_hasCheckedUpdates) {
+                _hasCheckedUpdates = true
                 checkForUpdates(info.firmwareVersion)
             }
         }.launchIn(viewModelScope)
@@ -77,28 +77,28 @@ class OtaViewModel(
         if (_state.value !is OTAState.Uploading) return
         when (status) {
             OTAStatus.READY_FOR_NEXT -> {
-                val nextIndex = currentChunkIndex + 1
-                if (nextIndex < totalChunks) sendNextChunk(nextIndex)
+                val nextIndex = _currentChunkIndex + 1
+                if (nextIndex < _totalChunks) sendNextChunk(nextIndex)
             }
             OTAStatus.COMPLETED -> _state.value = OTAState.Success
-            OTAStatus.ERROR -> _state.value = OTAState.Error(app.getString(R.string.ota_error_device_firmware))
+            OTAStatus.ERROR -> _state.value = OTAState.Error(_app.getString(R.string.ota_error_device_firmware))
             else -> {}
         }
     }
 
     private fun resetOtaState() {
         _state.value = OTAState.Idle
-        firmwareData = null
-        currentChunkIndex = 0
-        hasCheckedUpdates = false
+        _firmwareData = null
+        _currentChunkIndex = 0
+        _hasCheckedUpdates = false
     }
 
     fun checkForUpdates(currentVersion: String? = null) {
         viewModelScope.launch {
             _state.value = OTAState.CheckingUpdates
-            val current = currentVersion ?: bleRepository.systemInfo.value.firmwareVersion
+            val current = currentVersion ?: _bleRepository.systemInfo.value.firmwareVersion
             
-            when (val result = otaRepository.getLatestRelease()) {
+            when (val result = _otaRepository.getLatestRelease()) {
                 is Resource.Success -> {
                     val release = result.data
                     val cleanRelease = release.version.removePrefix("v")
@@ -140,7 +140,7 @@ class OtaViewModel(
         viewModelScope.launch {
             runCatching {
                 _state.value = OTAState.Downloading(0f)
-                val result = otaRepository.downloadFirmware(url, size) { progress ->
+                val result = _otaRepository.downloadFirmware(url, size) { progress ->
                     if (_state.value is OTAState.Downloading) _state.value = OTAState.Downloading(progress)
                 }
 
@@ -148,27 +148,27 @@ class OtaViewModel(
                     is Resource.Success -> {
                         val downloadedData = result.data
                         if (downloadedData.isEmpty()) {
-                            _state.value = OTAState.Error(app.getString(R.string.ota_error_empty_file))
+                            _state.value = OTAState.Error(_app.getString(R.string.ota_error_empty_file))
                             return@launch
                         }
                         _state.value = OTAState.Downloading(1f)
-                        firmwareData = downloadedData
-                        totalChunks = (downloadedData.size + BLEConstants.OTA_PAYLOAD_SIZE - 1) / BLEConstants.OTA_PAYLOAD_SIZE
+                        _firmwareData = downloadedData
+                        _totalChunks = (downloadedData.size + BLEConstants.OTA_PAYLOAD_SIZE - 1) / BLEConstants.OTA_PAYLOAD_SIZE
                         sendNextChunk(0)
                     }
                     is Resource.Error -> _state.value = OTAState.Error(result.message)
                 }
             }.onFailure { e ->
-                _state.value = OTAState.Error(app.getString(R.string.ota_error_system, e.localizedMessage ?: ""))
+                _state.value = OTAState.Error(_app.getString(R.string.ota_error_system, e.localizedMessage ?: ""))
             }
         }
     }
 
     private fun sendNextChunk(index: Int) {
-        val data = firmwareData ?: return
-        if (index >= totalChunks) return
+        val data = _firmwareData ?: return
+        if (index >= _totalChunks) return
 
-        currentChunkIndex = index
+        _currentChunkIndex = index
         val start = index * BLEConstants.OTA_PAYLOAD_SIZE
         val end = minOf(start + BLEConstants.OTA_PAYLOAD_SIZE, data.size)
 
@@ -176,22 +176,22 @@ class OtaViewModel(
 
         val payload = data.sliceArray(start until end)
 
-        bleRepository.sendOtaChunk(
+        _bleRepository.sendOtaChunk(
             OTAChunk(
                 firmwareSize = data.size.toLong(),
-                totalChunks = totalChunks,
+                totalChunks = _totalChunks,
                 chunkIndex = index,
                 data = payload
             )
         )
 
         val showIndex = index + 1
-        val uploadProgress = showIndex.toFloat() / totalChunks
+        val uploadProgress = showIndex.toFloat() / _totalChunks
 
         _state.value = OTAState.Uploading(
             progress = uploadProgress,
             currentChunk = showIndex,
-            totalChunks = totalChunks,
+            totalChunks = _totalChunks,
             firmwareSize = data.size.toLong()
         )
     }

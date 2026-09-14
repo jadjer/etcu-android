@@ -13,17 +13,19 @@ import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.telemetry.ServoTelemetry
-import by.jadjer.etcu.domain.model.telemetry.SystemTelemetry
 import by.jadjer.etcu.ui.component.StatusIndicator
-import by.jadjer.etcu.ui.component.StatusRow
 import by.jadjer.etcu.ui.component.StatusRow
 import by.jadjer.etcu.ui.component.history.HistoryGroup
 import by.jadjer.etcu.ui.component.history.StatusGraphDialog
@@ -45,7 +47,7 @@ fun ServoScreen(viewModel: DeviceViewModel) {
                     selector = selector,
                     currentValue = selector(telemetry.servo)
                 )
-                ServoStatusGraphDialog(label, unit, group) { showDialog = null }
+                StatusGraphDialog(label, unit, group) { showDialog = null }
             }
         }
     )
@@ -54,28 +56,9 @@ fun ServoScreen(viewModel: DeviceViewModel) {
 }
 
 @Composable
-private fun ServoStatusGraphDialog(
-    label: String,
-    unit: String,
-    group: HistoryGroup<ServoTelemetry>,
-    onDismiss: () -> Unit
-) {
-    val startTime = group.history.firstOrNull()?.timestamp ?: 0L
-    StatusGraphDialog(
-        title = label,
-        value = "%.1f".format(group.currentValue),
-        unit = unit,
-        history = group.history,
-        selector = { record -> group.selector(record.data) },
-        startTime = startTime,
-        onDismiss = onDismiss
-    )
-}
-
-@Composable
 fun ServoScreenContent(
     telemetry: ServoTelemetry,
-    onValueClick: (String, String, (ServoTelemetry) -> Float) -> Unit = { _, _, _ -> }
+    onValueClick: (String, String, (ServoTelemetry) -> Float) -> Unit
 ) {
     val posLabel = stringResource(R.string.servo_position)
     val posUnit = stringResource(R.string.unit_raw_4095)
@@ -164,7 +147,8 @@ fun ServoScreenPreview() {
                 voltage = 12.2f,
                 temperature = 38,
                 isMoved = true
-            )
+            ),
+            onValueClick = { _, _, _ -> }
         )
     }
 }

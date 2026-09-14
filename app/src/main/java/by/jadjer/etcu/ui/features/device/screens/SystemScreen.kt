@@ -9,14 +9,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material.icons.filled.TwoWheeler
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,14 +27,11 @@ import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.system.SystemState
 import by.jadjer.etcu.domain.model.telemetry.AcceleratorTelemetry
-import by.jadjer.etcu.domain.model.telemetry.HistoryRecord
 import by.jadjer.etcu.domain.model.telemetry.SystemStatusTelemetry
-import by.jadjer.etcu.domain.model.telemetry.SystemTelemetry
 import by.jadjer.etcu.ui.component.StatusIndicator
 import by.jadjer.etcu.ui.component.StatusRow
 import by.jadjer.etcu.ui.component.history.HistoryGroup
 import by.jadjer.etcu.ui.component.history.StatusGraphDialog
-import by.jadjer.etcu.ui.features.device.DeviceUiState
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
 import by.jadjer.etcu.ui.util.labelResId
 
@@ -43,10 +43,26 @@ fun SystemScreen(viewModel: DeviceViewModel) {
     var showDialog by remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
 
     SystemScreenContent(
-        uiState = uiState,
-        onValueClick = { label, unit, group ->
+        statusTelemetry = telemetry.status,
+        acceleratorTelemetry = telemetry.accelerator,
+        onAcceleratorClick = { label, unit, selector ->
             showDialog = {
-                SystemStatusGraphDialog(label, unit, group) { showDialog = null }
+                val group = HistoryGroup(
+                    history = uiState.telemetryHistory.accelerator,
+                    selector = selector,
+                    currentValue = selector(telemetry.accelerator)
+                )
+                StatusGraphDialog(label, unit, group) { showDialog = null }
+            }
+        },
+        onThrottleClick = { label, unit, selector ->
+            showDialog = {
+                val group = HistoryGroup(
+                    history = uiState.telemetryHistory.status,
+                    selector = selector,
+                    currentValue = selector(telemetry.status)
+                )
+                StatusGraphDialog(label, unit, group) { showDialog = null }
             }
         }
     )
@@ -55,35 +71,15 @@ fun SystemScreen(viewModel: DeviceViewModel) {
 }
 
 @Composable
-private fun <T> SystemStatusGraphDialog(
-    label: String,
-    unit: String,
-    group: HistoryGroup<T>,
-    onDismiss: () -> Unit
-) {
-    val startTime = group.history.firstOrNull()?.timestamp ?: 0L
-    StatusGraphDialog(
-        title = label,
-        value = "%.1f".format(group.currentValue),
-        unit = unit,
-        history = group.history,
-        selector = { record -> group.selector(record.data) },
-        startTime = startTime,
-        onDismiss = onDismiss
-    )
-}
-
-@Composable
 fun SystemScreenContent(
-    uiState: DeviceUiState,
-    onValueClick: (String, String, HistoryGroup<*>) -> Unit = { _, _, _ -> }
+    statusTelemetry: SystemStatusTelemetry,
+    acceleratorTelemetry: AcceleratorTelemetry,
+    onAcceleratorClick: (String, String, (AcceleratorTelemetry) -> Float) -> Unit,
+    onThrottleClick: (String, String, (SystemStatusTelemetry) -> Float) -> Unit
 ) {
-    val telemetry = uiState.telemetry
     val accLabel = stringResource(R.string.system_accel)
     val thrLabel = stringResource(R.string.system_throttle_target)
-    val targetSpeedLabel = stringResource(R.string.system_target_speed)
     val rawUnit = stringResource(R.string.unit_raw_1000)
-    val kmhUnit = stringResource(R.string.unit_kmh)
 
     Column(
         modifier = Modifier
@@ -99,7 +95,7 @@ fun SystemScreenContent(
 
         StatusRow(
             label = stringResource(R.string.system_state),
-            value = stringResource(telemetry.status.systemState.labelResId),
+            value = stringResource(statusTelemetry.systemState.labelResId),
             icon = Icons.Default.Info
         )
 
@@ -107,50 +103,30 @@ fun SystemScreenContent(
 
         StatusRow(
             label = accLabel,
-            value = telemetry.accelerator.position.toString(),
+            value = acceleratorTelemetry.position.toString(),
             unit = rawUnit,
             icon = Icons.Default.TwoWheeler,
-            onClick = {
-                onValueClick(
-                    accLabel,
-                    rawUnit,
-                    HistoryGroup(
-                        history = uiState.telemetryHistory.accelerator,
-                        selector = { it.position.toFloat() },
-                        currentValue = telemetry.accelerator.position.toFloat()
-                    )
-                )
-            }
+            onClick = { onAcceleratorClick(accLabel, rawUnit) { it.position.toFloat() } }
         )
 
         StatusRow(
             label = thrLabel,
-            value = telemetry.status.throttlePosition.toString(),
+            value = statusTelemetry.throttlePosition.toString(),
             unit = rawUnit,
             icon = Icons.Default.Timeline,
-            onClick = {
-                onValueClick(
-                    thrLabel,
-                    rawUnit,
-                    HistoryGroup(
-                        history = uiState.telemetryHistory.status,
-                        selector = { it.throttlePosition.toFloat() },
-                        currentValue = telemetry.status.throttlePosition.toFloat()
-                    )
-                )
-            }
+            onClick = { onThrottleClick(thrLabel, rawUnit) { it.throttlePosition.toFloat() } }
         )
 
         HorizontalDivider()
 
         StatusIndicator(
             label = stringResource(R.string.system_guard),
-            isActive = telemetry.status.isGuardActive,
+            isActive = statusTelemetry.isGuardActive,
             icon = Icons.Default.Lock
         )
         StatusIndicator(
             label = stringResource(R.string.system_brake),
-            isActive = telemetry.status.isBrakeEnabled
+            isActive = statusTelemetry.isBrakeEnabled
         )
     }
 }
@@ -160,21 +136,19 @@ fun SystemScreenContent(
 fun SystemScreenPreview() {
     MaterialTheme {
         SystemScreenContent(
-            uiState = DeviceUiState(
-                telemetry = SystemTelemetry(
-                    status = SystemStatusTelemetry(
-                        isGuardActive = false,
-                        isBrakeEnabled = true,
-                        systemState = SystemState.NORMAL,
-                        throttlePosition = 280,
-                    ),
-                    accelerator = AcceleratorTelemetry(
-                        hallA = 500,
-                        hallB = 510,
-                        position = 300,
-                    )
-                )
-            )
+            statusTelemetry = SystemStatusTelemetry(
+                isGuardActive = false,
+                isBrakeEnabled = true,
+                systemState = SystemState.NORMAL,
+                throttlePosition = 280,
+            ),
+            acceleratorTelemetry = AcceleratorTelemetry(
+                hallA = 500,
+                hallB = 510,
+                position = 300,
+            ),
+            onThrottleClick = { _, _, _ -> },
+            onAcceleratorClick = { _, _, _ -> }
         )
     }
 }

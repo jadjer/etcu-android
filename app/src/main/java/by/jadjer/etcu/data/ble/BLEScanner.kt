@@ -23,16 +23,16 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @SuppressLint("MissingPermission")
 class BLEScanner(
-    private val central: BluetoothCentralManager
+    private val _central: BluetoothCentralManager
 ) {
-    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-    private var scanJob: Job? = null
+    private val _scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var _scanJob: Job? = null
 
     private val _discoveredDevices = MutableStateFlow<Map<String, DiscoveredDevice>>(emptyMap())
     val discoveredDevices: StateFlow<List<DiscoveredDevice>> = _discoveredDevices
         .map { map -> map.values.sortedByDescending { it.rssi } }
         .stateIn(
-            scope = scope,
+            scope = _scope,
             started = SharingStarted.Eagerly,
             initialValue = emptyList()
         )
@@ -55,20 +55,20 @@ class BLEScanner(
     }
 
     fun startScan(timeout: Long = 15000L) {
-        if (!central.isBluetoothEnabled || _isScanning.value) return
+        if (!_central.isBluetoothEnabled || _isScanning.value) return
 
         _discoveredDevices.value = emptyMap()
         _isScanning.value = true
         
         try {
-            central.scanForPeripheralsWithServices(setOf(BLEConstants.SERVICE_UUID))
+            _central.scanForPeripheralsWithServices(setOf(BLEConstants.SERVICE_UUID))
         } catch (_: Exception) {
             _isScanning.value = false
             return
         }
 
-        scanJob?.cancel()
-        scanJob = scope.launch {
+        _scanJob?.cancel()
+        _scanJob = _scope.launch {
             delay(timeout.milliseconds)
             stopScan()
         }
@@ -77,8 +77,8 @@ class BLEScanner(
     fun stopScan() {
         if (_isScanning.value) {
             _isScanning.value = false
-            scanJob?.cancel()
-            central.stopScan()
+            _scanJob?.cancel()
+            _central.stopScan()
         }
     }
 }

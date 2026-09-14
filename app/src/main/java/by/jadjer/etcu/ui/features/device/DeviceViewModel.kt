@@ -9,6 +9,7 @@ import by.jadjer.etcu.domain.model.system.SystemInfo
 import by.jadjer.etcu.domain.model.telemetry.SystemTelemetry
 import by.jadjer.etcu.domain.model.telemetry.TelemetryHistory
 import by.jadjer.etcu.domain.repository.BLERepository
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,10 +20,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.FlowPreview
 
 data class DeviceUiState(
     val controlData: ControlData = ControlData(),
@@ -33,17 +32,17 @@ data class DeviceUiState(
 )
 
 @OptIn(FlowPreview::class)
-class DeviceViewModel(private val repository: BLERepository) : ViewModel() {
+class DeviceViewModel(private val _repository: BLERepository) : ViewModel() {
 
-    val telemetry: StateFlow<SystemTelemetry> = repository.telemetry
+    val telemetry: StateFlow<SystemTelemetry> = _repository.telemetry
 
     private val _controlData = MutableStateFlow(ControlData())
 
     val uiState: StateFlow<DeviceUiState> = combine(
         _controlData,
-        repository.systemInfo,
-        telemetry.sample(100.milliseconds),
-        repository.history.sample(500.milliseconds)
+        _repository.systemInfo,
+        telemetry.sample(50.milliseconds),
+        _repository.history.sample(50.milliseconds)
     ) { controlData, systemInfo, telemetry, history ->
         DeviceUiState(
             controlData = controlData,
@@ -58,14 +57,14 @@ class DeviceViewModel(private val repository: BLERepository) : ViewModel() {
         initialValue = DeviceUiState()
     )
 
-    private var updateJob: Job? = null
+    private var _updateJob: Job? = null
 
     init {
-        repository.controlData.onEach { _controlData.value = it }.launchIn(viewModelScope)
+        _repository.controlData.onEach { _controlData.value = it }.launchIn(viewModelScope)
     }
 
     fun forgetDevice() {
-        repository.forgetDevice()
+        _repository.forgetDevice()
     }
 
     fun updateServoRange(min: Int, max: Int) {
@@ -153,10 +152,10 @@ class DeviceViewModel(private val repository: BLERepository) : ViewModel() {
     }
 
     private fun scheduleUpdate(data: ControlData) {
-        updateJob?.cancel()
-        updateJob = viewModelScope.launch {
+        _updateJob?.cancel()
+        _updateJob = viewModelScope.launch {
             delay(ControlConstants.UPDATE_DELAY_MS.milliseconds)
-            repository.sendControlData(data)
+            _repository.sendControlData(data)
         }
     }
 }

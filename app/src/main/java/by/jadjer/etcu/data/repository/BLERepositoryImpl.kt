@@ -1,16 +1,18 @@
 package by.jadjer.etcu.data.repository
 
 import by.jadjer.etcu.data.ble.BLEManager
-import by.jadjer.etcu.domain.model.ble.*
-import by.jadjer.etcu.domain.model.control.*
-import by.jadjer.etcu.domain.model.calibration.*
-import by.jadjer.etcu.domain.model.telemetry.*
-import by.jadjer.etcu.domain.model.system.*
-import by.jadjer.etcu.domain.model.ota.*
+import by.jadjer.etcu.domain.model.ble.ConnectionState
+import by.jadjer.etcu.domain.model.ble.DiscoveredDevice
+import by.jadjer.etcu.domain.model.calibration.CalibrationData
+import by.jadjer.etcu.domain.model.control.ControlData
+import by.jadjer.etcu.domain.model.ota.OTAChunk
+import by.jadjer.etcu.domain.model.ota.OTAStatus
+import by.jadjer.etcu.domain.model.system.SystemInfo
+import by.jadjer.etcu.domain.model.telemetry.HistoryRecord
+import by.jadjer.etcu.domain.model.telemetry.SystemTelemetry
+import by.jadjer.etcu.domain.model.telemetry.TelemetryHistory
 import by.jadjer.etcu.domain.repository.BLERepository
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,23 +22,23 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 
 class BLERepositoryImpl(
-    private val bleManager: BLEManager,
-    private val scope: CoroutineScope
+    private val _bleManager: BLEManager,
+    scope: CoroutineScope
 ) : BLERepository {
-    override val connectionState: StateFlow<ConnectionState> = bleManager.connectionState
-    override val connectionDetail: StateFlow<String?> = bleManager.connectionDetail
-    override val isManualForget: StateFlow<Boolean> = bleManager.isManualForget
-    override val controlData: StateFlow<ControlData> = bleManager.controlData
-    override val calibrationData: StateFlow<CalibrationData> = bleManager.calibrationData
-    override val telemetry: StateFlow<SystemTelemetry> = bleManager.telemetry
-    override val systemInfo: StateFlow<SystemInfo> = bleManager.systemInfo
+    override val connectionState: StateFlow<ConnectionState> = _bleManager.connectionState
+    override val connectionDetail: StateFlow<String?> = _bleManager.connectionDetail
+    override val isManualForget: StateFlow<Boolean> = _bleManager.isManualForget
+    override val controlData: StateFlow<ControlData> = _bleManager.controlData
+    override val calibrationData: StateFlow<CalibrationData> = _bleManager.calibrationData
+    override val telemetry: StateFlow<SystemTelemetry> = _bleManager.telemetry
+    override val systemInfo: StateFlow<SystemInfo> = _bleManager.systemInfo
 
     private val _history = MutableStateFlow(TelemetryHistory())
     override val history: StateFlow<TelemetryHistory> = _history.asStateFlow()
 
-    override val discoveredDevices: StateFlow<List<DiscoveredDevice>> = bleManager.scanner.discoveredDevices
-    override val isScanning: StateFlow<Boolean> = bleManager.scanner.isScanning
-    override val otaFeedback: SharedFlow<OTAStatus> = bleManager.otaFeedback
+    override val discoveredDevices: StateFlow<List<DiscoveredDevice>> = _bleManager.scanner.discoveredDevices
+    override val isScanning: StateFlow<Boolean> = _bleManager.scanner.isScanning
+    override val otaFeedback: SharedFlow<OTAStatus> = _bleManager.otaFeedback
 
     init {
         telemetry.onEach { t ->
@@ -53,14 +55,14 @@ class BLERepositoryImpl(
         }.launchIn(scope)
     }
 
-    override fun startScan() = bleManager.scanner.startScan()
-    override fun stopScan() = bleManager.scanner.stopScan()
-    override fun connect(macAddress: String) = bleManager.connect(macAddress)
-    override fun autoConnect() = bleManager.autoConnect()
-    override fun forgetDevice() = bleManager.forgetDevice()
-    override fun isBonded(): Boolean = bleManager.isBonded()
+    override fun startScan() = _bleManager.scanner.startScan()
+    override fun stopScan() = _bleManager.scanner.stopScan()
+    override fun connect(macAddress: String) = _bleManager.connect(macAddress)
+    override fun autoConnect() = _bleManager.autoConnect()
+    override fun forgetDevice() = _bleManager.forgetDevice()
+    override fun isBonded(): Boolean = _bleManager.isBonded()
 
-    override fun sendControlData(data: ControlData) = bleManager.writeControlData(data)
-    override fun sendCalibrationData(data: CalibrationData) = bleManager.writeCalibrationData(data)
-    override fun sendOtaChunk(chunk: OTAChunk) = bleManager.writeOtaChunk(chunk)
+    override fun sendControlData(data: ControlData) = _bleManager.writeControlData(data)
+    override fun sendCalibrationData(data: CalibrationData) = _bleManager.writeCalibrationData(data)
+    override fun sendOtaChunk(chunk: OTAChunk) = _bleManager.writeOtaChunk(chunk)
 }
