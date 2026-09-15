@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -16,18 +15,13 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
@@ -40,6 +34,7 @@ import by.jadjer.etcu.domain.model.system.SystemInfo
 import by.jadjer.etcu.domain.model.telemetry.TelemetryConstants
 import by.jadjer.etcu.ui.component.ControlRangeSlider
 import by.jadjer.etcu.ui.component.StatusRow
+import by.jadjer.etcu.ui.component.ValueField
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
 import by.jadjer.etcu.ui.util.labelResId
 
@@ -66,8 +61,7 @@ fun SettingsScreen(
                 max = max.toInt(),
             )
         },
-        onCruiseAccPidChange = { p, i, d -> viewModel.updateCruiseAccPID(p, i, d) },
-        onCruiseDecPidChange = { p, i, d -> viewModel.updateCruiseDecPID(p, i, d) },
+        onCruisePidChange = { p, i, d -> viewModel.updateCruisePID(p, i, d) },
 
         onCruiseRpmChange = { min, max ->
             viewModel.updateCruiseRPMRange(
@@ -99,8 +93,7 @@ fun SettingsScreenContent(
     onModeChange: (OperatingMode) -> Unit,
     onAccRangeChange: (Float, Float) -> Unit,
     onServoRangeChange: (Float, Float) -> Unit,
-    onCruiseAccPidChange: (Float, Float, Float) -> Unit,
-    onCruiseDecPidChange: (Float, Float, Float) -> Unit,
+    onCruisePidChange: (Float, Float, Float) -> Unit,
     onCruiseRpmChange: (Float, Float) -> Unit,
     onCruiseSpeedChange: (Float, Float) -> Unit,
     onCruiseLimiterUpChange: (Float) -> Unit,
@@ -142,8 +135,7 @@ fun SettingsScreenContent(
 
         CruiseSettingsSection(
             cruise = controlData.cruise,
-            onAccPidChange = onCruiseAccPidChange,
-            onDecPidChange = onCruiseDecPidChange,
+            onPidChange = onCruisePidChange,
             onRpmChange = onCruiseRpmChange,
             onSpeedChange = onCruiseSpeedChange,
             onLimiterUpChange = onCruiseLimiterUpChange,
@@ -189,9 +181,7 @@ private fun AcceleratorSettingsSection(
             style = MaterialTheme.typography.titleMedium
         )
         ControlRangeSlider(
-            label = stringResource(
-                R.string.settings_accel_range, acceleratorMin, acceleratorMax
-            ),
+            label = stringResource(R.string.settings_accel_range),
             currentMin = acceleratorMin,
             currentMax = acceleratorMax,
             onRangeChange = onRangeChange,
@@ -243,9 +233,7 @@ private fun ServoSettingsSection(
         }
 
         ControlRangeSlider(
-            label = stringResource(
-                R.string.settings_servo_range, servoMin, servoMax
-            ),
+            label = stringResource(R.string.settings_servo_range),
             currentMin = servoMin,
             currentMax = servoMax,
             onRangeChange = onRangeChange,
@@ -258,8 +246,7 @@ private fun ServoSettingsSection(
 @Composable
 private fun CruiseSettingsSection(
     cruise: Cruise,
-    onAccPidChange: (Float, Float, Float) -> Unit,
-    onDecPidChange: (Float, Float, Float) -> Unit,
+    onPidChange: (Float, Float, Float) -> Unit,
     onRpmChange: (Float, Float) -> Unit,
     onSpeedChange: (Float, Float) -> Unit,
     onLimiterUpChange: (Float) -> Unit,
@@ -274,45 +261,22 @@ private fun CruiseSettingsSection(
         Row(
             modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            CruiseTextField(
-                value = cruise.acc.p,
-                label = stringResource(R.string.cruise_acc_p),
-                onValueChange = { onAccPidChange(it, cruise.acc.i, cruise.acc.d) },
+            ValueField(
+                value = cruise.pid.p,
+                label = stringResource(R.string.cruise_p),
+                onValueChange = { onPidChange(it, cruise.pid.i, cruise.pid.d) },
                 modifier = Modifier.weight(1f)
             )
-            CruiseTextField(
-                value = cruise.acc.i,
-                label = stringResource(R.string.cruise_acc_i),
-                onValueChange = { onAccPidChange(cruise.acc.p, it, cruise.acc.d) },
+            ValueField(
+                value = cruise.pid.i,
+                label = stringResource(R.string.cruise_i),
+                onValueChange = { onPidChange(cruise.pid.p, it, cruise.pid.d) },
                 modifier = Modifier.weight(1f)
             )
-            CruiseTextField(
-                value = cruise.acc.d,
-                label = stringResource(R.string.cruise_acc_d),
-                onValueChange = { onAccPidChange(cruise.acc.p, cruise.acc.i, it) },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            CruiseTextField(
-                value = cruise.dec.p,
-                label = stringResource(R.string.cruise_dec_p),
-                onValueChange = { onDecPidChange(it, cruise.dec.i, cruise.dec.d) },
-                modifier = Modifier.weight(1f)
-            )
-            CruiseTextField(
-                value = cruise.dec.i,
-                label = stringResource(R.string.cruise_dec_i),
-                onValueChange = { onDecPidChange(cruise.dec.p, it, cruise.dec.d) },
-                modifier = Modifier.weight(1f)
-            )
-            CruiseTextField(
-                value = cruise.dec.d,
-                label = stringResource(R.string.cruise_dec_d),
-                onValueChange = { onDecPidChange(cruise.dec.p, cruise.dec.i, it) },
+            ValueField(
+                value = cruise.pid.d,
+                label = stringResource(R.string.cruise_d),
+                onValueChange = { onPidChange(cruise.pid.p, cruise.pid.i, it) },
                 modifier = Modifier.weight(1f)
             )
         }
@@ -320,13 +284,13 @@ private fun CruiseSettingsSection(
         Row(
             modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            CruiseTextField(
+            ValueField(
                 value = cruise.limiterDown.toFloat(),
                 label = stringResource(R.string.cruise_limiter_brake),
                 onValueChange = { onLimiterDownChange(it) },
                 modifier = Modifier.weight(1f)
             )
-            CruiseTextField(
+            ValueField(
                 value = cruise.limiterUp.toFloat(),
                 label = stringResource(R.string.cruise_limiter_accel),
                 onValueChange = { onLimiterUpChange(it) },
@@ -335,7 +299,7 @@ private fun CruiseSettingsSection(
         }
 
         ControlRangeSlider(
-            label = stringResource(R.string.cruise_rpm_limit, cruise.rpmMin, cruise.rpmMax),
+            label = stringResource(R.string.cruise_rpm_limit),
             currentMin = cruise.rpmMin,
             currentMax = cruise.rpmMax,
             onRangeChange = onRpmChange,
@@ -343,7 +307,7 @@ private fun CruiseSettingsSection(
             steps = 9999
         )
         ControlRangeSlider(
-            label = stringResource(R.string.cruise_speed_range, cruise.speedMin, cruise.speedMax),
+            label = stringResource(R.string.cruise_speed_range),
             currentMin = cruise.speedMin,
             currentMax = cruise.speedMax,
             onRangeChange = onSpeedChange,
@@ -351,25 +315,6 @@ private fun CruiseSettingsSection(
             steps = 249
         )
     }
-}
-
-@Composable
-private fun CruiseTextField(
-    value: Float, label: String, onValueChange: (Float) -> Unit, modifier: Modifier = Modifier
-) {
-    var textValue by remember(value) { mutableStateOf(value.toString()) }
-
-    OutlinedTextField(
-        value = textValue,
-        onValueChange = { newValue ->
-            textValue = newValue
-            newValue.toFloatOrNull()?.let { onValueChange(it) }
-        },
-        label = { Text(label) },
-        modifier = modifier,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-        singleLine = true,
-    )
 }
 
 @Composable
@@ -413,8 +358,7 @@ fun SettingsScreenPreview() {
         SettingsScreenContent(
             controlData = ControlData(
                 cruise = Cruise(
-                    acc = PID(p = 10.0f, i = 0.5f, d = 2.0f),
-                    dec = PID(p = 10.0f, i = 0.5f, d = 2.0f),
+                    pid = PID(p = 10.0f, i = 0.5f, d = 2.0f),
                     rpmMin = 2500,
                     rpmMax = 7000,
                     speedMin = 40,
@@ -434,8 +378,7 @@ fun SettingsScreenPreview() {
             onModeChange = {},
             onAccRangeChange = { _, _ -> },
             onServoRangeChange = { _, _ -> },
-            onCruiseAccPidChange = { _, _, _ -> },
-            onCruiseDecPidChange = { _, _, _ -> },
+            onCruisePidChange = { _, _, _ -> },
             onCruiseRpmChange = { _, _ -> },
             onCruiseSpeedChange = { _, _ -> },
             onCruiseLimiterUpChange = { _ -> },

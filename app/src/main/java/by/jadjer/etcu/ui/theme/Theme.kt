@@ -13,21 +13,29 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val _darkColorScheme = darkColorScheme(
-    primary = Primary,
-    secondary = Secondary,
-    tertiary = SecondaryContainer,
-    background = OnBackground,
-    surface = OnSurface,
-    onPrimary = OnPrimary,
-    onSecondary = OnSecondary,
-    onBackground = Background,
-    onSurface = Surface,
-    error = Error,
-    onError = OnError
+// ИСПРАВЛЕНО: Использование полноценных контрастных цветов для темной темы
+private val darkColorScheme = darkColorScheme(
+    primary = PrimaryDark,
+    onPrimary = OnPrimaryDark,
+    primaryContainer = PrimaryContainerDark,
+    onPrimaryContainer = OnPrimaryContainerDark,
+    secondary = SecondaryDark,
+    onSecondary = OnSecondaryDark,
+    secondaryContainer = SecondaryContainerDark,
+    onSecondaryContainer = OnSecondaryContainerDark,
+    background = BackgroundDark,
+    onBackground = OnBackgroundDark,
+    surface = SurfaceDark,
+    onSurface = OnSurfaceDark,
+    surfaceVariant = SurfaceVariantDark,
+    onSurfaceVariant = OnSurfaceVariantDark,
+    error = ErrorDark, // Теперь метка на графике в темной теме будет отлично читаться
+    onError = OnErrorDark,
+    errorContainer = ErrorContainerDark,
+    onErrorContainer = OnErrorContainerDark
 )
 
-private val _lightColorScheme = lightColorScheme(
+private val lightColorScheme = lightColorScheme(
     primary = Primary,
     onPrimary = OnPrimary,
     primaryContainer = PrimaryContainer,
@@ -43,7 +51,9 @@ private val _lightColorScheme = lightColorScheme(
     surfaceVariant = SurfaceVariant,
     onSurfaceVariant = OnSurfaceVariant,
     error = Error,
-    onError = OnError
+    onError = OnError,
+    errorContainer = ErrorContainer,
+    onErrorContainer = OnErrorContainer
 )
 
 @Composable
@@ -57,8 +67,8 @@ fun ETCUTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        darkTheme -> _darkColorScheme
-        else -> _lightColorScheme
+        darkTheme -> darkColorScheme
+        else -> lightColorScheme
     }
 
     val view = LocalView.current

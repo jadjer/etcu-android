@@ -56,8 +56,8 @@ fun <T> StatusGraphDialogContent(
     onDismiss: () -> Unit
 ) {
     val data = remember(history, selector) { history.map(selector) }
-    val minVal = remember(data, valueRange) { valueRange?.start ?: (data.minOrNull() ?: 0f) }
-    val maxVal = remember(data, valueRange) { valueRange?.endInclusive ?: (data.maxOrNull() ?: 0f) }
+    val minVal = remember(data) { data.minOrNull() ?: 0f }
+    val maxVal = remember(data) { data.maxOrNull() ?: 0f }
 
     val timeFormat = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
     val sessionStartStr = remember(startTime) {

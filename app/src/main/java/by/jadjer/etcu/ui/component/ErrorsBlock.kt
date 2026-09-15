@@ -17,16 +17,37 @@ import by.jadjer.etcu.ui.util.labelResId
 
 @Composable
 fun ErrorsBlock(activeErrors: List<SystemError>) {
-    Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-        Text(stringResource(R.string.diag_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
+    Column(Modifier
+        .fillMaxWidth()
+        .padding(vertical = 8.dp)) {
+        Text(
+            stringResource(R.string.diag_title),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
         if (activeErrors.isEmpty()) {
-            Box(Modifier.fillMaxWidth().background(Color(0xFFE8F5E9), RoundedCornerShape(8.dp)).padding(12.dp)) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFFE8F5E9), RoundedCornerShape(8.dp))
+                    .padding(12.dp)
+            ) {
                 Text(stringResource(R.string.diag_no_errors), color = Color(0xFF2E7D32))
             }
         } else {
             activeErrors.forEach { error ->
-                Box(Modifier.fillMaxWidth().padding(vertical = 4.dp).background(Color(0xFFFFEBEE), RoundedCornerShape(8.dp)).padding(12.dp)) {
-                    Text(stringResource(R.string.diag_error_item, stringResource(error.labelResId)), color = Color(0xFFC62828), style = MaterialTheme.typography.bodyMedium)
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                        .background(Color(0xFFFFEBEE), RoundedCornerShape(8.dp))
+                        .padding(12.dp)
+                ) {
+                    Text(
+                        stringResource(R.string.diag_error_item, stringResource(error.labelResId)),
+                        color = Color(0xFFC62828),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
             }
         }

@@ -112,8 +112,7 @@ class BLEDataParser {
     }
 
     private fun ByteBuffer.parseCruise() = Cruise(
-        acc = PID(p = float, i = float, d = float),
-        dec = PID(p = float, i = float, d = float),
+        pid = PID(p = float, i = float, d = float),
         rpmMin = uShort,
         rpmMax = uShort,
         speedMin = uByte,
@@ -170,12 +169,9 @@ class BLEDataParser {
     fun serializeControlData(data: ControlData): ByteArray {
         return ByteBuffer.allocate(CONTROL_DATA_SIZE).order(ByteOrder.LITTLE_ENDIAN)
             // Cruise
-            .putFloat(data.cruise.acc.p)
-            .putFloat(data.cruise.acc.i)
-            .putFloat(data.cruise.acc.d)
-            .putFloat(data.cruise.dec.p)
-            .putFloat(data.cruise.dec.i)
-            .putFloat(data.cruise.dec.d)
+            .putFloat(data.cruise.pid.p)
+            .putFloat(data.cruise.pid.i)
+            .putFloat(data.cruise.pid.d)
             .putShort(data.cruise.rpmMin.toShort())
             .putShort(data.cruise.rpmMax.toShort())
             .put(data.cruise.speedMin.toByte())

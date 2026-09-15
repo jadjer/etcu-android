@@ -7,8 +7,7 @@ data class PID(
 )
 
 data class Cruise(
-    val acc: PID = PID(),
-    val dec: PID = PID(),
+    val pid: PID = PID(),
     val rpmMin: Int = 0,
     val rpmMax: Int = 0,
     val speedMin: Int = 0,

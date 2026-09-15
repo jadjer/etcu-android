@@ -120,7 +120,7 @@
     <string name="sys_state_update">Update</string>
 
     <!-- Diagnostics -->
-    <string name="diag_error_item">⚠️ %s</string>
+    <string name="diag_error_item" translatable="false">⚠️ %s</string>
     <string name="diag_no_errors">✅ No errors detected</string>
     <string name="diag_title">Diagnostic Status:</string>
 
@@ -148,7 +148,7 @@
     <string name="mode_normal">Normal</string>
     <string name="mode_rain">Rain</string>
     <string name="mode_sport">Sport</string>
-    <string name="settings_accel_range">Accelerator range: from %1$d to %2$d</string>
+    <string name="settings_accel_range">Accelerator range</string>
     <string name="settings_accel_settings">Accelerator Settings</string>
     <string name="settings_board_version">Board Version</string>
     <string name="settings_build_date">Build Date</string>
@@ -157,7 +157,7 @@
     <string name="settings_device_settings">Device Settings</string>
     <string name="settings_firmware_version">Firmware Version</string>
     <string name="settings_operating_mode">Operating Mode</string>
-    <string name="settings_servo_range">Servo range: from %1$d to %2$d</string>
+    <string name="settings_servo_range">Servo range</string>
     <string name="settings_servo_settings">Servo Settings</string>
 
     <!-- Cruise Settings -->
@@ -165,18 +165,12 @@
     <string name="cruise_p" translatable="false">P</string>
     <string name="cruise_i" translatable="false">I</string>
     <string name="cruise_d" translatable="false">D</string>
-    <string name="cruise_acc_p">Acc P</string>
-    <string name="cruise_acc_i">Acc I</string>
-    <string name="cruise_acc_d">Acc D</string>
-    <string name="cruise_dec_p">Dec P</string>
-    <string name="cruise_dec_i">Dec I</string>
-    <string name="cruise_dec_d">Dec D</string>
     <string name="cruise_integral_min">Integral Min</string>
     <string name="cruise_integral_max">Integral Max</string>
     <string name="cruise_filter_alpha">Speed filter alpha</string>
     <string name="cruise_fade_duration">Fade duration (sec)</string>
-    <string name="cruise_rpm_limit">RPM limit: %1$d - %2$d</string>
-    <string name="cruise_speed_range">Operating speed: %1$d - %2$d km/h</string>
+    <string name="cruise_rpm_limit">RPM limit</string>
+    <string name="cruise_speed_range">Operating speed</string>
     <string name="cruise_limiter_brake">Braking limit:</string>
     <string name="cruise_limiter_accel">Acceleration limit:</string>
 
@@ -256,8 +250,8 @@
     <string name="cal_btn_reset">Reset Detection</string>
     <string name="cal_btn_apply_auto">Apply Detected</string>
     <string name="cal_btn_save">Save Calibration</string>
-    <string name="cal_hall_format">%1$d .. %2$d</string>
-    <string name="cal_value_format">%1$s: %2$d</string>
+    <string name="cal_hall_format" translatable="false">%1$d .. %2$d</string>
+    <string name="cal_value_format" translatable="false">%1$s: %2$d</string>
     <string name="cal_range_format" translatable="false">%1$s: %2$s</string>
     <string name="cal_min">Min</string>
     <string name="cal_max">Max</string>

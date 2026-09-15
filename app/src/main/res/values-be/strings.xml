@@ -116,7 +116,7 @@
     <string name="sys_state_update">Абнаўленне</string>
 
     <!-- Diagnostics -->
-    <string name="diag_error_item">⚠️ %s</string>
+
     <string name="diag_no_errors">✅ Памылак не выяўлена</string>
     <string name="diag_title">Статус дыягностыкі:</string>
 
@@ -139,7 +139,7 @@
     <string name="mode_normal">Нармальны</string>
     <string name="mode_rain">Дождж</string>
     <string name="mode_sport">Спорт</string>
-    <string name="settings_accel_range">Дыяпазон акселератара: ад %1$d да %2$d</string>
+    <string name="settings_accel_range">Дыяпазон акселератара</string>
     <string name="settings_accel_settings">Налады акселератара</string>
     <string name="settings_board_version">Версія платы</string>
     <string name="settings_build_date">Дата прашыўкі</string>
@@ -148,23 +148,23 @@
     <string name="settings_device_settings">Налады прылады</string>
     <string name="settings_firmware_version">Версія прашыўкі</string>
     <string name="settings_operating_mode">Рэжым працы</string>
-    <string name="settings_servo_range">Дыяпазон серва: ад %1$d да %2$d</string>
+    <string name="settings_servo_range">Дыяпазон серва</string>
     <string name="settings_servo_settings">Налады прывада</string>
 
     <!-- Cruise Settings -->
     <string name="cruise_settings_title">Налады круіз-кантролю</string>
-    <string name="cruise_acc_p">Паскарэнне P</string>
-    <string name="cruise_acc_i">Паскарэнне I</string>
-    <string name="cruise_acc_d">Паскарэнне D</string>
-    <string name="cruise_dec_p">Тармажэнне P</string>
-    <string name="cruise_dec_i">Тармажэнне I</string>
-    <string name="cruise_dec_d">Тармажэнне D</string>
+
+
+
+
+
+
     <string name="cruise_integral_min">Мін. інтэграл</string>
     <string name="cruise_integral_max">Макс. інтэграл</string>
     <string name="cruise_filter_alpha">Альфа фільтра хуткасці</string>
     <string name="cruise_fade_duration">Дліт. згасання (сек)</string>
-    <string name="cruise_rpm_limit">Агр. RPM: %1$d - %2$d</string>
-    <string name="cruise_speed_range">Раб. хуткасць: %1$d - %2$d км/г</string>
+    <string name="cruise_rpm_limit">Абмежаванне RPM</string>
+    <string name="cruise_speed_range">Працоўная хуткасць</string>
     <string name="cruise_limiter_brake">Ліміт тармажэння:</string>
     <string name="cruise_limiter_accel">Ліміт паскарэння:</string>
 
@@ -244,8 +244,8 @@
     <string name="cal_btn_reset">Скінуць пошук</string>
     <string name="cal_btn_apply_auto">Ужыць знойдзенае</string>
     <string name="cal_btn_save">Захаваць каліброўку</string>
-    <string name="cal_hall_format">%1$d .. %2$d</string>
-    <string name="cal_value_format">%1$s: %2$d</string>
+
+
     <string name="cal_min">Мін</string>
     <string name="cal_max">Макс</string>
     <!-- Permissions -->
@@ -253,5 +253,5 @@
     <string name="perm_desc">Для працы з BLE прыладамі дадатку неабходныя дазволы на сканаванне і падключэнне.</string>
     <string name="perm_btn_grant">Даць доступ</string>
     <string name="perm_btn_settings">Адкрыць налады</string>
-    <string name="cal_range_format" translatable="false">%1$s: %2$s</string>
+
 </resources>

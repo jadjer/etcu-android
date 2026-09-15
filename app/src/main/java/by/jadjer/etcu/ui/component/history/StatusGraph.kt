@@ -58,6 +58,7 @@ fun <T> StatusGraph(
     selector: (HistoryRecord<T>) -> Float,
     modifier: Modifier = Modifier,
     lineColor: Color = MaterialTheme.colorScheme.primary,
+    selectColor: Color = MaterialTheme.colorScheme.error,
     valueRange: ClosedFloatingPointRange<Float>? = null
 ) {
     if (history.size < 2) {
@@ -76,6 +77,7 @@ fun <T> StatusGraph(
     val graphWidth = (totalDurationMs * (10.dp.value / 1000f)).dp
 
     val scrollState = rememberScrollState()
+
     AutoScrollToEnd(history.size, scrollState)
 
     val textMeasurer = rememberTextMeasurer()
@@ -83,6 +85,8 @@ fun <T> StatusGraph(
         fontSize = 8.sp,
         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
     )
+
+    val gridColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
 
     var selectedPoint by remember { mutableStateOf<Pair<Long, Float>?>(null) }
     val timeFormat = remember { SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault()) }
@@ -101,7 +105,7 @@ fun <T> StatusGraph(
                         )
                     }",
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary
+                    color = selectColor,
                 )
             }
         }
@@ -151,10 +155,8 @@ fun <T> StatusGraph(
 
                                             PointerEventType.Release -> {
                                                 if (!isMoving) {
-                                                    val clickedTime =
-                                                        startTime + (change.position.x / size.width * totalDurationMs).toLong()
-                                                    val closest =
-                                                        history.minByOrNull { abs(it.timestamp - clickedTime) }
+                                                    val clickedTime = startTime + (change.position.x / size.width * totalDurationMs).toLong()
+                                                    val closest = history.minByOrNull { abs(it.timestamp - clickedTime) }
                                                     closest?.let {
                                                         selectedPoint = it.timestamp to selector(it)
                                                     }
@@ -181,7 +183,8 @@ fun <T> StatusGraph(
                         textMeasurer,
                         labelStyle,
                         viewportStart,
-                        viewportEnd
+                        viewportEnd,
+                        gridColor
                     )
 
                     drawGraphPath(
@@ -208,7 +211,7 @@ fun <T> StatusGraph(
                             valRange,
                             width,
                             height,
-                            lineColor
+                            selectColor
                         )
                     }
                 }
@@ -227,7 +230,8 @@ private fun EmptyGraphMessage(modifier: Modifier) {
     ) {
         Text(
             stringResource(R.string.telemetry_graph_no_data),
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -275,7 +279,8 @@ private fun DrawScope.drawGraphGrid(
     textMeasurer: TextMeasurer,
     labelStyle: TextStyle,
     viewportStart: Float,
-    viewportEnd: Float
+    viewportEnd: Float,
+    gridColor: Color
 ) {
     val tenSecondsMs = 10000L
     val labelFormat = SimpleDateFormat(
@@ -292,7 +297,7 @@ private fun DrawScope.drawGraphGrid(
         if (gridX > viewportEnd) break
         if (gridX >= viewportStart) {
             drawLine(
-                color = Color.LightGray.copy(alpha = 0.3f),
+                color = gridColor,
                 start = Offset(gridX, 0f),
                 end = Offset(gridX, height),
                 strokeWidth = 1.dp.toPx()
@@ -325,12 +330,11 @@ private fun DrawScope.drawGraphPath(
     viewportEnd: Float
 ) {
     val path = Path()
-    var isPathEmpty = true// Запас в пикселях, чтобы линии на стыке экрана не обрывались резко
+    var isPathEmpty = true
     val padding = 50f
     val activeRange = (viewportStart - padding)..(viewportEnd + padding)
     history.forEachIndexed { index, record ->
-        val x =
-            ((record.timestamp - startTime).toFloat() / totalDurationMs) * width// Оптимизация: обрабатываем только точки в зоне видимости (+/- запас)
+        val x = ((record.timestamp - startTime).toFloat() / totalDurationMs) * width
         if (x in activeRange) {
             val value = data[index]
             val y = height - ((value - minVal) / valRange * height)
@@ -340,7 +344,7 @@ private fun DrawScope.drawGraphPath(
             } else {
                 path.lineTo(x, y)
             }
-        } else if (!isPathEmpty && x > viewportEnd + padding) {// Если мы уже вышли далеко за правый край экрана — прерываем цикл,// так как следующие точки истории гарантированно не видны
+        } else if (!isPathEmpty && x > viewportEnd + padding) {
             return@forEachIndexed
         }
     }
@@ -363,7 +367,7 @@ private fun DrawScope.drawSelectionHighlight(
     val x = ((time - startTime).toFloat() / totalDurationMs) * width
     val y = height - ((value - minVal) / valRange * height)
     drawLine(
-        color = lineColor.copy(alpha = 0.5f),
+        color = lineColor.copy(alpha = 0.4f),
         start = Offset(x, 0f),
         end = Offset(x, height),
         strokeWidth = 1.dp.toPx()

@@ -104,17 +104,9 @@ class CalibrationViewModel(private val _repository: BLERepository) : ViewModel()
     fun applyDetected() {
         val detA = _detectedHallA.value
         val detB = _detectedHallB.value
-        val margin = 50
 
-        val finalA = CalibrationRange(
-            min = if (detA.max > detA.min) detA.min + margin else detA.min,
-            max = if (detA.max > detA.min) detA.max - margin else detA.max
-        )
-
-        val finalB = CalibrationRange(
-            min = if (detB.max > detB.min) detB.min + margin else detB.min,
-            max = if (detB.max > detB.min) detB.max - margin else detB.max
-        )
+        val finalA = calculateSafeRange(detA)
+        val finalB = calculateSafeRange(detB)
 
         _editingCalibration.update {
             it.copy(hallA = finalA, hallB = finalB)
@@ -135,5 +127,17 @@ class CalibrationViewModel(private val _repository: BLERepository) : ViewModel()
 
     fun saveCalibration() {
         _repository.sendCalibrationData(_editingCalibration.value)
+    }
+
+    private fun calculateSafeRange(detected: CalibrationRange): CalibrationRange {
+        val hasValidRange = detected.max > detected.min
+
+        val calculatedMin = if (hasValidRange) detected.min + 50 else detected.min
+        val calculatedMax = if (hasValidRange) detected.max - 50 else detected.max
+
+        return CalibrationRange(
+            min = calculatedMin,
+            max = calculatedMax.coerceAtLeast(calculatedMin)
+        )
     }
 }

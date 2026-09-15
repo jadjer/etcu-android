@@ -88,17 +88,9 @@ class DeviceViewModel(private val _repository: BLERepository) : ViewModel() {
         scheduleUpdate(updated)
     }
 
-    fun updateCruiseAccPID(p: Float, i: Float, d: Float) {
+    fun updateCruisePID(p: Float, i: Float, d: Float) {
         val updated = _controlData.value.copy(
-            cruise = _controlData.value.cruise.copy(acc = PID(p = p, i = i, d = d))
-        )
-        _controlData.value = updated
-        scheduleUpdate(updated)
-    }
-
-    fun updateCruiseDecPID(p: Float, i: Float, d: Float) {
-        val updated = _controlData.value.copy(
-            cruise = _controlData.value.cruise.copy(dec = PID(p = p, i = i, d = d))
+            cruise = _controlData.value.cruise.copy(pid = PID(p = p, i = i, d = d))
         )
         _controlData.value = updated
         scheduleUpdate(updated)
