@@ -43,7 +43,7 @@ fun ServoScreen(viewModel: DeviceViewModel) {
             when (label) {
                 posLabel -> TelemetryConstants.SERVO_POSITION_RANGE
                 curLabel -> TelemetryConstants.SERVO_CURRENT_RANGE
-                voltLabel -> TelemetryConstants.SERVO_VOLTAGE_RANGE
+                voltLabel -> TelemetryConstants.VOLTAGE_RANGE
                 tempLabel -> TelemetryConstants.TEMPERATURE_RANGE
                 else -> null
             }

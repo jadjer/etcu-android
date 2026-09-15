@@ -49,7 +49,7 @@ fun EcuScreen(viewModel: DeviceViewModel) {
                 rpmLabel -> TelemetryConstants.RPM_RANGE
                 speedLabel -> TelemetryConstants.SPEED_RANGE
                 tpsLabel -> TelemetryConstants.TPS_RANGE
-                batteryLabel -> TelemetryConstants.BATTERY_RANGE
+                batteryLabel -> TelemetryConstants.VOLTAGE_RANGE
                 mapLabel -> TelemetryConstants.MAP_RANGE
                 airTempLabel, coolantTempLabel -> TelemetryConstants.TEMPERATURE_RANGE
                 else -> null

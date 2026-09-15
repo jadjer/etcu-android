@@ -30,6 +30,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
@@ -47,6 +50,7 @@ import kotlinx.coroutines.flow.first
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.abs
 
 @Composable
 fun <T> StatusGraph(
@@ -70,7 +74,7 @@ fun <T> StatusGraph(
     val endTime = history.last().timestamp
     val totalDurationMs = endTime - startTime
     val graphWidth = (totalDurationMs * (10.dp.value / 1000f)).dp
-    
+
     val scrollState = rememberScrollState()
     AutoScrollToEnd(history.size, scrollState)
 
@@ -80,8 +84,33 @@ fun <T> StatusGraph(
         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
     )
 
+    var selectedPoint by remember { mutableStateOf<Pair<Long, Float>?>(null) }
+    val timeFormat = remember { SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault()) }
+
     Column(modifier = modifier) {
-        Row(modifier = Modifier.fillMaxWidth().height(220.dp)) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(20.dp), contentAlignment = Alignment.Center
+        ) {
+            if (selectedPoint != null) {
+                Text(
+                    text = "${timeFormat.format(Date(selectedPoint!!.first))}: ${
+                        "%.2f".format(
+                            selectedPoint!!.second
+                        )
+                    }",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(220.dp)
+        ) {
             YAxisLabels(minVal, maxVal, labelStyle)
 
             Spacer(Modifier.width(4.dp))
@@ -96,12 +125,92 @@ fun <T> StatusGraph(
                     modifier = Modifier
                         .width(graphWidth)
                         .fillMaxHeight()
+                        .pointerInput(history, totalDurationMs, startTime) {
+                            val touchSlop = viewConfiguration.touchSlop
+
+                            awaitPointerEventScope {
+                                var startX = 0f
+                                var isMoving = false
+
+                                while (true) {
+                                    val event = awaitPointerEvent(pass = PointerEventPass.Initial)
+                                    val change = event.changes.firstOrNull()
+
+                                    if (change != null) {
+                                        when (event.type) {
+                                            PointerEventType.Press -> {
+                                                startX = change.position.x
+                                                isMoving = false
+                                            }
+
+                                            PointerEventType.Move -> {
+                                                if (abs(change.position.x - startX) > touchSlop) {
+                                                    isMoving = true
+                                                }
+                                            }
+
+                                            PointerEventType.Release -> {
+                                                if (!isMoving) {
+                                                    val clickedTime =
+                                                        startTime + (change.position.x / size.width * totalDurationMs).toLong()
+                                                    val closest =
+                                                        history.minByOrNull { abs(it.timestamp - clickedTime) }
+                                                    closest?.let {
+                                                        selectedPoint = it.timestamp to selector(it)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                 ) {
                     val width = size.width
                     val height = size.height - 20.dp.toPx()
 
-                    drawGraphGrid(startTime, endTime, totalDurationMs, width, height, textMeasurer, labelStyle)
-                    drawGraphPath(data, history, startTime, totalDurationMs, minVal, valRange, width, height, lineColor)
+                    val viewportStart = scrollState.value.toFloat()
+                    val viewportEnd = viewportStart + width
+
+                    drawGraphGrid(
+                        startTime,
+                        endTime,
+                        totalDurationMs,
+                        width,
+                        height,
+                        textMeasurer,
+                        labelStyle,
+                        viewportStart,
+                        viewportEnd
+                    )
+
+                    drawGraphPath(
+                        data,
+                        history,
+                        startTime,
+                        totalDurationMs,
+                        minVal,
+                        valRange,
+                        width,
+                        height,
+                        lineColor,
+                        viewportStart,
+                        viewportEnd
+                    )
+
+                    selectedPoint?.let { (time, value) ->
+                        drawSelectionHighlight(
+                            time,
+                            value,
+                            startTime,
+                            totalDurationMs,
+                            minVal,
+                            valRange,
+                            width,
+                            height,
+                            lineColor
+                        )
+                    }
                 }
             }
         }
@@ -113,7 +222,7 @@ private fun EmptyGraphMessage(modifier: Modifier) {
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(220.dp), 
+            .height(220.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -147,7 +256,11 @@ private fun YAxisLabels(minVal: Float, maxVal: Float, style: TextStyle) {
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.End
     ) {
-        Text("%.1f".format(maxVal), style = style, textAlign = TextAlign.End)
+        Text(
+            "%.1f".format(maxVal),
+            style = style,
+            textAlign = TextAlign.End
+        )
         Text("%.1f".format((maxVal + minVal) / 2), style = style, textAlign = TextAlign.End)
         Text("%.1f".format(minVal), style = style, textAlign = TextAlign.End)
     }
@@ -160,28 +273,39 @@ private fun DrawScope.drawGraphGrid(
     width: Float,
     height: Float,
     textMeasurer: TextMeasurer,
-    labelStyle: TextStyle
+    labelStyle: TextStyle,
+    viewportStart: Float,
+    viewportEnd: Float
 ) {
     val tenSecondsMs = 10000L
-    val labelFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-    var currentGridTime = (startTime / tenSecondsMs + 1) * tenSecondsMs
-
+    val labelFormat = SimpleDateFormat(
+        "HH:mm:ss",
+        Locale.getDefault()
+    )
+    val estimatedMsPerPixel = totalDurationMs.toFloat() / width
+    val minVisibleTime = startTime + (viewportStart * estimatedMsPerPixel).toLong()
+    var currentGridTime =
+        ((minVisibleTime / tenSecondsMs) * tenSecondsMs).coerceAtLeast(startTime + tenSecondsMs)
     while (currentGridTime < endTime) {
-        val gridX = ((currentGridTime - startTime).toFloat() / totalDurationMs) * width
-        drawLine(
-            color = Color.LightGray.copy(alpha = 0.3f),
-            start = Offset(gridX, 0f),
-            end = Offset(gridX, height),
-            strokeWidth = 1.dp.toPx()
-        )
-
-        if (currentGridTime % 30000L == 0L) {
-            val timeStr = labelFormat.format(Date(currentGridTime))
-            val textLayoutResult = textMeasurer.measure(timeStr, labelStyle)
-            drawText(
-                textLayoutResult = textLayoutResult,
-                topLeft = Offset(gridX - textLayoutResult.size.width / 2, height + 4.dp.toPx())
+        val gridX =
+            ((currentGridTime - startTime).toFloat() / totalDurationMs) * width// Оптимизация: Выходим из цикла, если сетка ушла правее экрана
+        if (gridX > viewportEnd) break
+        if (gridX >= viewportStart) {
+            drawLine(
+                color = Color.LightGray.copy(alpha = 0.3f),
+                start = Offset(gridX, 0f),
+                end = Offset(gridX, height),
+                strokeWidth = 1.dp.toPx()
             )
+            if (currentGridTime % 30000L == 0L) {
+                val timeStr = labelFormat.format(Date(currentGridTime))
+                val textLayoutResult = textMeasurer.measure(timeStr, labelStyle)
+
+                drawText(
+                    textLayoutResult = textLayoutResult,
+                    topLeft = Offset(gridX - textLayoutResult.size.width / 2, height + 4.dp.toPx())
+                )
+            }
         }
         currentGridTime += tenSecondsMs
     }
@@ -196,17 +320,55 @@ private fun DrawScope.drawGraphPath(
     valRange: Float,
     width: Float,
     height: Float,
-    lineColor: Color
+    lineColor: Color,
+    viewportStart: Float,
+    viewportEnd: Float
 ) {
-    val path = Path().apply {
-        history.forEachIndexed { index, record ->
+    val path = Path()
+    var isPathEmpty = true// Запас в пикселях, чтобы линии на стыке экрана не обрывались резко
+    val padding = 50f
+    val activeRange = (viewportStart - padding)..(viewportEnd + padding)
+    history.forEachIndexed { index, record ->
+        val x =
+            ((record.timestamp - startTime).toFloat() / totalDurationMs) * width// Оптимизация: обрабатываем только точки в зоне видимости (+/- запас)
+        if (x in activeRange) {
             val value = data[index]
-            val x = ((record.timestamp - startTime).toFloat() / totalDurationMs) * width
             val y = height - ((value - minVal) / valRange * height)
-            if (index == 0) moveTo(x, y) else lineTo(x, y)
+            if (isPathEmpty) {
+                path.moveTo(x, y)
+                isPathEmpty = false
+            } else {
+                path.lineTo(x, y)
+            }
+        } else if (!isPathEmpty && x > viewportEnd + padding) {// Если мы уже вышли далеко за правый край экрана — прерываем цикл,// так как следующие точки истории гарантированно не видны
+            return@forEachIndexed
         }
     }
-    drawPath(path = path, color = lineColor, style = Stroke(width = 2.dp.toPx()))
+    if (!isPathEmpty) {
+        drawPath(path = path, color = lineColor, style = Stroke(width = 2.dp.toPx()))
+    }
+}
+
+private fun DrawScope.drawSelectionHighlight(
+    time: Long,
+    value: Float,
+    startTime: Long,
+    totalDurationMs: Long,
+    minVal: Float,
+    valRange: Float,
+    width: Float,
+    height: Float,
+    lineColor: Color
+) {
+    val x = ((time - startTime).toFloat() / totalDurationMs) * width
+    val y = height - ((value - minVal) / valRange * height)
+    drawLine(
+        color = lineColor.copy(alpha = 0.5f),
+        start = Offset(x, 0f),
+        end = Offset(x, height),
+        strokeWidth = 1.dp.toPx()
+    )
+    drawCircle(color = lineColor, radius = 5.dp.toPx(), center = Offset(x, y))
 }
 
 @Preview(showBackground = true)
@@ -222,10 +384,7 @@ private fun StatusGraphPreview() {
                 HistoryRecord(SystemTelemetry(), now - 2000),
                 HistoryRecord(SystemTelemetry(), now - 1000),
                 HistoryRecord(SystemTelemetry(), now),
-            ),
-            selector = { 10f },
-            valueRange = 0f..100f,
-            modifier = Modifier.padding(16.dp)
+            ), selector = { 10f }, valueRange = 0f..100f, modifier = Modifier.padding(16.dp)
         )
     }
 }
