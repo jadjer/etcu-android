@@ -37,6 +37,7 @@ fun <T> StatusGraphDialog(
             unit = unit,
             history = group.history,
             selector = selector,
+            valueRange = group.valueRange,
             startTime = group.history.firstOrNull()?.timestamp ?: 0L,
             onDismiss = onDismiss
         )
@@ -50,12 +51,13 @@ fun <T> StatusGraphDialogContent(
     unit: String,
     history: List<HistoryRecord<T>>,
     selector: (HistoryRecord<T>) -> Float,
+    valueRange: ClosedFloatingPointRange<Float>? = null,
     startTime: Long = 0,
     onDismiss: () -> Unit
 ) {
     val data = remember(history, selector) { history.map(selector) }
-    val minVal = remember(data) { data.minOrNull() }
-    val maxVal = remember(data) { data.maxOrNull() }
+    val minVal = remember(data, valueRange) { valueRange?.start ?: (data.minOrNull() ?: 0f) }
+    val maxVal = remember(data, valueRange) { valueRange?.endInclusive ?: (data.maxOrNull() ?: 0f) }
 
     val timeFormat = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
     val sessionStartStr = remember(startTime) {
@@ -103,7 +105,7 @@ fun <T> StatusGraphDialogContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = minVal?.let { "%.1f".format(it) } ?: "-",
+                        text = "%.1f".format(minVal),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -137,7 +139,7 @@ fun <T> StatusGraphDialogContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = maxVal?.let { "%.1f".format(it) } ?: "-",
+                        text = "%.1f".format(maxVal),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -149,6 +151,7 @@ fun <T> StatusGraphDialogContent(
             StatusGraph(
                 history = history,
                 selector = selector,
+                valueRange = valueRange,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)

@@ -16,19 +16,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.telemetry.ServoTelemetry
+import by.jadjer.etcu.domain.model.telemetry.TelemetryConstants
 import by.jadjer.etcu.ui.component.StatusIndicator
 import by.jadjer.etcu.ui.component.StatusRow
-import by.jadjer.etcu.ui.component.history.HistoryGroup
-import by.jadjer.etcu.ui.component.history.StatusGraphDialog
+import by.jadjer.etcu.ui.component.history.rememberTelemetryHistoryState
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
 
 @Composable
@@ -36,23 +33,29 @@ fun ServoScreen(viewModel: DeviceViewModel) {
     val uiState by viewModel.uiState.collectAsState()
     val telemetry by viewModel.telemetry.collectAsState()
 
-    var showDialog by remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
+    val posLabel = stringResource(R.string.servo_position)
+    val curLabel = stringResource(R.string.servo_current)
+    val voltLabel = stringResource(R.string.servo_voltage)
+    val tempLabel = stringResource(R.string.servo_temp)
 
-    ServoScreenContent(
-        telemetry = telemetry.servo,
-        onValueClick = { label, unit, selector ->
-            showDialog = {
-                val group = HistoryGroup(
-                    history = uiState.telemetryHistory.servo,
-                    selector = selector,
-                    currentValue = selector(telemetry.servo)
-                )
-                StatusGraphDialog(label, unit, group) { showDialog = null }
+    val historyState = rememberTelemetryHistoryState<ServoTelemetry>(
+        rangeProvider = { label ->
+            when (label) {
+                posLabel -> TelemetryConstants.SERVO_POSITION_RANGE
+                curLabel -> TelemetryConstants.SERVO_CURRENT_RANGE
+                voltLabel -> TelemetryConstants.SERVO_VOLTAGE_RANGE
+                tempLabel -> TelemetryConstants.TEMPERATURE_RANGE
+                else -> null
             }
         }
     )
 
-    showDialog?.invoke()
+    ServoScreenContent(
+        telemetry = telemetry.servo,
+        onValueClick = historyState::onValueClick
+    )
+
+    historyState.ShowDialog(history = uiState.telemetryHistory.servo, currentTelemetry = telemetry.servo)
 }
 
 @Composable

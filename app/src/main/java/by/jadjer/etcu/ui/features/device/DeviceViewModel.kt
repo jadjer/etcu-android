@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import by.jadjer.etcu.domain.model.control.ControlConstants
 import by.jadjer.etcu.domain.model.control.ControlData
 import by.jadjer.etcu.domain.model.control.OperatingMode
+import by.jadjer.etcu.domain.model.control.PID
 import by.jadjer.etcu.domain.model.system.SystemInfo
 import by.jadjer.etcu.domain.model.telemetry.SystemTelemetry
 import by.jadjer.etcu.domain.model.telemetry.TelemetryHistory
@@ -87,9 +88,17 @@ class DeviceViewModel(private val _repository: BLERepository) : ViewModel() {
         scheduleUpdate(updated)
     }
 
-    fun updateCruisePID(p: Float, i: Float, d: Float) {
+    fun updateCruiseAccPID(p: Float, i: Float, d: Float) {
         val updated = _controlData.value.copy(
-            cruise = _controlData.value.cruise.copy(p = p, i = i, d = d)
+            cruise = _controlData.value.cruise.copy(acc = PID(p = p, i = i, d = d))
+        )
+        _controlData.value = updated
+        scheduleUpdate(updated)
+    }
+
+    fun updateCruiseDecPID(p: Float, i: Float, d: Float) {
+        val updated = _controlData.value.copy(
+            cruise = _controlData.value.cruise.copy(dec = PID(p = p, i = i, d = d))
         )
         _controlData.value = updated
         scheduleUpdate(updated)

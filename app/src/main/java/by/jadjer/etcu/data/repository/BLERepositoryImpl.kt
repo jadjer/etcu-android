@@ -8,10 +8,10 @@ import by.jadjer.etcu.domain.model.control.ControlData
 import by.jadjer.etcu.domain.model.ota.OTAChunk
 import by.jadjer.etcu.domain.model.ota.OTAStatus
 import by.jadjer.etcu.domain.model.system.SystemInfo
-import by.jadjer.etcu.domain.model.telemetry.HistoryRecord
 import by.jadjer.etcu.domain.model.telemetry.SystemTelemetry
 import by.jadjer.etcu.domain.model.telemetry.TelemetryHistory
 import by.jadjer.etcu.domain.repository.BLERepository
+import by.jadjer.etcu.domain.util.TelemetryHistoryManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -25,6 +25,7 @@ class BLERepositoryImpl(
     private val _bleManager: BLEManager,
     scope: CoroutineScope
 ) : BLERepository {
+    private val _historyManager = TelemetryHistoryManager()
     override val connectionState: StateFlow<ConnectionState> = _bleManager.connectionState
     override val connectionDetail: StateFlow<String?> = _bleManager.connectionDetail
     override val isManualForget: StateFlow<Boolean> = _bleManager.isManualForget
@@ -42,16 +43,7 @@ class BLERepositoryImpl(
 
     init {
         telemetry.onEach { t ->
-            val timestamp = System.currentTimeMillis()
-            _history.update { h ->
-                h.copy(
-                    status = (h.status + HistoryRecord(t.status, timestamp)).takeLast(1000),
-                    ecu = (h.ecu + HistoryRecord(t.ecu, timestamp)).takeLast(1000),
-                    servo = (h.servo + HistoryRecord(t.servo, timestamp)).takeLast(1000),
-                    cruise = (h.cruise + HistoryRecord(t.cruise, timestamp)).takeLast(1000),
-                    accelerator = (h.accelerator + HistoryRecord(t.accelerator, timestamp)).takeLast(1000)
-                )
-            }
+            _history.update { h -> _historyManager.updateHistory(h, t) }
         }.launchIn(scope)
     }
 

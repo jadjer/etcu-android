@@ -18,10 +18,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.telemetry.CruiseTelemetry
+import by.jadjer.etcu.domain.model.telemetry.TelemetryConstants
 import by.jadjer.etcu.ui.component.StatusIndicator
 import by.jadjer.etcu.ui.component.StatusRow
-import by.jadjer.etcu.ui.component.history.HistoryGroup
-import by.jadjer.etcu.ui.component.history.StatusGraphDialog
+import by.jadjer.etcu.ui.component.history.rememberTelemetryHistoryState
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
 
 @Composable
@@ -29,23 +29,31 @@ fun CruiseScreen(viewModel: DeviceViewModel) {
     val uiState by viewModel.uiState.collectAsState()
     val telemetry by viewModel.telemetry.collectAsState()
 
-    var showDialog by remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
+    val targetSpeedLabel = stringResource(R.string.cruise_target_speed)
+    val currentSpeedLabel = stringResource(R.string.cruise_current_speed)
+    val errorLabel = stringResource(R.string.cruise_error)
+    val corrLabel = stringResource(R.string.cruise_correction)
+    val basePosLabel = stringResource(R.string.cruise_base_pos)
+    val targetPosLabel = stringResource(R.string.cruise_target_pos)
+    val currentPosLabel = stringResource(R.string.cruise_current_pos)
 
-    CruiseScreenContent(
-        telemetry = telemetry.cruise,
-        onValueClick = { label, unit, selector ->
-            showDialog = {
-                val group = HistoryGroup(
-                    history = uiState.telemetryHistory.cruise,
-                    selector = selector,
-                    currentValue = selector(telemetry.cruise)
-                )
-                StatusGraphDialog(label, unit, group) { showDialog = null }
+    val historyState = rememberTelemetryHistoryState<CruiseTelemetry>(
+        rangeProvider = { label ->
+            when (label) {
+                targetSpeedLabel, currentSpeedLabel -> TelemetryConstants.SPEED_RANGE
+                errorLabel, corrLabel -> TelemetryConstants.CRUISE_ERROR_RANGE
+                basePosLabel, targetPosLabel, currentPosLabel -> TelemetryConstants.POSITION_RANGE
+                else -> null
             }
         }
     )
 
-    showDialog?.invoke()
+    CruiseScreenContent(
+        telemetry = telemetry.cruise,
+        onValueClick = historyState::onValueClick
+    )
+
+    historyState.ShowDialog(history = uiState.telemetryHistory.cruise, currentTelemetry = telemetry.cruise)
 }
 
 @Composable
@@ -56,8 +64,9 @@ fun CruiseScreenContent(
     val errorLabel = stringResource(R.string.cruise_error)
     val corrLabel = stringResource(R.string.cruise_correction)
     val targetSpeedLabel = stringResource(R.string.cruise_target_speed)
+    val currentSpeedLabel = stringResource(R.string.cruise_current_speed)
     val basePosLabel = stringResource(R.string.cruise_base_pos)
-    val targetPosLabel = stringResource(R.string.cruise_target_pos)
+    val currentPosLabel = stringResource(R.string.cruise_current_pos)
 
     val speedUnit = stringResource(R.string.unit_kmh)
     val posUnit = stringResource(R.string.unit_raw_1000)
@@ -95,11 +104,11 @@ fun CruiseScreenContent(
         )
 
         StatusRow(
-            label = "Current speed",
+            label = currentSpeedLabel,
             value = telemetry.currentSpeed.toString(),
             unit = speedUnit,
             icon = Icons.Default.Speed,
-            onClick = { onValueClick(targetSpeedLabel, speedUnit) { it.currentSpeed.toFloat() } }
+            onClick = { onValueClick(currentSpeedLabel, speedUnit) { it.currentSpeed.toFloat() } }
         )
 
         HorizontalDivider()
@@ -120,30 +129,22 @@ fun CruiseScreenContent(
             onClick = { onValueClick(corrLabel, floatUnit) { it.correction } }
         )
 
-        StatusRow(
-            label = "Derivative",
-            value = "%.2f".format(telemetry.derivative),
-            unit = floatUnit,
-            icon = Icons.AutoMirrored.Filled.ShowChart,
-            onClick = { onValueClick(corrLabel, floatUnit) { it.derivative } }
-        )
-
         HorizontalDivider()
 
         StatusRow(
-            label = "Last position",
-            value = telemetry.lastPosition.toString(),
+            label = basePosLabel,
+            value = telemetry.basePosition.toString(),
             unit = posUnit,
             icon = Icons.Default.LocationSearching,
-            onClick = { onValueClick(basePosLabel, posUnit) { it.lastPosition.toFloat() } }
+            onClick = { onValueClick(basePosLabel, posUnit) { it.basePosition.toFloat() } }
         )
 
         StatusRow(
-            label = "Current position",
+            label = currentPosLabel,
             value = telemetry.currentPosition.toString(),
             unit = posUnit,
             icon = Icons.Default.Timeline,
-            onClick = { onValueClick(targetPosLabel, posUnit) { it.currentPosition.toFloat() } }
+            onClick = { onValueClick(currentPosLabel, posUnit) { it.currentPosition.toFloat() } }
         )
     }
 }
@@ -159,12 +160,11 @@ fun CruiseScreenPreview() {
 
                 error = 1.5f,
                 correction = 10.0f,
-                derivative = 5.0f,
 
                 targetSpeed = 60,
                 currentSpeed = 58,
 
-                lastPosition = 285,
+                basePosition = 285,
                 currentPosition = 310
             ),
             onValueClick = { _, _, _ -> }

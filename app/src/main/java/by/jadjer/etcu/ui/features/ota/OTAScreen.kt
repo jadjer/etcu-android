@@ -182,6 +182,16 @@ fun OtaScreenContent(
                         stringResource(R.string.ota_chunks_remaining, state.totalChunks - state.currentChunk),
                         style = MaterialTheme.typography.bodyMedium
                     )
+                    
+                    val seconds = (state.estimatedTimeMs / 1000) % 60
+                    val minutes = (state.estimatedTimeMs / (1000 * 60)) % 60
+                    val timeStr = "%02d:%02d".format(minutes, seconds)
+                    
+                    Text(
+                        stringResource(R.string.ota_time_remaining, timeStr),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
             OTAState.Success -> {
@@ -207,12 +217,12 @@ fun OtaScreenContent(
 fun OtaScreenPreview() {
     MaterialTheme {
         OtaScreenContent(
-            state = OTAState.UpdateAvailable(
-                currentVersion = "1.0.0",
-                latestVersion = "1.1.0",
-                description = "• Added new features\n• Fixed bugs\n• Improved performance",
-                downloadUrl = "",
-                size = 1024
+            state = OTAState.Uploading(
+                progress = 0.5f,
+                currentChunk = 50,
+                totalChunks = 100,
+                firmwareSize = 51200,
+                estimatedTimeMs = 5000
             ),
             onCheckUpdates = {},
             onStartUpdate = { _, _ -> }

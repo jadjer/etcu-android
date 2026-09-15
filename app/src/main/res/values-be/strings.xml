@@ -52,7 +52,7 @@
     <string name="ecu_coolant_temp">Тэмп. ахаладж. вадкасці</string>
     <string name="ecu_disconnected">Няма сувязі</string>
     <string name="ecu_engine_started">Запушчаны</string>
-    <string name="ecu_engine_status">Рухавік запушчаны</string>
+    <string name="ecu_engine_status">Рухавік</string>
     <string name="ecu_engine_stopped">Спынены</string>
     <string name="ecu_map">Ціск у калектары</string>
     <string name="ecu_neutral_off">На перадачы</string>
@@ -88,6 +88,8 @@
     <string name="cruise_target_speed">Мэтавая хуткасць</string>
     <string name="cruise_base_pos">Базавая пазіцыя</string>
     <string name="cruise_target_pos">Мэтавая пазіцыя</string>
+    <string name="cruise_current_pos">Бягучая пазіцыя</string>
+    <string name="cruise_current_speed">Бягучая хуткасць</string>
 
     <!-- System Screen -->
     <string name="system_accel">Акселератар</string>
@@ -151,6 +153,12 @@
 
     <!-- Cruise Settings -->
     <string name="cruise_settings_title">Налады круіз-кантролю</string>
+    <string name="cruise_acc_p">Паскарэнне P</string>
+    <string name="cruise_acc_i">Паскарэнне I</string>
+    <string name="cruise_acc_d">Паскарэнне D</string>
+    <string name="cruise_dec_p">Тармажэнне P</string>
+    <string name="cruise_dec_i">Тармажэнне I</string>
+    <string name="cruise_dec_d">Тармажэнне D</string>
     <string name="cruise_integral_min">Мін. інтэграл</string>
     <string name="cruise_integral_max">Макс. інтэграл</string>
     <string name="cruise_filter_alpha">Альфа фільтра хуткасці</string>
@@ -222,6 +230,7 @@
     <string name="ota_success">Абнаўленне паспяхова завершана!</string>
     <string name="ota_title">Абнаўленне прашыўкі</string>
     <string name="ota_up_to_date">Прашыўка актуальная</string>
+    <string name="ota_time_remaining">Засталося часу: %s</string>
     <string name="ota_update_available">Даступная новая версія: %s</string>
     <string name="ota_uploading_progress">Перадача прашыўкі: %d%%</string>
 

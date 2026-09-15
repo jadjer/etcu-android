@@ -23,9 +23,8 @@ class BLEDataParserTest {
 
     @Test
     fun `parseControlData parses correctly`() {
-        // CONTROL_DATA_SIZE = 43
-        val buffer = ByteBuffer.allocate(43).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.position(35) // Skip cruise
+        val buffer = ByteBuffer.allocate(BLEConstants.CONTROL_DATA_SIZE).order(ByteOrder.LITTLE_ENDIAN)
+        buffer.position(34) // Skip cruise
         buffer.putShort(100.toShort()) // min
         buffer.putShort(600.toShort()) // max
         buffer.putShort(150.toShort()) // min
@@ -42,7 +41,7 @@ class BLEDataParserTest {
 
     @Test
     fun `parseCalibrationData parses correctly`() {
-        val bytes = ByteBuffer.allocate(12).order(ByteOrder.LITTLE_ENDIAN)
+        val bytes = ByteBuffer.allocate(BLEConstants.CALIBRATION_DATA_SIZE).order(ByteOrder.LITTLE_ENDIAN)
             .putShort(1000.toShort()).putShort(2000.toShort()) // HallA
             .putShort(1100.toShort()).putShort(2100.toShort()) // HallB
             .putShort(1200.toShort()).putShort(2200.toShort()) // Servo
@@ -60,7 +59,7 @@ class BLEDataParserTest {
 
     @Test
     fun `parseSystemInfo parses strings correctly`() {
-        val bytes = ByteArray(48)
+        val bytes = ByteArray(BLEConstants.SYSTEM_INFO_SIZE)
         "2026-08-29".toByteArray().copyInto(bytes, 0)
         "V1.0".toByteArray().copyInto(bytes, 16)
         "FW-2.0".toByteArray().copyInto(bytes, 32)
@@ -74,42 +73,47 @@ class BLEDataParserTest {
 
     @Test
     fun `parseSystemTelemetry parses correctly`() {
-        // TELEMETRY_SIZE = 55
-        val buffer = ByteBuffer.allocate(55).order(ByteOrder.LITTLE_ENDIAN)
+        val buffer = ByteBuffer.allocate(BLEConstants.TELEMETRY_SIZE).order(ByteOrder.LITTLE_ENDIAN)
         buffer.put(1.toByte()) // isGuardActive
         buffer.put(0.toByte()) // isBrakeEnabled
         buffer.putShort(300.toShort()) // throttlePosition
+        
         // ECU Telemetry (15 bytes)
         buffer.put(1.toByte()) // isConnected
         buffer.put(1.toByte()) // isStarted
         buffer.put(0.toByte()) // isNeutral
         buffer.putShort(3000.toShort()) // rpm
-        buffer.putFloat(14.5f) // battery
         buffer.put(60.toByte()) // speed
         buffer.put(90.toByte()) // map
         buffer.putShort(2500.toShort()) // tps
+        buffer.putFloat(14.5f) // battery
         buffer.put(45.toByte()) // airTemp
         buffer.put(85.toByte()) // coolantTemp
+        
         // Servo Telemetry (12 bytes)
         buffer.put(1.toByte()) // isConnected
         buffer.put(1.toByte()) // isEnabled
         buffer.put(0.toByte()) // isMoved
-        buffer.putFloat(12.2f) // voltage
         buffer.putShort(500.toShort()) // current
+        buffer.putFloat(12.2f) // voltage
         buffer.putShort(1500.toShort()) // position
         buffer.put(50.toByte()) // temperature
-        // Cruise Telemetry (15 bytes)
+        
+        // Cruise Telemetry (16 bytes)
         buffer.put(1.toByte()) // isEnabled
         buffer.put(0.toByte()) // isActivated
         buffer.putFloat(1.5f) // error
         buffer.putFloat(2.5f) // correction
         buffer.put(100.toByte()) // targetSpeed
+        buffer.put(70.toByte()) // currentSpeed
         buffer.putShort(1200.toShort()) // basePosition
-        buffer.putShort(1300.toShort()) // targetPosition
+        buffer.putShort(1300.toShort()) // currentPosition
+        
         // Accelerator Telemetry (6 bytes)
         buffer.putShort(1000.toShort()) // hallA
         buffer.putShort(2000.toShort()) // hallB
         buffer.putShort(1500.toShort()) // position
+        
         // System level fields
         buffer.put(SystemState.NORMAL.value.toByte()) // systemState
         buffer.putShort(0.toShort()) // activeErrors (None)
@@ -174,7 +178,7 @@ class BLEDataParserTest {
         val bytes = _parser.serializeControlData(data)
         val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
         
-        buffer.position(35) // Skip cruise
+        buffer.position(34) // Skip cruise
         assertEquals(100, buffer.short.toInt() and 0xFFFF)
         assertEquals(600, buffer.short.toInt() and 0xFFFF)
         assertEquals(150, buffer.short.toInt() and 0xFFFF)
@@ -201,7 +205,7 @@ class BLEDataParserTest {
 
     @Test
     fun `serializeOtaChunk serializes correctly`() {
-        val chunkData = ByteArray(500) { it.toByte() }
+        val chunkData = ByteArray(BLEConstants.OTA_PAYLOAD_SIZE) { it.toByte() }
         val chunk = OTAChunk(
             firmwareSize = 10000L,
             totalChunks = 20,
@@ -215,7 +219,7 @@ class BLEDataParserTest {
         assertEquals(20.toShort(), buffer.short)
         assertEquals(5.toShort(), buffer.short)
 
-        val actualData = ByteArray(500)
+        val actualData = ByteArray(BLEConstants.OTA_PAYLOAD_SIZE)
         buffer.get(actualData)
         assertEquals(chunkData.toList(), actualData.toList())
     }

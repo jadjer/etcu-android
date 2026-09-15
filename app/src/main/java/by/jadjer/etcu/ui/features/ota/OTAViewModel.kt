@@ -29,7 +29,13 @@ sealed class OTAState {
     ) : OTAState()
     data object UpToDate : OTAState()
     data class Downloading(val progress: Float) : OTAState()
-    data class Uploading(val progress: Float, val currentChunk: Int, val totalChunks: Int, val firmwareSize: Long) : OTAState()
+    data class Uploading(
+        val progress: Float,
+        val currentChunk: Int,
+        val totalChunks: Int,
+        val firmwareSize: Long,
+        val estimatedTimeMs: Long
+    ) : OTAState()
     data object Success : OTAState()
     data class Error(val message: String) : OTAState()
 }
@@ -187,12 +193,15 @@ class OtaViewModel(
 
         val showIndex = index + 1
         val uploadProgress = showIndex.toFloat() / _totalChunks
+        val remainingChunks = _totalChunks - showIndex
+        val estimatedTimeMs = remainingChunks * 100L
 
         _state.value = OTAState.Uploading(
             progress = uploadProgress,
             currentChunk = showIndex,
             totalChunks = _totalChunks,
-            firmwareSize = data.size.toLong()
+            firmwareSize = data.size.toLong(),
+            estimatedTimeMs = estimatedTimeMs
         )
     }
 }

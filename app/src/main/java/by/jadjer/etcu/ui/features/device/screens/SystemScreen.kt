@@ -17,9 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,10 +25,10 @@ import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.system.SystemState
 import by.jadjer.etcu.domain.model.telemetry.AcceleratorTelemetry
 import by.jadjer.etcu.domain.model.telemetry.SystemStatusTelemetry
+import by.jadjer.etcu.domain.model.telemetry.TelemetryConstants
 import by.jadjer.etcu.ui.component.StatusIndicator
 import by.jadjer.etcu.ui.component.StatusRow
-import by.jadjer.etcu.ui.component.history.HistoryGroup
-import by.jadjer.etcu.ui.component.history.StatusGraphDialog
+import by.jadjer.etcu.ui.component.history.rememberTelemetryHistoryState
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
 import by.jadjer.etcu.ui.util.labelResId
 
@@ -40,34 +37,23 @@ fun SystemScreen(viewModel: DeviceViewModel) {
     val uiState by viewModel.uiState.collectAsState()
     val telemetry by viewModel.telemetry.collectAsState()
 
-    var showDialog by remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
+    val accHistoryState = rememberTelemetryHistoryState<AcceleratorTelemetry>(
+        rangeProvider = { TelemetryConstants.POSITION_RANGE }
+    )
+
+    val thrHistoryState = rememberTelemetryHistoryState<SystemStatusTelemetry>(
+        rangeProvider = { TelemetryConstants.POSITION_RANGE }
+    )
 
     SystemScreenContent(
         statusTelemetry = telemetry.status,
         acceleratorTelemetry = telemetry.accelerator,
-        onAcceleratorClick = { label, unit, selector ->
-            showDialog = {
-                val group = HistoryGroup(
-                    history = uiState.telemetryHistory.accelerator,
-                    selector = selector,
-                    currentValue = selector(telemetry.accelerator)
-                )
-                StatusGraphDialog(label, unit, group) { showDialog = null }
-            }
-        },
-        onThrottleClick = { label, unit, selector ->
-            showDialog = {
-                val group = HistoryGroup(
-                    history = uiState.telemetryHistory.status,
-                    selector = selector,
-                    currentValue = selector(telemetry.status)
-                )
-                StatusGraphDialog(label, unit, group) { showDialog = null }
-            }
-        }
+        onAcceleratorClick = accHistoryState::onValueClick,
+        onThrottleClick = thrHistoryState::onValueClick
     )
 
-    showDialog?.invoke()
+    accHistoryState.ShowDialog(history = uiState.telemetryHistory.accelerator, currentTelemetry = telemetry.accelerator)
+    thrHistoryState.ShowDialog(history = uiState.telemetryHistory.status, currentTelemetry = telemetry.status)
 }
 
 @Composable

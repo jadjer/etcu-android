@@ -52,7 +52,7 @@
     <string name="ecu_coolant_temp">Темп. охлажд. жидкости</string>
     <string name="ecu_disconnected">Нет связи</string>
     <string name="ecu_engine_started">Запущен</string>
-    <string name="ecu_engine_status">Двигатель запущен</string>
+    <string name="ecu_engine_status">Двигатель</string>
     <string name="ecu_engine_stopped">Остановлен</string>
     <string name="ecu_map">Давление в коллекторе</string>
     <string name="ecu_neutral_off">На передаче</string>
@@ -88,6 +88,8 @@
     <string name="cruise_target_speed">Целевая скорость</string>
     <string name="cruise_base_pos">Базовая позиция</string>
     <string name="cruise_target_pos">Целевая позиция</string>
+    <string name="cruise_current_pos">Текущая позиция</string>
+    <string name="cruise_current_speed">Текущая скорость</string>
 
     <!-- System Screen -->
     <string name="system_accel">Акселератор</string>
@@ -151,6 +153,12 @@
 
     <!-- Cruise Settings -->
     <string name="cruise_settings_title">Настройки круиз-контроля</string>
+    <string name="cruise_acc_p">Ускорение P</string>
+    <string name="cruise_acc_i">Ускорение I</string>
+    <string name="cruise_acc_d">Ускорение D</string>
+    <string name="cruise_dec_p">Торможение P</string>
+    <string name="cruise_dec_i">Торможение I</string>
+    <string name="cruise_dec_d">Торможение D</string>
     <string name="cruise_integral_min">Мин. интеграл</string>
     <string name="cruise_integral_max">Макс. интеграл</string>
     <string name="cruise_filter_alpha">Альфа фильтра скорости</string>
@@ -222,6 +230,7 @@
     <string name="ota_success">Обновление успешно завершено!</string>
     <string name="ota_title">Обновление прошивки</string>
     <string name="ota_up_to_date">Прошивка актуальна</string>
+    <string name="ota_time_remaining">Осталось времени: %s</string>
     <string name="ota_update_available">Доступна новая версия: %s</string>
     <string name="ota_uploading_progress">Передача прошивки: %d%%</string>
 

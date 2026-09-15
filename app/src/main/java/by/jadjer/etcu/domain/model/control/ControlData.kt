@@ -1,9 +1,14 @@
 package by.jadjer.etcu.domain.model.control
 
-data class Cruise(
+data class PID(
     val p: Float = 0.0f,
     val i: Float = 0.0f,
     val d: Float = 0.0f,
+)
+
+data class Cruise(
+    val acc: PID = PID(),
+    val dec: PID = PID(),
     val rpmMin: Int = 0,
     val rpmMax: Int = 0,
     val speedMin: Int = 0,

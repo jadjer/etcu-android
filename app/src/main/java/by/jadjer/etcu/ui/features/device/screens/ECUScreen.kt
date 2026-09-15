@@ -18,19 +18,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.telemetry.ECUTelemetry
+import by.jadjer.etcu.domain.model.telemetry.TelemetryConstants
 import by.jadjer.etcu.ui.component.StatusIndicator
 import by.jadjer.etcu.ui.component.StatusRow
-import by.jadjer.etcu.ui.component.history.HistoryGroup
-import by.jadjer.etcu.ui.component.history.StatusGraphDialog
+import by.jadjer.etcu.ui.component.history.rememberTelemetryHistoryState
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
 
 @Composable
@@ -38,23 +35,34 @@ fun EcuScreen(viewModel: DeviceViewModel) {
     val uiState by viewModel.uiState.collectAsState()
     val telemetry by viewModel.telemetry.collectAsState()
 
-    var showDialog by remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
+    val rpmLabel = stringResource(R.string.ecu_rpm)
+    val speedLabel = stringResource(R.string.ecu_speed)
+    val tpsLabel = stringResource(R.string.ecu_tps)
+    val batteryLabel = stringResource(R.string.ecu_battery)
+    val mapLabel = stringResource(R.string.ecu_map)
+    val airTempLabel = stringResource(R.string.ecu_air_temp)
+    val coolantTempLabel = stringResource(R.string.ecu_coolant_temp)
 
-    EcuScreenContent(
-        telemetry = telemetry.ecu,
-        onValueClick = { label, unit, selector ->
-            showDialog = {
-                val group = HistoryGroup(
-                    history = uiState.telemetryHistory.ecu,
-                    selector = selector,
-                    currentValue = selector(telemetry.ecu)
-                )
-                StatusGraphDialog(label, unit, group) { showDialog = null }
+    val historyState = rememberTelemetryHistoryState<ECUTelemetry>(
+        rangeProvider = { label ->
+            when (label) {
+                rpmLabel -> TelemetryConstants.RPM_RANGE
+                speedLabel -> TelemetryConstants.SPEED_RANGE
+                tpsLabel -> TelemetryConstants.TPS_RANGE
+                batteryLabel -> TelemetryConstants.BATTERY_RANGE
+                mapLabel -> TelemetryConstants.MAP_RANGE
+                airTempLabel, coolantTempLabel -> TelemetryConstants.TEMPERATURE_RANGE
+                else -> null
             }
         }
     )
 
-    showDialog?.invoke()
+    EcuScreenContent(
+        telemetry = telemetry.ecu,
+        onValueClick = historyState::onValueClick
+    )
+
+    historyState.ShowDialog(history = uiState.telemetryHistory.ecu, currentTelemetry = telemetry.ecu)
 }
 
 @Composable

@@ -92,6 +92,8 @@
     <string name="cruise_target_speed">Target Speed</string>
     <string name="cruise_base_pos">Base Position</string>
     <string name="cruise_target_pos">Target Position</string>
+    <string name="cruise_current_pos">Current Position</string>
+    <string name="cruise_current_speed">Current Speed</string>
 
     <!-- System Screen -->
     <string name="system_accel">Accelerator</string>
@@ -163,6 +165,12 @@
     <string name="cruise_p" translatable="false">P</string>
     <string name="cruise_i" translatable="false">I</string>
     <string name="cruise_d" translatable="false">D</string>
+    <string name="cruise_acc_p">Acc P</string>
+    <string name="cruise_acc_i">Acc I</string>
+    <string name="cruise_acc_d">Acc D</string>
+    <string name="cruise_dec_p">Dec P</string>
+    <string name="cruise_dec_i">Dec I</string>
+    <string name="cruise_dec_d">Dec D</string>
     <string name="cruise_integral_min">Integral Min</string>
     <string name="cruise_integral_max">Integral Max</string>
     <string name="cruise_filter_alpha">Speed filter alpha</string>
@@ -234,6 +242,7 @@
     <string name="ota_success">Update completed successfully!</string>
     <string name="ota_title">Firmware Update</string>
     <string name="ota_up_to_date">Firmware is up to date</string>
+    <string name="ota_time_remaining">Estimated time: %s</string>
     <string name="ota_update_available">New version available: %s</string>
     <string name="ota_uploading_progress">Uploading firmware: %d%%</string>
 
