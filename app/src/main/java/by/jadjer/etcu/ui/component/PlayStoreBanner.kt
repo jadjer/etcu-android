@@ -43,9 +43,9 @@ fun PlayStoreBanner() {
                 modifier = Modifier.size(180.dp),
                 colorFilter = ColorFilter.tint(Color.White)
             )
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             // Название приложения
             Text(
                 text = stringResource(id = R.string.app_name),
@@ -54,7 +54,7 @@ fun PlayStoreBanner() {
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 4.sp
             )
-            
+
             // Описание
             Text(
                 text = stringResource(id = R.string.app_full_name),

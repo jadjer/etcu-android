@@ -24,7 +24,7 @@ class BLEDataParserTest {
     @Test
     fun `parseControlData parses correctly`() {
         val buffer = ByteBuffer.allocate(BLEConstants.CONTROL_DATA_SIZE).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.position(34) // Skip cruise
+        buffer.position(22) // Skip cruise
         buffer.putShort(100.toShort()) // min
         buffer.putShort(600.toShort()) // max
         buffer.putShort(150.toShort()) // min
@@ -178,7 +178,7 @@ class BLEDataParserTest {
         val bytes = _parser.serializeControlData(data)
         val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
         
-        buffer.position(34) // Skip cruise
+        buffer.position(22) // Skip cruise
         assertEquals(100, buffer.short.toInt() and 0xFFFF)
         assertEquals(600, buffer.short.toInt() and 0xFFFF)
         assertEquals(150, buffer.short.toInt() and 0xFFFF)

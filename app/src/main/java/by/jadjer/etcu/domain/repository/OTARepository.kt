@@ -6,7 +6,7 @@ import by.jadjer.etcu.domain.util.Resource
 interface OTARepository {
     suspend fun getLatestRelease(): Resource<FirmwareRelease>
     suspend fun downloadFirmware(
-        url: String, 
+        url: String,
         expectedSize: Long = -1,
         onProgress: (Float) -> Unit
     ): Resource<ByteArray>

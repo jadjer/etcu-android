@@ -18,7 +18,7 @@ class MainViewModel(
     fun retryConnection() {
         _bleRepository.autoConnect()
     }
-    
+
     fun forgetDevice() {
         _bleRepository.forgetDevice()
     }

@@ -2,7 +2,9 @@ package by.jadjer.etcu.ui.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -14,7 +16,11 @@ import by.jadjer.etcu.ui.theme.ETCUTheme
 @Composable
 fun ErrorsBottomSheet(activeErrors: List<SystemError>, onDismiss: () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState()) {
-        Box(Modifier.padding(16.dp).padding(bottom = 32.dp)) {
+        Box(
+            Modifier
+                .padding(16.dp)
+                .padding(bottom = 32.dp)
+        ) {
             ErrorsBlock(activeErrors)
         }
     }

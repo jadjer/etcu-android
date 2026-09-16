@@ -155,8 +155,10 @@ fun <T> StatusGraph(
 
                                             PointerEventType.Release -> {
                                                 if (!isMoving) {
-                                                    val clickedTime = startTime + (change.position.x / size.width * totalDurationMs).toLong()
-                                                    val closest = history.minByOrNull { abs(it.timestamp - clickedTime) }
+                                                    val clickedTime =
+                                                        startTime + (change.position.x / size.width * totalDurationMs).toLong()
+                                                    val closest =
+                                                        history.minByOrNull { abs(it.timestamp - clickedTime) }
                                                     closest?.let {
                                                         selectedPoint = it.timestamp to selector(it)
                                                     }
@@ -239,6 +241,7 @@ private fun EmptyGraphMessage(modifier: Modifier) {
 @Composable
 private fun AutoScrollToEnd(historySize: Int, scrollState: ScrollState) {
     var isInitial by remember { mutableStateOf(true) }
+
     LaunchedEffect(historySize) {
         if (isInitial) {
             snapshotFlow { scrollState.maxValue }.first { it > 0 }
@@ -283,17 +286,16 @@ private fun DrawScope.drawGraphGrid(
     gridColor: Color
 ) {
     val tenSecondsMs = 10000L
-    val labelFormat = SimpleDateFormat(
-        "HH:mm:ss",
-        Locale.getDefault()
-    )
+    val labelFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
     val estimatedMsPerPixel = totalDurationMs.toFloat() / width
     val minVisibleTime = startTime + (viewportStart * estimatedMsPerPixel).toLong()
     var currentGridTime =
         ((minVisibleTime / tenSecondsMs) * tenSecondsMs).coerceAtLeast(startTime + tenSecondsMs)
+
     while (currentGridTime < endTime) {
         val gridX =
             ((currentGridTime - startTime).toFloat() / totalDurationMs) * width// Оптимизация: Выходим из цикла, если сетка ушла правее экрана
+
         if (gridX > viewportEnd) break
         if (gridX >= viewportStart) {
             drawLine(
@@ -312,6 +314,7 @@ private fun DrawScope.drawGraphGrid(
                 )
             }
         }
+
         currentGridTime += tenSecondsMs
     }
 }
@@ -333,6 +336,7 @@ private fun DrawScope.drawGraphPath(
     var isPathEmpty = true
     val padding = 50f
     val activeRange = (viewportStart - padding)..(viewportEnd + padding)
+
     history.forEachIndexed { index, record ->
         val x = ((record.timestamp - startTime).toFloat() / totalDurationMs) * width
         if (x in activeRange) {
@@ -348,6 +352,7 @@ private fun DrawScope.drawGraphPath(
             return@forEachIndexed
         }
     }
+
     if (!isPathEmpty) {
         drawPath(path = path, color = lineColor, style = Stroke(width = 2.dp.toPx()))
     }
@@ -366,12 +371,14 @@ private fun DrawScope.drawSelectionHighlight(
 ) {
     val x = ((time - startTime).toFloat() / totalDurationMs) * width
     val y = height - ((value - minVal) / valRange * height)
+
     drawLine(
         color = lineColor.copy(alpha = 0.4f),
         start = Offset(x, 0f),
         end = Offset(x, height),
         strokeWidth = 1.dp.toPx()
     )
+
     drawCircle(color = lineColor, radius = 5.dp.toPx(), center = Offset(x, y))
 }
 
@@ -379,6 +386,7 @@ private fun DrawScope.drawSelectionHighlight(
 @Composable
 private fun StatusGraphPreview() {
     val now = System.currentTimeMillis()
+
     ETCUTheme {
         StatusGraph(
             history = listOf(
@@ -388,7 +396,10 @@ private fun StatusGraphPreview() {
                 HistoryRecord(SystemTelemetry(), now - 2000),
                 HistoryRecord(SystemTelemetry(), now - 1000),
                 HistoryRecord(SystemTelemetry(), now),
-            ), selector = { 10f }, valueRange = 0f..100f, modifier = Modifier.padding(16.dp)
+            ),
+            selector = { 10f },
+            valueRange = 0f..100f,
+            modifier = Modifier.padding(16.dp)
         )
     }
 }

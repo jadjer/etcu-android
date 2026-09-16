@@ -4,13 +4,36 @@ import android.content.Intent
 import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,7 +50,7 @@ fun ScanScreen(viewModel: ScanViewModel) {
     val discoveredDevices by viewModel.discoveredDevices.collectAsState()
     val connectionState by viewModel.connectionState.collectAsState()
     val isScanning by viewModel.isScanning.collectAsState()
-    
+
     val connectionStatus = connectionState.toDisplayString()
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -77,7 +100,10 @@ fun ScanScreenContent(
                 title = { Text(stringResource(R.string.scan_title)) },
                 actions = {
                     IconButton(onClick = onRefreshClick) {
-                        Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.common_refresh))
+                        Icon(
+                            Icons.Default.Refresh,
+                            contentDescription = stringResource(R.string.common_refresh)
+                        )
                     }
                 }
             )
@@ -145,7 +171,7 @@ private fun DeviceItem(device: DiscoveredDevice, onClick: () -> Unit) {
     val deviceName = device.name.ifEmpty { stringResource(R.string.unknown) }
     ListItem(
         headlineContent = { Text(deviceName) },
-        supportingContent = { 
+        supportingContent = {
             Column {
                 Text(device.macAddress)
                 if (device.rssi != 0) {
@@ -175,7 +201,7 @@ private fun SignalIcon(rssi: Int) {
         rssi > -80 -> Color(0xFFFFC107) // Yellow
         else -> Color(0xFFF44336) // Red
     }
-    
+
     Box(
         modifier = Modifier
             .size(12.dp)

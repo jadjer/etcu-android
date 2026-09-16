@@ -1,6 +1,6 @@
 package by.jadjer.etcu.ui.navigation
 
-object NavRoutes {
-    const val PERMISSIONS = "permissions"
-    const val MAIN = "main"
+sealed class NavScreen(val route: String) {
+    data object Permissions : NavScreen("permissions")
+    data object Main : NavScreen("main")
 }

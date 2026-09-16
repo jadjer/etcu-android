@@ -1,11 +1,15 @@
 package by.jadjer.etcu.ui.component.history
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import by.jadjer.etcu.domain.model.telemetry.HistoryRecord
 
-/**
- * A wrapper to handle generic history data in a type-safe way for the UI.
- */
 data class HistoryGroup<T>(
     val history: List<HistoryRecord<T>>,
     val selector: (T) -> Float,
@@ -13,9 +17,6 @@ data class HistoryGroup<T>(
     val valueRange: ClosedFloatingPointRange<Float>? = null
 )
 
-/**
- * State holder to manage telemetry history dialogs across different screens.
- */
 @Stable
 class TelemetryHistoryState<T>(
     private val rangeProvider: (String) -> ClosedFloatingPointRange<Float>?
@@ -32,20 +33,30 @@ class TelemetryHistoryState<T>(
     }
 
     @Composable
-    fun ShowDialog(history: List<HistoryRecord<T>>, currentTelemetry: T) {
-        dialogInfo?.let { info ->
-            StatusGraphDialog(
-                title = info.label,
-                unit = info.unit,
-                group = HistoryGroup(
-                    history = history,
+    fun ShowDialog(
+        historyProvider: () -> List<HistoryRecord<T>>,
+        currentTelemetryProvider: () -> T
+    ) {
+        val info = dialogInfo ?: return
+
+        val historyGroup by remember(info) {
+            derivedStateOf {
+                val currentTelemetry = currentTelemetryProvider()
+                HistoryGroup(
+                    history = historyProvider(),
                     selector = info.selector,
                     currentValue = info.selector(currentTelemetry),
                     valueRange = rangeProvider(info.label)
-                ),
-                onDismiss = { dismissDialog() }
-            )
+                )
+            }
         }
+
+        StatusGraphDialog(
+            title = info.label,
+            unit = info.unit,
+            group = historyGroup,
+            onDismiss = { dismissDialog() }
+        )
     }
 }
 
@@ -59,7 +70,8 @@ data class DialogInfo<T>(
 fun <T> rememberTelemetryHistoryState(
     rangeProvider: (String) -> ClosedFloatingPointRange<Float>?
 ): TelemetryHistoryState<T> {
+    val currentRangeProvider by rememberUpdatedState(rangeProvider)
     return remember {
-        TelemetryHistoryState(rangeProvider)
+        TelemetryHistoryState(currentRangeProvider)
     }
 }

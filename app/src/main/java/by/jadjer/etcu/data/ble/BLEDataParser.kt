@@ -1,5 +1,6 @@
 package by.jadjer.etcu.data.ble
 
+import android.util.Log
 import by.jadjer.etcu.data.ble.BLEConstants.CALIBRATION_DATA_SIZE
 import by.jadjer.etcu.data.ble.BLEConstants.CONTROL_DATA_SIZE
 import by.jadjer.etcu.data.ble.BLEConstants.INFO_STR_LEN
@@ -38,7 +39,8 @@ class BLEDataParser {
                 acceleratorMin = buffer.uShort,
                 acceleratorMax = buffer.uShort,
             )
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            logError("parseControlData", e)
             ControlData()
         }
     }
@@ -54,7 +56,8 @@ class BLEDataParser {
                 hallB = CalibrationRange(min = buffer.uShort, max = buffer.uShort),
                 servo = CalibrationRange(min = buffer.uShort, max = buffer.uShort)
             )
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            logError("parseCalibrationData", e)
             CalibrationData()
         }
     }
@@ -63,16 +66,13 @@ class BLEDataParser {
         if (bytes.size < SYSTEM_INFO_SIZE) return SystemInfo()
 
         return try {
-            val buildDate = bytes.readString(0, INFO_STR_LEN)
-            val boardVersion = bytes.readString(INFO_STR_LEN, INFO_STR_LEN)
-            val firmwareVersion = bytes.readString(INFO_STR_LEN * 2, INFO_STR_LEN)
-
             SystemInfo(
-                boardVersion = boardVersion,
-                buildDate = buildDate,
-                firmwareVersion = firmwareVersion
+                buildDate = bytes.readString(0, INFO_STR_LEN),
+                boardVersion = bytes.readString(INFO_STR_LEN, INFO_STR_LEN),
+                firmwareVersion = bytes.readString(INFO_STR_LEN * 2, INFO_STR_LEN)
             )
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            logError("parseSystemInfo", e)
             SystemInfo()
         }
     }
@@ -106,7 +106,8 @@ class BLEDataParser {
                 cruise = cruise,
                 accelerator = accelerator
             )
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            logError("parseSystemTelemetry", e)
             SystemTelemetry()
         }
     }
@@ -168,24 +169,24 @@ class BLEDataParser {
 
     fun serializeControlData(data: ControlData): ByteArray {
         return ByteBuffer.allocate(CONTROL_DATA_SIZE).order(ByteOrder.LITTLE_ENDIAN)
-            // Cruise
-            .putFloat(data.cruise.pid.p)
-            .putFloat(data.cruise.pid.i)
-            .putFloat(data.cruise.pid.d)
-            .putShort(data.cruise.rpmMin.toShort())
-            .putShort(data.cruise.rpmMax.toShort())
-            .put(data.cruise.speedMin.toByte())
-            .put(data.cruise.speedMax.toByte())
-            .putShort(data.cruise.limiterUp.toShort())
-            .putShort(data.cruise.limiterDown.toShort())
-            // Servo
+            .putCruise(data.cruise)
             .putShort(data.servoMin.toShort())
             .putShort(data.servoMax.toShort())
-            // Accelerator
             .putShort(data.acceleratorMin.toShort())
             .putShort(data.acceleratorMax.toShort())
             .array()
     }
+
+    private fun ByteBuffer.putCruise(cruise: Cruise) = this
+        .putFloat(cruise.pid.p)
+        .putFloat(cruise.pid.i)
+        .putFloat(cruise.pid.d)
+        .putShort(cruise.rpmMin.toShort())
+        .putShort(cruise.rpmMax.toShort())
+        .put(cruise.speedMin.toByte())
+        .put(cruise.speedMax.toByte())
+        .putShort(cruise.limiterUp.toShort())
+        .putShort(cruise.limiterDown.toShort())
 
     fun serializeCalibrationData(data: CalibrationData): ByteArray {
         return ByteBuffer.allocate(CALIBRATION_DATA_SIZE).order(ByteOrder.LITTLE_ENDIAN)
@@ -205,6 +206,10 @@ class BLEDataParser {
             .putShort(chunk.chunkIndex.toShort())
             .put(chunk.data)
             .array()
+    }
+
+    private fun logError(method: String, e: Exception) {
+        Log.e("BLEDataParser", "Error in $method", e)
     }
 
     // Helper Extensions

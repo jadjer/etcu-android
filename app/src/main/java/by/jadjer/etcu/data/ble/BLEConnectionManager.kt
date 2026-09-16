@@ -10,10 +10,20 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import by.jadjer.etcu.domain.model.ble.ConnectionState
-import com.welie.blessed.*
-import kotlinx.coroutines.*
+import com.welie.blessed.BluetoothCentralManager
+import com.welie.blessed.BluetoothCentralManagerCallback
+import com.welie.blessed.BluetoothPeripheral
+import com.welie.blessed.BluetoothPeripheralCallback
+import com.welie.blessed.BondState
+import com.welie.blessed.HciStatus
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 @SuppressLint("MissingPermission")
@@ -21,8 +31,9 @@ class BLEConnectionManager(
     app: Application
 ) {
     private val _tag = "BLEConnectionManager"
-    
-    private val _bluetoothManager = app.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+
+    private val _bluetoothManager =
+        app.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
     private val _adapter = _bluetoothManager.adapter
 
     private val _connectionState = MutableStateFlow(ConnectionState.INITIALIZING)
@@ -47,7 +58,7 @@ class BLEConnectionManager(
     private val _centralCallback = object : BluetoothCentralManagerCallback() {
         override fun onDiscovered(peripheral: BluetoothPeripheral, scanResult: ScanResult) {
             scanner.handleDiscoveredPeripheral(peripheral, scanResult)
-            
+
             if (!_isManualForget.value && _connectionState.value == ConnectionState.INITIALIZING) {
                 if (peripheral.bondState == BondState.BONDED && isEtcuDevice(peripheral)) {
                     Log.i(_tag, "Auto-connecting during scan: ${peripheral.address}")
@@ -92,7 +103,7 @@ class BLEConnectionManager(
 
     fun connect(macAddress: String) {
         if (!central.isBluetoothEnabled) return
-        
+
         _reconnectJob?.cancel()
         _isManualForget.value = false
         _connectionState.value = ConnectionState.CONNECTING
@@ -112,10 +123,10 @@ class BLEConnectionManager(
 
         _isManualForget.value = false
         _connectionState.value = ConnectionState.INITIALIZING
-        
+
         val connected = central.getConnectedPeripherals()
             .firstOrNull { isEtcuDevice(it) }
-        
+
         if (connected != null) {
             Log.i(_tag, "Using existing connection: ${connected.address}")
             connect(connected.address)
@@ -123,7 +134,7 @@ class BLEConnectionManager(
         }
 
         scanner.startScan(timeout = 5000L)
-        
+
         _scope.launch {
             delay(5500.milliseconds)
             if (_connectionState.value == ConnectionState.INITIALIZING) {
@@ -135,7 +146,7 @@ class BLEConnectionManager(
     fun forgetDevice() {
         _isManualForget.value = true
         _reconnectJob?.cancel()
-        
+
         activePeripheral?.let { peripheral ->
             val address = peripheral.address
             central.cancelConnection(peripheral)
@@ -149,7 +160,7 @@ class BLEConnectionManager(
                     Log.i(_tag, "Bond removed for ${device.address}")
                 }
         }
-        
+
         _connectionState.value = ConnectionState.DISCONNECTED
     }
 

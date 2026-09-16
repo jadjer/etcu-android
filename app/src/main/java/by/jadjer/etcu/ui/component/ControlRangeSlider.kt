@@ -1,14 +1,22 @@
 package by.jadjer.etcu.ui.component
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -17,6 +25,7 @@ import by.jadjer.etcu.R
 import by.jadjer.etcu.ui.features.main.LocalPagerScrollEnabled
 import by.jadjer.etcu.ui.theme.ETCUTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ControlRangeSlider(
     label: String,
@@ -29,27 +38,39 @@ fun ControlRangeSlider(
 ) {
     val pagerScrollEnabled = LocalPagerScrollEnabled.current
 
-    // Оптимизация: используем remember(currentMin, currentMax), чтобы не плодить LaunchedEffect
-    var sliderValue by remember(currentMin, currentMax) {
+    // Internal state for smooth sliding
+    var sliderValue by remember {
         mutableStateOf(currentMin.toFloat()..currentMax.toFloat())
+    }
+
+    // Sync internal state with external updates when not interacting
+    val startInteractionSource = remember { MutableInteractionSource() }
+    val endInteractionSource = remember { MutableInteractionSource() }
+    val isStartPressed by startInteractionSource.collectIsPressedAsState()
+    val isEndPressed by endInteractionSource.collectIsPressedAsState()
+
+    LaunchedEffect(currentMin, currentMax) {
+        if (!isStartPressed && !isEndPressed) {
+            sliderValue = currentMin.toFloat()..currentMax.toFloat()
+        }
     }
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp) // Внешний отступ для всего компонента
+            .padding(vertical = 8.dp)
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(bottom = 8.dp) // Отступ под заголовком
+            modifier = Modifier.padding(bottom = 8.dp)
         )
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 12.dp), // Отступ между текстовыми полями и слайдером
-            horizontalArrangement = Arrangement.spacedBy(12.dp) // Увеличен зазор между полями
+                .padding(bottom = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             ValueField(
                 value = currentMin.toFloat(),
@@ -74,11 +95,12 @@ fun ControlRangeSlider(
             },
             onValueChangeFinished = {
                 pagerScrollEnabled.value = true
-                sliderValue = currentMin.toFloat()..currentMax.toFloat()
             },
             valueRange = valueRange,
             steps = steps,
-            modifier = Modifier.padding(horizontal = 4.dp) // Небольшой отступ по бокам для краев слайдера
+            startInteractionSource = startInteractionSource,
+            endInteractionSource = endInteractionSource,
+            modifier = Modifier.padding(horizontal = 4.dp)
         )
     }
 }

@@ -27,6 +27,7 @@ sealed class OTAState {
         val downloadUrl: String,
         val size: Long
     ) : OTAState()
+
     data object UpToDate : OTAState()
     data class Downloading(val progress: Float) : OTAState()
     data class Uploading(
@@ -36,6 +37,7 @@ sealed class OTAState {
         val firmwareSize: Long,
         val estimatedTimeMs: Long
     ) : OTAState()
+
     data object Success : OTAState()
     data class Error(val message: String) : OTAState()
 }
@@ -66,7 +68,12 @@ class OtaViewModel(
         _bleRepository.connectionState
             .onEach { connState ->
                 if (connState.isError && _state.value is OTAState.Uploading) {
-                    _state.value = OTAState.Error(_app.getString(R.string.ota_error_transmission, connState.toString()))
+                    _state.value = OTAState.Error(
+                        _app.getString(
+                            R.string.ota_error_transmission,
+                            connState.toString()
+                        )
+                    )
                 }
             }
             .launchIn(viewModelScope)
@@ -86,8 +93,11 @@ class OtaViewModel(
                 val nextIndex = _currentChunkIndex + 1
                 if (nextIndex < _totalChunks) sendNextChunk(nextIndex)
             }
+
             OTAStatus.COMPLETED -> _state.value = OTAState.Success
-            OTAStatus.ERROR -> _state.value = OTAState.Error(_app.getString(R.string.ota_error_device_firmware))
+            OTAStatus.ERROR -> _state.value =
+                OTAState.Error(_app.getString(R.string.ota_error_device_firmware))
+
             else -> {}
         }
     }
@@ -103,7 +113,7 @@ class OtaViewModel(
         viewModelScope.launch {
             _state.value = OTAState.CheckingUpdates
             val current = currentVersion ?: _bleRepository.systemInfo.value.firmwareVersion
-            
+
             when (val result = _otaRepository.getLatestRelease()) {
                 is Resource.Success -> {
                     val release = result.data
@@ -122,6 +132,7 @@ class OtaViewModel(
                         _state.value = OTAState.UpToDate
                     }
                 }
+
                 is Resource.Error -> _state.value = OTAState.Error(result.message)
             }
         }
@@ -147,25 +158,34 @@ class OtaViewModel(
             runCatching {
                 _state.value = OTAState.Downloading(0f)
                 val result = _otaRepository.downloadFirmware(url, size) { progress ->
-                    if (_state.value is OTAState.Downloading) _state.value = OTAState.Downloading(progress)
+                    if (_state.value is OTAState.Downloading) _state.value =
+                        OTAState.Downloading(progress)
                 }
 
                 when (result) {
                     is Resource.Success -> {
                         val downloadedData = result.data
                         if (downloadedData.isEmpty()) {
-                            _state.value = OTAState.Error(_app.getString(R.string.ota_error_empty_file))
+                            _state.value =
+                                OTAState.Error(_app.getString(R.string.ota_error_empty_file))
                             return@launch
                         }
                         _state.value = OTAState.Downloading(1f)
                         _firmwareData = downloadedData
-                        _totalChunks = (downloadedData.size + BLEConstants.OTA_PAYLOAD_SIZE - 1) / BLEConstants.OTA_PAYLOAD_SIZE
+                        _totalChunks =
+                            (downloadedData.size + BLEConstants.OTA_PAYLOAD_SIZE - 1) / BLEConstants.OTA_PAYLOAD_SIZE
                         sendNextChunk(0)
                     }
+
                     is Resource.Error -> _state.value = OTAState.Error(result.message)
                 }
             }.onFailure { e ->
-                _state.value = OTAState.Error(_app.getString(R.string.ota_error_system, e.localizedMessage ?: ""))
+                _state.value = OTAState.Error(
+                    _app.getString(
+                        R.string.ota_error_system,
+                        e.localizedMessage ?: ""
+                    )
+                )
             }
         }
     }

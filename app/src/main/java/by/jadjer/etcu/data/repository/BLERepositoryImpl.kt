@@ -13,18 +13,20 @@ import by.jadjer.etcu.domain.model.telemetry.TelemetryHistory
 import by.jadjer.etcu.domain.repository.BLERepository
 import by.jadjer.etcu.domain.util.TelemetryHistoryManager
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.flow.update
+import kotlin.time.Duration.Companion.milliseconds
 
-class BLERepositoryImpl(
-    private val _bleManager: BLEManager,
-    scope: CoroutineScope
-) : BLERepository {
+@OptIn(FlowPreview::class)
+class BLERepositoryImpl(private val _bleManager: BLEManager, scope: CoroutineScope) :
+    BLERepository {
     private val _historyManager = TelemetryHistoryManager()
     override val connectionState: StateFlow<ConnectionState> = _bleManager.connectionState
     override val connectionDetail: StateFlow<String?> = _bleManager.connectionDetail
@@ -37,14 +39,17 @@ class BLERepositoryImpl(
     private val _history = MutableStateFlow(TelemetryHistory())
     override val history: StateFlow<TelemetryHistory> = _history.asStateFlow()
 
-    override val discoveredDevices: StateFlow<List<DiscoveredDevice>> = _bleManager.scanner.discoveredDevices
+    override val discoveredDevices: StateFlow<List<DiscoveredDevice>> =
+        _bleManager.scanner.discoveredDevices
     override val isScanning: StateFlow<Boolean> = _bleManager.scanner.isScanning
     override val otaFeedback: SharedFlow<OTAStatus> = _bleManager.otaFeedback
 
     init {
-        telemetry.onEach { t ->
-            _history.update { h -> _historyManager.updateHistory(h, t) }
-        }.launchIn(scope)
+        telemetry
+            .sample(100.milliseconds)
+            .onEach { t ->
+                _history.update { h -> _historyManager.updateHistory(h, t) }
+            }.launchIn(scope)
     }
 
     override fun startScan() = _bleManager.scanner.startScan()

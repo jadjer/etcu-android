@@ -15,19 +15,31 @@ import by.jadjer.etcu.ui.theme.ETCUTheme
 
 @Composable
 fun ValueField(
-    value: Float, label: String, onValueChange: (Float) -> Unit, modifier: Modifier = Modifier
+    value: Float,
+    label: String,
+    onValueChange: (Float) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var textValue by remember(value) { mutableStateOf(value.toString()) }
 
     OutlinedTextField(
         value = textValue,
         onValueChange = { newValue ->
-            textValue = newValue
-            newValue.toFloatOrNull()?.let { onValueChange(it) }
+            // Filter input to only allow numbers, dots, and minus sign
+            val filtered = newValue.filter { it.isDigit() || it == '.' || it == '-' }
+            textValue = filtered
+
+            // Try to parse, but don't notify if it's an intermediate state
+            if (filtered.isNotEmpty() && filtered != "-" && filtered != ".") {
+                filtered.toFloatOrNull()?.let { onValueChange(it) }
+            }
         },
         label = { Text(label) },
         modifier = modifier,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Decimal,
+            autoCorrectEnabled = false
+        ),
         singleLine = true,
     )
 }

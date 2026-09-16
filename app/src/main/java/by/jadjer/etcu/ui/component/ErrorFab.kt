@@ -2,7 +2,12 @@ package by.jadjer.etcu.ui.component
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.*
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -11,7 +16,11 @@ import by.jadjer.etcu.ui.theme.ETCUTheme
 
 @Composable
 fun ErrorFab(errorCount: Int, onClick: () -> Unit) {
-    FloatingActionButton(onClick = onClick, containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer) {
+    FloatingActionButton(
+        onClick = onClick,
+        containerColor = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer
+    ) {
         BadgedBox(badge = { Badge { Text(errorCount.toString()) } }) {
             Icon(Icons.Default.Warning, stringResource(R.string.common_errors))
         }

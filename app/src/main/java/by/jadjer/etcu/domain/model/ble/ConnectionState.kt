@@ -35,6 +35,7 @@ enum class ConnectionState {
             OTA_SETUP,
             READING_INFO,
             READING_SETTINGS -> true
+
             else -> false
         }
 
@@ -56,6 +57,7 @@ enum class ConnectionState {
             ERROR_READ_CHAR,
             ERROR_WRITE_CHAR,
             INVALID_MAC -> true
+
             else -> false
         }
 }

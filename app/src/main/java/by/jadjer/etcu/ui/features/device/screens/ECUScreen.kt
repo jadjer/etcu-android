@@ -1,11 +1,11 @@
 package by.jadjer.etcu.ui.features.device.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.FlashOn
@@ -16,12 +16,13 @@ import androidx.compose.material.icons.filled.TwoWheeler
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.telemetry.ECUTelemetry
 import by.jadjer.etcu.domain.model.telemetry.TelemetryConstants
@@ -32,43 +33,83 @@ import by.jadjer.etcu.ui.features.device.DeviceViewModel
 
 @Composable
 fun EcuScreen(viewModel: DeviceViewModel) {
-    val uiState by viewModel.uiState.collectAsState()
-    val telemetry by viewModel.telemetry.collectAsState()
+    val telemetry by viewModel.telemetry.collectAsStateWithLifecycle()
+    val history by viewModel.telemetryHistory.collectAsStateWithLifecycle()
 
     val rpmLabel = stringResource(R.string.ecu_rpm)
     val speedLabel = stringResource(R.string.ecu_speed)
     val tpsLabel = stringResource(R.string.ecu_tps)
     val batteryLabel = stringResource(R.string.ecu_battery)
     val mapLabel = stringResource(R.string.ecu_map)
-    val airTempLabel = stringResource(R.string.ecu_air_temp)
-    val coolantTempLabel = stringResource(R.string.ecu_coolant_temp)
+    val airTemperatureLabel = stringResource(R.string.ecu_air_temp)
+    val coolantTemperatureLabel = stringResource(R.string.ecu_coolant_temp)
 
     val historyState = rememberTelemetryHistoryState<ECUTelemetry>(
-        rangeProvider = { label ->
-            when (label) {
-                rpmLabel -> TelemetryConstants.RPM_RANGE
-                speedLabel -> TelemetryConstants.SPEED_RANGE
-                tpsLabel -> TelemetryConstants.TPS_RANGE
-                batteryLabel -> TelemetryConstants.VOLTAGE_RANGE
-                mapLabel -> TelemetryConstants.MAP_RANGE
-                airTempLabel, coolantTempLabel -> TelemetryConstants.TEMPERATURE_RANGE
-                else -> null
+        rangeProvider = remember(
+            rpmLabel,
+            speedLabel,
+            tpsLabel,
+            batteryLabel,
+            mapLabel,
+            airTemperatureLabel,
+            coolantTemperatureLabel
+        ) {
+            { label: String ->
+                when (label) {
+                    rpmLabel -> TelemetryConstants.RPM_RANGE
+                    speedLabel -> TelemetryConstants.SPEED_RANGE
+                    tpsLabel -> TelemetryConstants.TPS_RANGE
+                    batteryLabel -> TelemetryConstants.VOLTAGE_RANGE
+                    mapLabel -> TelemetryConstants.MAP_RANGE
+                    airTemperatureLabel, coolantTemperatureLabel -> TelemetryConstants.TEMPERATURE_RANGE
+                    else -> null
+                }
             }
         }
     )
 
+    val rpmProvider = remember { { t: ECUTelemetry -> t.rpm.toFloat() } }
+    val speedProvider = remember { { t: ECUTelemetry -> t.speed.toFloat() } }
+    val tpsProvider = remember { { t: ECUTelemetry -> t.tps.toFloat() } }
+    val batteryProvider = remember { { t: ECUTelemetry -> t.battery } }
+    val mapProvider = remember { { t: ECUTelemetry -> t.map.toFloat() } }
+    val airTemperatureProvider = remember { { t: ECUTelemetry -> t.airTemp.toFloat() } }
+    val coolantTemperatureProvider = remember { { t: ECUTelemetry -> t.coolantTemp.toFloat() } }
+
+    val onValueClick = remember(historyState) {
+        { label: String, unit: String, provider: (ECUTelemetry) -> Float ->
+            historyState.onValueClick(label, unit, provider)
+        }
+    }
+
     EcuScreenContent(
         telemetry = telemetry.ecu,
-        onValueClick = historyState::onValueClick
+        rpmProvider = rpmProvider,
+        speedProvider = speedProvider,
+        tpsProvider = tpsProvider,
+        batteryProvider = batteryProvider,
+        mapProvider = mapProvider,
+        airTemperatureProvider = airTemperatureProvider,
+        coolantTemperatureProvider = coolantTemperatureProvider,
+        onValueClick = onValueClick,
     )
 
-    historyState.ShowDialog(history = uiState.telemetryHistory.ecu, currentTelemetry = telemetry.ecu)
+    historyState.ShowDialog(
+        historyProvider = { history.ecu },
+        currentTelemetryProvider = { telemetry.ecu })
 }
 
 @Composable
 fun EcuScreenContent(
     telemetry: ECUTelemetry,
-    onValueClick: (String, String, (ECUTelemetry) -> Float) -> Unit
+    rpmProvider: (ECUTelemetry) -> Float,
+    speedProvider: (ECUTelemetry) -> Float,
+    tpsProvider: (ECUTelemetry) -> Float,
+    batteryProvider: (ECUTelemetry) -> Float,
+    mapProvider: (ECUTelemetry) -> Float,
+    airTemperatureProvider: (ECUTelemetry) -> Float,
+    coolantTemperatureProvider: (ECUTelemetry) -> Float,
+    onValueClick: (String, String, (ECUTelemetry) -> Float) -> Unit,
 ) {
     val rpmLabel = stringResource(R.string.ecu_rpm)
     val rpmUnit = stringResource(R.string.unit_rpm)
@@ -84,93 +125,120 @@ fun EcuScreenContent(
     val coolantTempLabel = stringResource(R.string.ecu_coolant_temp)
     val celsiusUnit = stringResource(R.string.unit_celsius)
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
+            .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        StatusIndicator(
-            label = stringResource(R.string.ecu_conn_status),
-            isActive = telemetry.isConnected,
-            activeText = stringResource(R.string.ecu_connected),
-            inactiveText = stringResource(R.string.ecu_disconnected)
-        )
+        item(key = "ecu_conn_status") {
+            Spacer(Modifier.height(16.dp))
+            StatusIndicator(
+                label = stringResource(R.string.ecu_conn_status),
+                isActive = telemetry.isConnected,
+                activeText = stringResource(R.string.ecu_connected),
+                inactiveText = stringResource(R.string.ecu_disconnected)
+            )
+        }
 
-        StatusIndicator(
-            label = stringResource(R.string.ecu_engine_status),
-            isActive = telemetry.isStarted,
-            activeText = stringResource(R.string.ecu_engine_started),
-            inactiveText = stringResource(R.string.ecu_engine_stopped)
-        )
+        item(key = "ecu_engine_status") {
+            StatusIndicator(
+                label = stringResource(R.string.ecu_engine_status),
+                isActive = telemetry.isStarted,
+                activeText = stringResource(R.string.ecu_engine_started),
+                inactiveText = stringResource(R.string.ecu_engine_stopped)
+            )
+        }
 
-        HorizontalDivider()
+        item(key = "divider_1") { HorizontalDivider() }
 
-        StatusRow(
-            label = rpmLabel,
-            value = telemetry.rpm.toString(),
-            unit = rpmUnit,
-            icon = Icons.Default.Timer,
-            onClick = { onValueClick(rpmLabel, rpmUnit) { it.rpm.toFloat() } }
-        )
+        item(key = "rpm") {
+            StatusRow(
+                label = rpmLabel,
+                value = telemetry.rpm.toString(),
+                unit = rpmUnit,
+                icon = Icons.Default.Timer,
+                onClick = { onValueClick(rpmLabel, rpmUnit, rpmProvider) }
+            )
+        }
 
-        StatusRow(
-            label = speedLabel,
-            value = telemetry.speed.toString(),
-            unit = speedUnit,
-            icon = Icons.Default.Speed,
-            onClick = { onValueClick(speedLabel, speedUnit) { it.speed.toFloat() } }
-        )
+        item(key = "speed") {
+            StatusRow(
+                label = speedLabel,
+                value = telemetry.speed.toString(),
+                unit = speedUnit,
+                icon = Icons.Default.Speed,
+                onClick = { onValueClick(speedLabel, speedUnit, speedProvider) }
+            )
+        }
 
-        StatusRow(
-            label = tpsLabel,
-            value = telemetry.tps.toString(),
-            unit = tpsUnit,
-            icon = Icons.Default.TwoWheeler,
-            onClick = { onValueClick(tpsLabel, tpsUnit) { it.tps.toFloat() } }
-        )
+        item(key = "tps") {
+            StatusRow(
+                label = tpsLabel,
+                value = telemetry.tps.toString(),
+                unit = tpsUnit,
+                icon = Icons.Default.TwoWheeler,
+                onClick = { onValueClick(tpsLabel, tpsUnit, tpsProvider) }
+            )
+        }
 
-        StatusRow(
-            label = batteryLabel,
-            value = "%.1f".format(telemetry.battery),
-            unit = batteryUnit,
-            icon = Icons.Default.FlashOn,
-            onClick = { onValueClick(batteryLabel, batteryUnit) { it.battery / 10.0f } }
-        )
+        item(key = "battery") {
+            StatusRow(
+                label = batteryLabel,
+                value = "%.1f".format(telemetry.battery),
+                unit = batteryUnit,
+                icon = Icons.Default.FlashOn,
+                onClick = { onValueClick(batteryLabel, batteryUnit, batteryProvider) }
+            )
+        }
 
-        StatusRow(
-            label = mapLabel,
-            value = telemetry.map.toString(),
-            unit = mapUnit,
-            icon = Icons.Default.Cloud,
-            onClick = { onValueClick(mapLabel, mapUnit) { it.map.toFloat() } }
-        )
+        item(key = "map") {
+            StatusRow(
+                label = mapLabel,
+                value = telemetry.map.toString(),
+                unit = mapUnit,
+                icon = Icons.Default.Cloud,
+                onClick = { onValueClick(mapLabel, mapUnit, mapProvider) }
+            )
+        }
 
-        StatusRow(
-            label = airTempLabel,
-            value = telemetry.airTemp.toString(),
-            unit = celsiusUnit,
-            icon = Icons.Default.Thermostat,
-            onClick = { onValueClick(airTempLabel, celsiusUnit) { it.airTemp.toFloat() } }
-        )
+        item(key = "air_temp") {
+            StatusRow(
+                label = airTempLabel,
+                value = telemetry.airTemp.toString(),
+                unit = celsiusUnit,
+                icon = Icons.Default.Thermostat,
+                onClick = { onValueClick(airTempLabel, celsiusUnit, airTemperatureProvider) }
+            )
+        }
 
-        StatusRow(
-            label = coolantTempLabel,
-            value = telemetry.coolantTemp.toString(),
-            unit = celsiusUnit,
-            icon = Icons.Default.Thermostat,
-            onClick = { onValueClick(coolantTempLabel, celsiusUnit) { it.coolantTemp.toFloat() } }
-        )
+        item(key = "coolant_temp") {
+            StatusRow(
+                label = coolantTempLabel,
+                value = telemetry.coolantTemp.toString(),
+                unit = celsiusUnit,
+                icon = Icons.Default.Thermostat,
+                onClick = {
+                    onValueClick(
+                        coolantTempLabel,
+                        celsiusUnit,
+                        coolantTemperatureProvider
+                    )
+                }
+            )
+        }
 
-        HorizontalDivider()
+        item(key = "divider_2") { HorizontalDivider() }
 
-        StatusIndicator(
-            label = stringResource(R.string.ecu_neutral_status),
-            isActive = telemetry.isNeutral,
-            activeText = stringResource(R.string.ecu_neutral_on),
-            inactiveText = stringResource(R.string.ecu_neutral_off)
-        )
+        item(key = "ecu_neutral_status") {
+            StatusIndicator(
+                label = stringResource(R.string.ecu_neutral_status),
+                isActive = telemetry.isNeutral,
+                activeText = stringResource(R.string.ecu_neutral_on),
+                inactiveText = stringResource(R.string.ecu_neutral_off)
+            )
+            Spacer(Modifier.height(16.dp))
+        }
     }
 }
 
@@ -191,6 +259,13 @@ fun EcuScreenPreview() {
                 airTemp = 30,
                 coolantTemp = 78,
             ),
+            rpmProvider = { it.rpm.toFloat() },
+            speedProvider = { it.speed.toFloat() },
+            tpsProvider = { it.tps.toFloat() },
+            batteryProvider = { it.battery },
+            mapProvider = { it.map.toFloat() },
+            airTemperatureProvider = { it.airTemp.toFloat() },
+            coolantTemperatureProvider = { it.coolantTemp.toFloat() },
             onValueClick = { _, _, _ -> }
         )
     }

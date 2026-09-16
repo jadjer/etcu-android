@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,14 +35,14 @@ import by.jadjer.etcu.ui.component.ErrorFab
 import by.jadjer.etcu.ui.component.ErrorsBottomSheet
 import by.jadjer.etcu.ui.component.MainNavigationBar
 import by.jadjer.etcu.ui.component.MainTopAppBar
+import by.jadjer.etcu.ui.features.calibration.CalibrationViewModel
+import by.jadjer.etcu.ui.features.calibration.screens.CalibrationScreen
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
 import by.jadjer.etcu.ui.features.device.screens.CruiseScreen
 import by.jadjer.etcu.ui.features.device.screens.EcuScreen
 import by.jadjer.etcu.ui.features.device.screens.ServoScreen
 import by.jadjer.etcu.ui.features.device.screens.SettingsScreen
 import by.jadjer.etcu.ui.features.device.screens.SystemScreen
-import by.jadjer.etcu.ui.features.calibration.CalibrationViewModel
-import by.jadjer.etcu.ui.features.calibration.screens.CalibrationScreen
 import by.jadjer.etcu.ui.features.ota.OtaScreen
 import by.jadjer.etcu.ui.features.ota.OtaViewModel
 import by.jadjer.etcu.ui.features.scan.ScanScreen
@@ -63,7 +64,7 @@ fun MainScreen(viewModel: MainViewModel) {
     val connectionState by viewModel.connectionState.collectAsState()
     val connectionDetail by viewModel.connectionDetail.collectAsState()
     val isManualForget by viewModel.isManualForget.collectAsState()
-    
+
     val isBonded = remember(connectionState, isManualForget) { viewModel.isBonded() }
     val connectionStatus = connectionState.toDisplayString(connectionDetail ?: "")
 
@@ -76,13 +77,15 @@ fun MainScreen(viewModel: MainViewModel) {
                 onResetClick = viewModel::forgetDevice
             )
         }
+
         connectionState == ConnectionState.DISCONNECTED -> {
             val scanViewModel: ScanViewModel = viewModel(factory = ViewModelFactory)
             ScanScreen(viewModel = scanViewModel)
         }
+
         else -> {
             val deviceViewModel: DeviceViewModel = viewModel(factory = ViewModelFactory)
-            MainScreenContent(deviceViewModel, connectionStatus)
+            MainScreenContent(deviceViewModel) { connectionStatus }
         }
     }
 }
@@ -101,17 +104,21 @@ fun MainScreenPreview() {
 @Composable
 private fun MainScreenContent(
     deviceViewModel: DeviceViewModel,
-    connectionStatus: String
+    connectionStatus: () -> String
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
-    val currentScreen = ScreenItem.fromRoute(currentRoute)
-    val isFullscreenRoute = currentScreen == ScreenItem.OTA || currentScreen == ScreenItem.Calibration
+
+    val isFullscreenRoute by remember {
+        derivedStateOf {
+            val route = navBackStackEntry?.destination?.route
+            val screen = ScreenItem.fromRoute(route)
+            screen == ScreenItem.OTA || screen == ScreenItem.Calibration
+        }
+    }
 
     val coroutineScope = rememberCoroutineScope()
-    val telemetry by deviceViewModel.telemetry.collectAsState()
-    val activeErrors = telemetry.status.activeErrors
+    val errorCount by deviceViewModel.errorCount.collectAsState()
 
     val navItems = ScreenItem.mainItems
     val pagerState = rememberPagerState(pageCount = { navItems.size })
@@ -120,7 +127,7 @@ private fun MainScreenContent(
 
     CompositionLocalProvider(LocalNavController provides navController) {
         Scaffold(
-            topBar = { MainTopAppBar(connectionStatus) },
+            topBar = { MainTopAppBar(connectionStatus = connectionStatus) },
             bottomBar = {
                 if (!isFullscreenRoute) {
                     MainNavigationBar(
@@ -136,13 +143,17 @@ private fun MainScreenContent(
                 }
             },
             floatingActionButton = {
-                if (activeErrors.isNotEmpty() && !isFullscreenRoute) {
-                    ErrorFab(errorCount = activeErrors.size, onClick = { showErrorsSheet = true })
+                if (errorCount > 0 && !isFullscreenRoute) {
+                    ErrorFab(errorCount = errorCount, onClick = { showErrorsSheet = true })
                 }
             }
         ) { innerPadding ->
             if (showErrorsSheet) {
-                ErrorsBottomSheet(activeErrors, onDismiss = { showErrorsSheet = false })
+                val telemetry by deviceViewModel.telemetry.collectAsState()
+                ErrorsBottomSheet(
+                    activeErrors = telemetry.status.activeErrors,
+                    onDismiss = { showErrorsSheet = false }
+                )
             }
 
             MainNavigationHost(
@@ -175,7 +186,8 @@ fun MainNavigationHost(
                     HorizontalPager(
                         state = pagerState,
                         modifier = Modifier.fillMaxSize(),
-                        userScrollEnabled = pagerScrollEnabled.value
+                        userScrollEnabled = pagerScrollEnabled.value,
+                        beyondViewportPageCount = 1
                     ) { page ->
                         MainTabContent(navItems[page], deviceViewModel)
                     }
@@ -186,7 +198,8 @@ fun MainNavigationHost(
                 OtaScreen(viewModel = otaViewModel)
             }
             composable(MainNavRoutes.Routes.CALIBRATION) {
-                val calibrationViewModel: CalibrationViewModel = viewModel(factory = ViewModelFactory)
+                val calibrationViewModel: CalibrationViewModel =
+                    viewModel(factory = ViewModelFactory)
                 CalibrationScreen(viewModel = calibrationViewModel)
             }
         }

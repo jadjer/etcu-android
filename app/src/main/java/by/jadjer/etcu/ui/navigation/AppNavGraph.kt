@@ -1,6 +1,7 @@
 package by.jadjer.etcu.ui.navigation
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,9 +19,7 @@ import by.jadjer.etcu.ETCUApplication
 import by.jadjer.etcu.di.ViewModelFactory
 import by.jadjer.etcu.ui.features.main.MainScreen
 import by.jadjer.etcu.ui.features.permission.PermissionsScreen
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun AppNavGraph() {
     val appContext = LocalContext.current.applicationContext
@@ -33,11 +32,7 @@ fun AppNavGraph() {
     )
 
     var hasPermissions by remember {
-        mutableStateOf(
-            requiredPermissions.all {
-                ContextCompat.checkSelfPermission(appContext, it) == PackageManager.PERMISSION_GRANTED
-            }
-        )
+        mutableStateOf(checkPermissions(appContext, requiredPermissions))
     }
 
     LaunchedEffect(hasPermissions) {
@@ -47,23 +42,27 @@ fun AppNavGraph() {
     }
 
     val startRoute = remember(hasPermissions) {
-        if (hasPermissions) NavRoutes.MAIN else NavRoutes.PERMISSIONS
+        if (hasPermissions) NavScreen.Main.route else NavScreen.Permissions.route
     }
 
     NavHost(
         navController = navController,
         startDestination = startRoute
     ) {
-        composable(NavRoutes.PERMISSIONS) {
+        composable(NavScreen.Permissions.route) {
             PermissionsScreen(
-                onPermissionsGranted = {
-                    hasPermissions = true
-                }
+                onPermissionsGranted = { hasPermissions = true }
             )
         }
 
-        composable(NavRoutes.MAIN) {
+        composable(NavScreen.Main.route) {
             MainScreen(viewModel = viewModel(factory = ViewModelFactory))
         }
+    }
+}
+
+private fun checkPermissions(context: Context, permissions: Array<String>): Boolean {
+    return permissions.all {
+        ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
     }
 }

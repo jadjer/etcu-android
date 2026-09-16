@@ -22,9 +22,7 @@ import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 @SuppressLint("MissingPermission")
-class BLEScanner(
-    private val _central: BluetoothCentralManager
-) {
+class BLEScanner(private val _central: BluetoothCentralManager) {
     private val _scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var _scanJob: Job? = null
 
@@ -44,7 +42,7 @@ class BLEScanner(
         _discoveredDevices.update { currentMap ->
             val existing = currentMap[peripheral.address]
             if (existing != null && existing.rssi == scanResult.rssi) return@update currentMap
-            
+
             currentMap + (peripheral.address to DiscoveredDevice(
                 name = peripheral.name,
                 macAddress = peripheral.address,
@@ -59,7 +57,7 @@ class BLEScanner(
 
         _discoveredDevices.value = emptyMap()
         _isScanning.value = true
-        
+
         try {
             _central.scanForPeripheralsWithServices(setOf(BLEConstants.SERVICE_UUID))
         } catch (_: Exception) {

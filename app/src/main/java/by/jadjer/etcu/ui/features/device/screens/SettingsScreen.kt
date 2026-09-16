@@ -4,11 +4,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilterChip
@@ -17,13 +18,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.control.ControlConstants
 import by.jadjer.etcu.domain.model.control.ControlData
@@ -40,46 +42,56 @@ import by.jadjer.etcu.ui.util.labelResId
 
 @Composable
 fun SettingsScreen(
-    viewModel: DeviceViewModel, onOtaClick: () -> Unit, onCalibrateClick: () -> Unit
+    viewModel: DeviceViewModel,
+    onOtaClick: () -> Unit,
+    onCalibrateClick: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val controlData by viewModel.controlData.collectAsStateWithLifecycle()
+    val systemInfo by viewModel.systemInfo.collectAsStateWithLifecycle()
+    val operatingMode by viewModel.operatingMode.collectAsStateWithLifecycle()
+
+    val onModeChange =
+        remember(viewModel) { { mode: OperatingMode -> viewModel.updateOperatingMode(mode) } }
+    val onAccRangeChange = remember(viewModel) {
+        { min: Float, max: Float ->
+            viewModel.updateAccRange(min = min.toInt(), max = max.toInt())
+        }
+    }
+    val onServoRangeChange = remember(viewModel) {
+        { min: Float, max: Float ->
+            viewModel.updateServoRange(min = min.toInt(), max = max.toInt())
+        }
+    }
+    val onCruisePidChange = remember(viewModel) {
+        { p: Float, i: Float, d: Float -> viewModel.updateCruisePID(p, i, d) }
+    }
+    val onCruiseRpmChange = remember(viewModel) {
+        { min: Float, max: Float -> viewModel.updateCruiseRPMRange(min.toInt(), max.toInt()) }
+    }
+    val onCruiseSpeedChange = remember(viewModel) {
+        { min: Float, max: Float -> viewModel.updateCruiseSpeedRange(min.toInt(), max.toInt()) }
+    }
+    val onCruiseLimiterUpChange = remember(viewModel) {
+        { value: Float -> viewModel.updateCruiseLimiterUp(value.toInt()) }
+    }
+    val onCruiseLimiterDownChange = remember(viewModel) {
+        { value: Float -> viewModel.updateCruiseLimiterDown(value.toInt()) }
+    }
+    val onForgetClick = remember(viewModel) { { viewModel.forgetDevice() } }
 
     SettingsScreenContent(
-        controlData = uiState.controlData,
-        systemInfo = uiState.systemInfo,
-        operatingMode = uiState.operatingMode,
-        onModeChange = { viewModel.updateOperatingMode(it) },
-        onAccRangeChange = { min, max ->
-            viewModel.updateAccRange(
-                min = min.toInt(),
-                max = max.toInt(),
-            )
-        },
-        onServoRangeChange = { min, max ->
-            viewModel.updateServoRange(
-                min = min.toInt(),
-                max = max.toInt(),
-            )
-        },
-        onCruisePidChange = { p, i, d -> viewModel.updateCruisePID(p, i, d) },
-
-        onCruiseRpmChange = { min, max ->
-            viewModel.updateCruiseRPMRange(
-                min.toInt(), max.toInt()
-            )
-        },
-        onCruiseSpeedChange = { min, max ->
-            viewModel.updateCruiseSpeedRange(
-                min.toInt(), max.toInt()
-            )
-        },
-        onCruiseLimiterUpChange = { value ->
-            viewModel.updateCruiseLimiterUp(value.toInt())
-        },
-        onCruiseLimiterDownChange = { value ->
-            viewModel.updateCruiseLimiterDown(value.toInt())
-        },
-        onForgetClick = { viewModel.forgetDevice() },
+        controlData = controlData,
+        systemInfo = systemInfo,
+        operatingMode = operatingMode,
+        onModeChange = onModeChange,
+        onAccRangeChange = onAccRangeChange,
+        onServoRangeChange = onServoRangeChange,
+        onCruisePidChange = onCruisePidChange,
+        onCruiseRpmChange = onCruiseRpmChange,
+        onCruiseSpeedChange = onCruiseSpeedChange,
+        onCruiseLimiterUpChange = onCruiseLimiterUpChange,
+        onCruiseLimiterDownChange = onCruiseLimiterDownChange,
+        onForgetClick = onForgetClick,
         onOtaClick = onOtaClick,
         onCalibrateClick = onCalibrateClick
     )
@@ -102,53 +114,69 @@ fun SettingsScreenContent(
     onOtaClick: () -> Unit,
     onCalibrateClick: () -> Unit
 ) {
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
+            .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        DeviceInfoSection(systemInfo = systemInfo)
+        item(key = "device_info") {
+            Spacer(Modifier.height(16.dp))
+            DeviceInfoSection(systemInfo = systemInfo)
+        }
 
-        HorizontalDivider()
+        item(key = "divider_1") { HorizontalDivider() }
 
-        Text(stringResource(R.string.settings_control), style = MaterialTheme.typography.titleLarge)
+        item(key = "header_control") {
+            Text(
+                stringResource(R.string.settings_control),
+                style = MaterialTheme.typography.titleLarge
+            )
+        }
 
-        AcceleratorSettingsSection(
-            acceleratorMin = controlData.acceleratorMin,
-            acceleratorMax = controlData.acceleratorMax,
-            onRangeChange = onAccRangeChange
-        )
+        item(key = "accel_settings") {
+            AcceleratorSettingsSection(
+                acceleratorMin = controlData.acceleratorMin,
+                acceleratorMax = controlData.acceleratorMax,
+                onRangeChange = onAccRangeChange
+            )
+        }
 
-        HorizontalDivider()
+        item(key = "divider_2") { HorizontalDivider() }
 
-        ServoSettingsSection(
-            servoMin = controlData.servoMin,
-            servoMax = controlData.servoMax,
-            operatingMode = operatingMode,
-            onModeChange = onModeChange,
-            onRangeChange = onServoRangeChange
-        )
+        item(key = "servo_settings") {
+            ServoSettingsSection(
+                servoMin = controlData.servoMin,
+                servoMax = controlData.servoMax,
+                operatingMode = operatingMode,
+                onModeChange = onModeChange,
+                onRangeChange = onServoRangeChange
+            )
+        }
 
-        HorizontalDivider()
+        item(key = "divider_3") { HorizontalDivider() }
 
-        CruiseSettingsSection(
-            cruise = controlData.cruise,
-            onPidChange = onCruisePidChange,
-            onRpmChange = onCruiseRpmChange,
-            onSpeedChange = onCruiseSpeedChange,
-            onLimiterUpChange = onCruiseLimiterUpChange,
-            onLimiterDownChange = onCruiseLimiterDownChange
-        )
+        item(key = "cruise_settings") {
+            CruiseSettingsSection(
+                cruise = controlData.cruise,
+                onPidChange = onCruisePidChange,
+                onRpmChange = onCruiseRpmChange,
+                onSpeedChange = onCruiseSpeedChange,
+                onLimiterUpChange = onCruiseLimiterUpChange,
+                onLimiterDownChange = onCruiseLimiterDownChange
+            )
+        }
 
-        HorizontalDivider()
+        item(key = "divider_4") { HorizontalDivider() }
 
-        DeviceActionsSection(
-            onCalibrateClick = onCalibrateClick,
-            onForgetClick = onForgetClick,
-            onOtaClick = onOtaClick
-        )
+        item(key = "device_actions") {
+            DeviceActionsSection(
+                onCalibrateClick = onCalibrateClick,
+                onForgetClick = onForgetClick,
+                onOtaClick = onOtaClick
+            )
+            Spacer(Modifier.height(16.dp))
+        }
     }
 }
 
