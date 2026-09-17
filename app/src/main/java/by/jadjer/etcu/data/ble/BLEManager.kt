@@ -5,13 +5,13 @@ import android.app.Application
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothManager
 import android.content.Context
-import android.util.Log
 import by.jadjer.etcu.domain.model.calibration.CalibrationData
 import by.jadjer.etcu.domain.model.control.ControlData
 import by.jadjer.etcu.domain.model.ota.OTAChunk
 import by.jadjer.etcu.domain.model.ota.OTAStatus
 import by.jadjer.etcu.domain.model.system.SystemInfo
 import by.jadjer.etcu.domain.model.telemetry.SystemTelemetry
+import by.jadjer.etcu.util.AppLogger
 import com.welie.blessed.BluetoothPeripheral
 import com.welie.blessed.BluetoothPeripheralCallback
 import com.welie.blessed.GattStatus
@@ -86,14 +86,14 @@ class BLEManager(app: Application) {
     }
 
     private fun handleServicesDiscovered(peripheral: BluetoothPeripheral) {
-        Log.d(_tag, "Services discovered for ${peripheral.address}")
+        AppLogger.d(_tag, "Services discovered for ${peripheral.address}")
         _connectionManager.updateState(AppConnectionState.SERVICES_DISCOVERED)
         peripheral.requestMtu(BLEConstants.REQUESTED_MTU)
     }
 
     private fun handleMtuChanged(mtu: Int, status: GattStatus) {
         if (status == GattStatus.SUCCESS) {
-            Log.d(_tag, "MTU changed to $mtu")
+            AppLogger.d(_tag, "MTU changed to $mtu")
             _negotiatedMTU = mtu
             _connectionManager.updateState(AppConnectionState.OTA_SETUP)
             _connectionManager.activePeripheral?.startNotify(
@@ -102,7 +102,7 @@ class BLEManager(app: Application) {
                 false
             )
         } else {
-            Log.e(_tag, "MTU change failed with status $status")
+            AppLogger.e(_tag, "MTU change failed with status $status")
             _connectionManager.updateState(AppConnectionState.ERROR_MTU, status.value.toString())
         }
     }
@@ -113,7 +113,7 @@ class BLEManager(app: Application) {
         status: GattStatus
     ) {
         if (status != GattStatus.SUCCESS) {
-            Log.e(_tag, "Notification failed for ${characteristic.uuid}: $status")
+            AppLogger.e(_tag, "Notification failed for ${characteristic.uuid}: $status")
             _connectionManager.updateState(
                 AppConnectionState.ERROR_DESCRIPTOR_WRITE,
                 status.value.toString()
@@ -147,7 +147,7 @@ class BLEManager(app: Application) {
         status: GattStatus
     ) {
         if (status != GattStatus.SUCCESS) {
-            Log.e(_tag, "Read failed for ${characteristic.uuid}: $status")
+            AppLogger.e(_tag, "Read failed for ${characteristic.uuid}: $status")
             _connectionManager.updateState(
                 AppConnectionState.ERROR_READ_CHAR,
                 status.value.toString()
@@ -188,7 +188,7 @@ class BLEManager(app: Application) {
         status: GattStatus
     ) {
         if (status != GattStatus.SUCCESS) {
-            Log.e(_tag, "Write failed for ${characteristic.uuid}: $status")
+            AppLogger.e(_tag, "Write failed for ${characteristic.uuid}: $status")
             _connectionManager.updateState(
                 AppConnectionState.ERROR_WRITE_CHAR,
                 status.value.toString()

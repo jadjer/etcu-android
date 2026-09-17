@@ -28,7 +28,9 @@ import by.jadjer.etcu.domain.model.telemetry.AcceleratorTelemetry
 import by.jadjer.etcu.domain.model.telemetry.SystemStatusTelemetry
 import by.jadjer.etcu.domain.model.telemetry.TelemetryConstants
 import by.jadjer.etcu.ui.component.StatusIndicator
+import by.jadjer.etcu.ui.component.StatusIndicatorPlaceholder
 import by.jadjer.etcu.ui.component.StatusRow
+import by.jadjer.etcu.ui.component.StatusRowPlaceholder
 import by.jadjer.etcu.ui.component.history.rememberTelemetryHistoryState
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
 import by.jadjer.etcu.ui.util.labelResId
@@ -64,6 +66,7 @@ fun SystemScreen(viewModel: DeviceViewModel) {
     SystemScreenContent(
         statusTelemetry = telemetry.status,
         acceleratorTelemetry = telemetry.accelerator,
+        isLoading = telemetry.status.systemState == SystemState.UNKNOWN,
         acceleratorProvider = acceleratorProvider,
         onAcceleratorClick = onAcceleratorClick,
         throttleProvider = throttleProvider,
@@ -82,6 +85,7 @@ fun SystemScreen(viewModel: DeviceViewModel) {
 fun SystemScreenContent(
     statusTelemetry: SystemStatusTelemetry,
     acceleratorTelemetry: AcceleratorTelemetry,
+    isLoading: Boolean = false,
     acceleratorProvider: (AcceleratorTelemetry) -> Float,
     onAcceleratorClick: (String, String, (AcceleratorTelemetry) -> Float) -> Unit,
     throttleProvider: (SystemStatusTelemetry) -> Float,
@@ -106,7 +110,8 @@ fun SystemScreenContent(
         }
 
         item(key = "system_state") {
-            StatusRow(
+            if (isLoading) StatusRowPlaceholder()
+            else StatusRow(
                 label = stringResource(R.string.system_state),
                 value = stringResource(statusTelemetry.systemState.labelResId),
                 icon = Icons.Default.Info
@@ -116,7 +121,8 @@ fun SystemScreenContent(
         item(key = "divider_1") { HorizontalDivider() }
 
         item(key = "accelerator") {
-            StatusRow(
+            if (isLoading) StatusRowPlaceholder()
+            else StatusRow(
                 label = acceleratorLabel,
                 value = acceleratorTelemetry.position.toString(),
                 unit = rawUnit,
@@ -126,7 +132,8 @@ fun SystemScreenContent(
         }
 
         item(key = "throttle") {
-            StatusRow(
+            if (isLoading) StatusRowPlaceholder()
+            else StatusRow(
                 label = throttleLabel,
                 value = statusTelemetry.throttlePosition.toString(),
                 unit = rawUnit,
@@ -138,7 +145,8 @@ fun SystemScreenContent(
         item(key = "divider_2") { HorizontalDivider() }
 
         item(key = "system_guard") {
-            StatusIndicator(
+            if (isLoading) StatusIndicatorPlaceholder()
+            else StatusIndicator(
                 label = stringResource(R.string.system_guard),
                 isActive = statusTelemetry.isGuardActive,
                 icon = Icons.Default.Lock
@@ -146,7 +154,8 @@ fun SystemScreenContent(
         }
 
         item(key = "system_brake") {
-            StatusIndicator(
+            if (isLoading) StatusIndicatorPlaceholder()
+            else StatusIndicator(
                 label = stringResource(R.string.system_brake),
                 isActive = statusTelemetry.isBrakeEnabled
             )
@@ -171,6 +180,7 @@ fun SystemScreenPreview() {
                 hallB = 510,
                 position = 300,
             ),
+            isLoading = false,
             acceleratorProvider = { it.position.toFloat() },
             onAcceleratorClick = { _, _, _ -> },
             throttleProvider = { it.throttlePosition.toFloat() },

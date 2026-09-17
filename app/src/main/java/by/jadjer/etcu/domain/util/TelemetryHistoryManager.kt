@@ -15,26 +15,32 @@ class TelemetryHistoryManager {
         val cutoff = timestamp - TelemetryConstants.HISTORY_DURATION_MS
 
         return TelemetryHistory(
-            status = (currentHistory.status + HistoryRecord(
-                newTelemetry.status,
-                timestamp
-            )).filter { it.timestamp > cutoff },
-            ecu = (currentHistory.ecu + HistoryRecord(
-                newTelemetry.ecu,
-                timestamp
-            )).filter { it.timestamp > cutoff },
-            servo = (currentHistory.servo + HistoryRecord(
-                newTelemetry.servo,
-                timestamp
-            )).filter { it.timestamp > cutoff },
-            cruise = (currentHistory.cruise + HistoryRecord(
-                newTelemetry.cruise,
-                timestamp
-            )).filter { it.timestamp > cutoff },
-            accelerator = (currentHistory.accelerator + HistoryRecord(
-                newTelemetry.accelerator,
-                timestamp
-            )).filter { it.timestamp > cutoff }
+            status = updateList(currentHistory.status, newTelemetry.status, timestamp, cutoff),
+            ecu = updateList(currentHistory.ecu, newTelemetry.ecu, timestamp, cutoff),
+            servo = updateList(currentHistory.servo, newTelemetry.servo, timestamp, cutoff),
+            cruise = updateList(currentHistory.cruise, newTelemetry.cruise, timestamp, cutoff),
+            accelerator = updateList(currentHistory.accelerator, newTelemetry.accelerator, timestamp, cutoff)
         )
+    }
+
+    private fun <T> updateList(
+        current: List<HistoryRecord<T>>,
+        newData: T,
+        timestamp: Long,
+        cutoff: Long
+    ): List<HistoryRecord<T>> {
+        val result = ArrayList<HistoryRecord<T>>(current.size + 1)
+
+        // Поскольку записи добавляются последовательно, мы можем найти индекс первой валидной записи
+        val firstValidIndex = current.indexOfFirst { it.timestamp > cutoff }
+
+        if (firstValidIndex != -1) {
+            for (i in firstValidIndex until current.size) {
+                result.add(current[i])
+            }
+        }
+
+        result.add(HistoryRecord(newData, timestamp))
+        return result
     }
 }

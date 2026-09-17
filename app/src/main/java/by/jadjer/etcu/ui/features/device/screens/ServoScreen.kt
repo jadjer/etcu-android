@@ -24,8 +24,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.telemetry.ServoTelemetry
 import by.jadjer.etcu.domain.model.telemetry.TelemetryConstants
+import by.jadjer.etcu.domain.model.system.SystemState
 import by.jadjer.etcu.ui.component.StatusIndicator
+import by.jadjer.etcu.ui.component.StatusIndicatorPlaceholder
 import by.jadjer.etcu.ui.component.StatusRow
+import by.jadjer.etcu.ui.component.StatusRowPlaceholder
 import by.jadjer.etcu.ui.component.history.rememberTelemetryHistoryState
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
 
@@ -66,6 +69,7 @@ fun ServoScreen(viewModel: DeviceViewModel) {
 
     ServoScreenContent(
         telemetry = telemetry.servo,
+        isLoading = telemetry.status.systemState == SystemState.UNKNOWN,
         positionProvider = positionProvider,
         currentProvider = currentProvider,
         voltageProvider = voltageProvider,
@@ -81,6 +85,7 @@ fun ServoScreen(viewModel: DeviceViewModel) {
 @Composable
 fun ServoScreenContent(
     telemetry: ServoTelemetry,
+    isLoading: Boolean = false,
     positionProvider: (ServoTelemetry) -> Float,
     currentProvider: (ServoTelemetry) -> Float,
     voltageProvider: (ServoTelemetry) -> Float,
@@ -104,7 +109,8 @@ fun ServoScreenContent(
     ) {
         item(key = "servo_conn_status") {
             Spacer(Modifier.height(16.dp))
-            StatusIndicator(
+            if (isLoading) StatusIndicatorPlaceholder()
+            else StatusIndicator(
                 label = stringResource(R.string.servo_conn_status),
                 isActive = telemetry.isConnected,
                 activeText = stringResource(R.string.servo_connected),
@@ -113,7 +119,8 @@ fun ServoScreenContent(
         }
 
         item(key = "servo_enable_status") {
-            StatusIndicator(
+            if (isLoading) StatusIndicatorPlaceholder()
+            else StatusIndicator(
                 label = stringResource(R.string.servo_enable_status),
                 isActive = telemetry.isEnabled,
                 activeText = stringResource(R.string.servo_enabled),
@@ -124,7 +131,8 @@ fun ServoScreenContent(
         item(key = "divider_1") { HorizontalDivider() }
 
         item(key = "position") {
-            StatusRow(
+            if (isLoading) StatusRowPlaceholder()
+            else StatusRow(
                 label = positionLabel,
                 value = telemetry.position.toString(),
                 unit = positionUnit,
@@ -134,7 +142,8 @@ fun ServoScreenContent(
         }
 
         item(key = "current") {
-            StatusRow(
+            if (isLoading) StatusRowPlaceholder()
+            else StatusRow(
                 label = currentLabel,
                 value = telemetry.current.toString(),
                 unit = currentUnit,
@@ -144,7 +153,8 @@ fun ServoScreenContent(
         }
 
         item(key = "voltage") {
-            StatusRow(
+            if (isLoading) StatusRowPlaceholder()
+            else StatusRow(
                 label = voltageLabel,
                 value = "%.1f".format(telemetry.voltage),
                 unit = voltageUnit,
@@ -154,7 +164,8 @@ fun ServoScreenContent(
         }
 
         item(key = "temperature") {
-            StatusRow(
+            if (isLoading) StatusRowPlaceholder()
+            else StatusRow(
                 label = temperatureLabel,
                 value = telemetry.temperature.toString(),
                 unit = temperatureUnit,
@@ -166,7 +177,8 @@ fun ServoScreenContent(
         item(key = "divider_2") { HorizontalDivider() }
 
         item(key = "servo_motion_status") {
-            StatusIndicator(
+            if (isLoading) StatusIndicatorPlaceholder()
+            else StatusIndicator(
                 label = stringResource(R.string.servo_motion_status),
                 isActive = telemetry.isMoved,
                 activeText = stringResource(R.string.servo_moving),
@@ -190,6 +202,7 @@ fun ServoScreenPreview() {
                 temperature = 38,
                 isMoved = true
             ),
+            isLoading = false,
             positionProvider = { it.position.toFloat() },
             currentProvider = { it.current.toFloat() },
             voltageProvider = { it.voltage },

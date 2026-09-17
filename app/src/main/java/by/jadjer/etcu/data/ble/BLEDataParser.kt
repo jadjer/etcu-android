@@ -1,6 +1,6 @@
 package by.jadjer.etcu.data.ble
 
-import android.util.Log
+import by.jadjer.etcu.util.AppLogger
 import by.jadjer.etcu.data.ble.BLEConstants.CALIBRATION_DATA_SIZE
 import by.jadjer.etcu.data.ble.BLEConstants.CONTROL_DATA_SIZE
 import by.jadjer.etcu.data.ble.BLEConstants.INFO_STR_LEN
@@ -209,7 +209,7 @@ class BLEDataParser {
     }
 
     private fun logError(method: String, e: Exception) {
-        Log.e("BLEDataParser", "Error in $method", e)
+        AppLogger.e("BLEDataParser", "Error in $method", e)
     }
 
     // Helper Extensions

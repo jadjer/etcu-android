@@ -26,8 +26,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.telemetry.ECUTelemetry
 import by.jadjer.etcu.domain.model.telemetry.TelemetryConstants
+import by.jadjer.etcu.domain.model.system.SystemState
 import by.jadjer.etcu.ui.component.StatusIndicator
+import by.jadjer.etcu.ui.component.StatusIndicatorPlaceholder
 import by.jadjer.etcu.ui.component.StatusRow
+import by.jadjer.etcu.ui.component.StatusRowPlaceholder
 import by.jadjer.etcu.ui.component.history.rememberTelemetryHistoryState
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
 
@@ -84,6 +87,7 @@ fun EcuScreen(viewModel: DeviceViewModel) {
 
     EcuScreenContent(
         telemetry = telemetry.ecu,
+        isLoading = telemetry.status.systemState == SystemState.UNKNOWN,
         rpmProvider = rpmProvider,
         speedProvider = speedProvider,
         tpsProvider = tpsProvider,
@@ -102,6 +106,7 @@ fun EcuScreen(viewModel: DeviceViewModel) {
 @Composable
 fun EcuScreenContent(
     telemetry: ECUTelemetry,
+    isLoading: Boolean = false,
     rpmProvider: (ECUTelemetry) -> Float,
     speedProvider: (ECUTelemetry) -> Float,
     tpsProvider: (ECUTelemetry) -> Float,
@@ -133,7 +138,8 @@ fun EcuScreenContent(
     ) {
         item(key = "ecu_conn_status") {
             Spacer(Modifier.height(16.dp))
-            StatusIndicator(
+            if (isLoading) StatusIndicatorPlaceholder()
+            else StatusIndicator(
                 label = stringResource(R.string.ecu_conn_status),
                 isActive = telemetry.isConnected,
                 activeText = stringResource(R.string.ecu_connected),
@@ -142,7 +148,8 @@ fun EcuScreenContent(
         }
 
         item(key = "ecu_engine_status") {
-            StatusIndicator(
+            if (isLoading) StatusIndicatorPlaceholder()
+            else StatusIndicator(
                 label = stringResource(R.string.ecu_engine_status),
                 isActive = telemetry.isStarted,
                 activeText = stringResource(R.string.ecu_engine_started),
@@ -153,7 +160,8 @@ fun EcuScreenContent(
         item(key = "divider_1") { HorizontalDivider() }
 
         item(key = "rpm") {
-            StatusRow(
+            if (isLoading) StatusRowPlaceholder()
+            else StatusRow(
                 label = rpmLabel,
                 value = telemetry.rpm.toString(),
                 unit = rpmUnit,
@@ -163,7 +171,8 @@ fun EcuScreenContent(
         }
 
         item(key = "speed") {
-            StatusRow(
+            if (isLoading) StatusRowPlaceholder()
+            else StatusRow(
                 label = speedLabel,
                 value = telemetry.speed.toString(),
                 unit = speedUnit,
@@ -173,7 +182,8 @@ fun EcuScreenContent(
         }
 
         item(key = "tps") {
-            StatusRow(
+            if (isLoading) StatusRowPlaceholder()
+            else StatusRow(
                 label = tpsLabel,
                 value = telemetry.tps.toString(),
                 unit = tpsUnit,
@@ -183,7 +193,8 @@ fun EcuScreenContent(
         }
 
         item(key = "battery") {
-            StatusRow(
+            if (isLoading) StatusRowPlaceholder()
+            else StatusRow(
                 label = batteryLabel,
                 value = "%.1f".format(telemetry.battery),
                 unit = batteryUnit,
@@ -193,7 +204,8 @@ fun EcuScreenContent(
         }
 
         item(key = "map") {
-            StatusRow(
+            if (isLoading) StatusRowPlaceholder()
+            else StatusRow(
                 label = mapLabel,
                 value = telemetry.map.toString(),
                 unit = mapUnit,
@@ -203,7 +215,8 @@ fun EcuScreenContent(
         }
 
         item(key = "air_temp") {
-            StatusRow(
+            if (isLoading) StatusRowPlaceholder()
+            else StatusRow(
                 label = airTempLabel,
                 value = telemetry.airTemp.toString(),
                 unit = celsiusUnit,
@@ -213,7 +226,8 @@ fun EcuScreenContent(
         }
 
         item(key = "coolant_temp") {
-            StatusRow(
+            if (isLoading) StatusRowPlaceholder()
+            else StatusRow(
                 label = coolantTempLabel,
                 value = telemetry.coolantTemp.toString(),
                 unit = celsiusUnit,
@@ -231,7 +245,8 @@ fun EcuScreenContent(
         item(key = "divider_2") { HorizontalDivider() }
 
         item(key = "ecu_neutral_status") {
-            StatusIndicator(
+            if (isLoading) StatusIndicatorPlaceholder()
+            else StatusIndicator(
                 label = stringResource(R.string.ecu_neutral_status),
                 isActive = telemetry.isNeutral,
                 activeText = stringResource(R.string.ecu_neutral_on),
@@ -259,6 +274,7 @@ fun EcuScreenPreview() {
                 airTemp = 30,
                 coolantTemp = 78,
             ),
+            isLoading = false,
             rpmProvider = { it.rpm.toFloat() },
             speedProvider = { it.speed.toFloat() },
             tpsProvider = { it.tps.toFloat() },

@@ -256,6 +256,25 @@
     <string name="cal_min">Min</string>
     <string name="cal_max">Max</string>
 
+    <!-- Notifications -->
+    <string name="notif_channel_alerts">Critical Alerts</string>
+    <string name="notif_channel_cruise">Cruise Control</string>
+    <string name="notif_engine_overheat">Engine Overheat!</string>
+    <string name="notif_engine_overheat_desc">Coolant temperature is too high: %d°C</string>
+    <string name="notif_servo_overheat">Servo Overheat!</string>
+    <string name="notif_servo_overheat_desc">Servo temperature is too high: %d°C</string>
+    <string name="notif_voltage_low">Low Voltage!</string>
+    <string name="notif_voltage_low_desc">Battery voltage is low: %.1fV</string>
+    <string name="notif_voltage_high">High Voltage!</string>
+    <string name="notif_voltage_high_desc">Battery voltage is too high: %.1fV</string>
+    <string name="notif_cruise_on">Cruise Control ON</string>
+    <string name="notif_cruise_off">Cruise Control OFF</string>
+    <string name="notif_cruise_failed">Cruise Activation Failed</string>
+    <string name="notif_cruise_failed_speed_low">Speed too low: %d km/h</string>
+    <string name="notif_cruise_failed_speed_high">Speed too high: %d km/h</string>
+    <string name="notif_cruise_failed_rpm_low">RPM too low: %d</string>
+    <string name="notif_cruise_failed_rpm_high">RPM too high: %d</string>
+
     <!-- Permissions -->
     <string name="perm_title">Bluetooth Access Required</string>
     <string name="perm_desc">To work with BLE devices, the application needs permissions for scanning and connecting.</string>

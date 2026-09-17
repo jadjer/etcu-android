@@ -7,6 +7,7 @@ import by.jadjer.etcu.data.repository.BLERepositoryImpl
 import by.jadjer.etcu.data.repository.OTARepositoryImpl
 import by.jadjer.etcu.domain.repository.BLERepository
 import by.jadjer.etcu.domain.repository.OTARepository
+import by.jadjer.etcu.ui.util.TelemetryNotificationMonitor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -21,6 +22,10 @@ class AppContainer(private val _application: Application) {
 
     private val _bleManager by lazy { BLEManager(_application) }
     private val _appScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    
+    private val _notificationMonitor by lazy {
+        TelemetryNotificationMonitor(_application, bleRepository)
+    }
 
     private val _githubService by lazy {
         val logging = HttpLoggingInterceptor().apply {
@@ -57,5 +62,9 @@ class AppContainer(private val _application: Application) {
 
     val otaRepository: OTARepository by lazy {
         OTARepositoryImpl(_githubService, _application)
+    }
+    
+    fun startMonitoring() {
+        _notificationMonitor.toString() // Force lazy initialization
     }
 }

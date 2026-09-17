@@ -26,13 +26,16 @@ fun AppNavGraph() {
     val app = appContext as ETCUApplication
     val navController = rememberNavController()
 
-    val requiredPermissions = arrayOf(
-        Manifest.permission.BLUETOOTH_SCAN,
-        Manifest.permission.BLUETOOTH_CONNECT,
-    )
+    val bluetoothPermissions = remember {
+        arrayOf(
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.POST_NOTIFICATIONS,
+        )
+    }
 
     var hasPermissions by remember {
-        mutableStateOf(checkPermissions(appContext, requiredPermissions))
+        mutableStateOf(checkPermissions(appContext, bluetoothPermissions))
     }
 
     LaunchedEffect(hasPermissions) {

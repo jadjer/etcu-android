@@ -6,8 +6,8 @@
 
     <path
         android:pathData="M54,54m-32,0a32,32 0,1 1,64 0a32,32 0,1 1,-64 0"
-        android:strokeWidth="3"
-        android:strokeColor="#FFFFFF" />
+        android:strokeWidth="4"
+        android:strokeColor="@color/on_primary" />
 
     <group
         android:name="butterfly_group"
@@ -16,8 +16,13 @@
         <path
             android:name="butterfly_path"
             android:pathData="M54,32 L54,76"
+            android:strokeWidth="12"
+            android:strokeLineCap="round"
+            android:strokeColor="@color/on_primary" />
+
+        <path
             android:strokeWidth="8"
             android:strokeLineCap="round"
-            android:strokeColor="#FFFFFF" />
+            android:strokeColor="@color/on_primary" />
     </group>
 </vector>

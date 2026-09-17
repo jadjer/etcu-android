@@ -116,7 +116,6 @@
     <string name="sys_state_update">Абнаўленне</string>
 
     <!-- Diagnostics -->
-
     <string name="diag_no_errors">✅ Памылак не выяўлена</string>
     <string name="diag_title">Статус дыягностыкі:</string>
 
@@ -153,12 +152,6 @@
 
     <!-- Cruise Settings -->
     <string name="cruise_settings_title">Налады круіз-кантролю</string>
-
-
-
-
-
-
     <string name="cruise_integral_min">Мін. інтэграл</string>
     <string name="cruise_integral_max">Макс. інтэграл</string>
     <string name="cruise_filter_alpha">Альфа фільтра хуткасці</string>
@@ -236,22 +229,39 @@
 
     <!-- Calibration Screen -->
     <string name="cal_title">Каліброўка</string>
-    <string name="cal_hall_a">Хола А</string>
-    <string name="cal_hall_b">Хола Б</string>
+    <string name="cal_hall_a">Хол А</string>
+    <string name="cal_hall_b">Хол Б</string>
     <string name="cal_servo">Прывад</string>
     <string name="cal_detected">Выяўлены дыяпазон</string>
     <string name="cal_current">Бягучы дыяпазон</string>
     <string name="cal_btn_reset">Скінуць пошук</string>
     <string name="cal_btn_apply_auto">Ужыць знойдзенае</string>
     <string name="cal_btn_save">Захаваць каліброўку</string>
-
-
     <string name="cal_min">Мін</string>
     <string name="cal_max">Макс</string>
+
+    <!-- Notifications -->
+    <string name="notif_channel_alerts">Крытычныя апавяшчэнні</string>
+    <string name="notif_channel_cruise">Круіз-кантроль</string>
+    <string name="notif_engine_overheat">Перагрэў рухавіка!</string>
+    <string name="notif_engine_overheat_desc">Тэмпература ахаладжальнай вадкасці занадта высокая: %d°C</string>
+    <string name="notif_servo_overheat">Перагрэў прывада!</string>
+    <string name="notif_servo_overheat_desc">Тэмпература прывада занадта высокая: %d°C</string>
+    <string name="notif_voltage_low">Нізкае напружанне!</string>
+    <string name="notif_voltage_low_desc">Напружанне АКБ нізкае: %.1fВ</string>
+    <string name="notif_voltage_high">Высокае напружанне!</string>
+    <string name="notif_voltage_high_desc">Напружанне АКБ занадта высокае: %.1fВ</string>
+    <string name="notif_cruise_on">Круіз-кантроль ВКЛ</string>
+    <string name="notif_cruise_off">Круіз-кантроль ВЫКЛ</string>
+    <string name="notif_cruise_failed">Памылка ўключэння круізу</string>
+    <string name="notif_cruise_failed_speed_low">Занадта нізкая хуткасць: %d км/г</string>
+    <string name="notif_cruise_failed_speed_high">Занадта высокая хуткасць: %d км/г</string>
+    <string name="notif_cruise_failed_rpm_low">Занадта нізкія абароты: %d</string>
+    <string name="notif_cruise_failed_rpm_high">Занадта высокія абароты: %d</string>
+
     <!-- Permissions -->
     <string name="perm_title">Патрабуецца доступ да Bluetooth</string>
     <string name="perm_desc">Для працы з BLE прыладамі дадатку неабходныя дазволы на сканаванне і падключэнне.</string>
     <string name="perm_btn_grant">Даць доступ</string>
     <string name="perm_btn_settings">Адкрыць налады</string>
-
 </resources>

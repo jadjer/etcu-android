@@ -116,7 +116,6 @@
     <string name="sys_state_update">Обновление</string>
 
     <!-- Diagnostics -->
-
     <string name="diag_no_errors">✅ Ошибок не обнаружено</string>
     <string name="diag_title">Статус диагностики:</string>
 
@@ -153,12 +152,6 @@
 
     <!-- Cruise Settings -->
     <string name="cruise_settings_title">Настройки круиз-контроля</string>
-
-
-
-
-
-
     <string name="cruise_integral_min">Мин. интеграл</string>
     <string name="cruise_integral_max">Макс. интеграл</string>
     <string name="cruise_filter_alpha">Альфа фильтра скорости</string>
@@ -244,14 +237,31 @@
     <string name="cal_btn_reset">Сбросить поиск</string>
     <string name="cal_btn_apply_auto">Применить найденное</string>
     <string name="cal_btn_save">Сохранить калибровку</string>
-
-
     <string name="cal_min">Мин</string>
     <string name="cal_max">Макс</string>
+
+    <!-- Notifications -->
+    <string name="notif_channel_alerts">Критические оповещения</string>
+    <string name="notif_channel_cruise">Круиз-контроль</string>
+    <string name="notif_engine_overheat">Перегрев двигателя!</string>
+    <string name="notif_engine_overheat_desc">Температура охлаждающей жидкости слишком высокая: %d°C</string>
+    <string name="notif_servo_overheat">Перегрев привода!</string>
+    <string name="notif_servo_overheat_desc">Температура привода слишком высокая: %d°C</string>
+    <string name="notif_voltage_low">Низкое напряжение!</string>
+    <string name="notif_voltage_low_desc">Напряжение АКБ низкое: %.1fВ</string>
+    <string name="notif_voltage_high">Высокое напряжение!</string>
+    <string name="notif_voltage_high_desc">Напряжение АКБ слишком высокое: %.1fВ</string>
+    <string name="notif_cruise_on">Круиз-контроль ВКЛ</string>
+    <string name="notif_cruise_off">Круиз-контроль ВЫКЛ</string>
+    <string name="notif_cruise_failed">Ошибка включения круиза</string>
+    <string name="notif_cruise_failed_speed_low">Слишком низкая скорость: %d км/ч</string>
+    <string name="notif_cruise_failed_speed_high">Слишком высокая скорость: %d км/ч</string>
+    <string name="notif_cruise_failed_rpm_low">Слишком низкие обороты: %d</string>
+    <string name="notif_cruise_failed_rpm_high">Слишком высокие обороты: %d</string>
+
     <!-- Permissions -->
     <string name="perm_title">Требуется доступ к Bluetooth</string>
     <string name="perm_desc">Для работы с BLE устройствами приложению необходимы разрешения на сканирование и подключение.</string>
     <string name="perm_btn_grant">Предоставить доступ</string>
     <string name="perm_btn_settings">Открыть настройки</string>
-
 </resources>

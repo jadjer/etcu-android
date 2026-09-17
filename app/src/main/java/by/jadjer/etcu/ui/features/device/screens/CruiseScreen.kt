@@ -25,8 +25,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.telemetry.CruiseTelemetry
 import by.jadjer.etcu.domain.model.telemetry.TelemetryConstants
+import by.jadjer.etcu.domain.model.system.SystemState
 import by.jadjer.etcu.ui.component.StatusIndicator
+import by.jadjer.etcu.ui.component.StatusIndicatorPlaceholder
 import by.jadjer.etcu.ui.component.StatusRow
+import by.jadjer.etcu.ui.component.StatusRowPlaceholder
 import by.jadjer.etcu.ui.component.history.rememberTelemetryHistoryState
 import by.jadjer.etcu.ui.features.device.DeviceViewModel
 
@@ -74,12 +77,13 @@ fun CruiseScreen(viewModel: DeviceViewModel) {
 
     CruiseScreenContent(
         telemetry = telemetry.cruise,
-        targetSpeedProvider,
-        currentSpeedProvider,
-        errorProvider,
-        correctionProvider,
-        basePositionProvider,
-        currentPositionProvider,
+        isLoading = telemetry.status.systemState == SystemState.UNKNOWN,
+        targetSpeedProvider = targetSpeedProvider,
+        currentSpeedProvider = currentSpeedProvider,
+        errorProvider = errorProvider,
+        correctionProvider = correctionProvider,
+        basePositionProvider = basePositionProvider,
+        currentPositionProvider = currentPositionProvider,
         onValueClick = onValueClick,
     )
 
@@ -91,6 +95,7 @@ fun CruiseScreen(viewModel: DeviceViewModel) {
 @Composable
 fun CruiseScreenContent(
     telemetry: CruiseTelemetry,
+    isLoading: Boolean = false,
     targetSpeedProvider: (CruiseTelemetry) -> Float,
     currentSpeedProvider: (CruiseTelemetry) -> Float,
     errorProvider: (CruiseTelemetry) -> Float,
@@ -118,7 +123,8 @@ fun CruiseScreenContent(
     ) {
         item(key = "cruise_status") {
             Spacer(Modifier.height(16.dp))
-            StatusIndicator(
+            if (isLoading) StatusIndicatorPlaceholder()
+            else StatusIndicator(
                 label = stringResource(R.string.cruise_status_title),
                 isActive = telemetry.isEnabled,
                 activeText = stringResource(R.string.cruise_enabled),
@@ -127,7 +133,8 @@ fun CruiseScreenContent(
         }
 
         item(key = "cruise_activated") {
-            StatusIndicator(
+            if (isLoading) StatusIndicatorPlaceholder()
+            else StatusIndicator(
                 label = stringResource(R.string.cruise_activated),
                 isActive = telemetry.isActivated,
                 activeText = stringResource(R.string.cruise_activated),
@@ -138,7 +145,8 @@ fun CruiseScreenContent(
         item(key = "divider_1") { HorizontalDivider() }
 
         item(key = "target_speed") {
-            StatusRow(
+            if (isLoading) StatusRowPlaceholder()
+            else StatusRow(
                 label = targetSpeedLabel,
                 value = telemetry.targetSpeed.toString(),
                 unit = speedUnit,
@@ -148,7 +156,8 @@ fun CruiseScreenContent(
         }
 
         item(key = "current_speed") {
-            StatusRow(
+            if (isLoading) StatusRowPlaceholder()
+            else StatusRow(
                 label = currentSpeedLabel,
                 value = telemetry.currentSpeed.toString(),
                 unit = speedUnit,
@@ -160,7 +169,8 @@ fun CruiseScreenContent(
         item(key = "divider_2") { HorizontalDivider() }
 
         item(key = "error") {
-            StatusRow(
+            if (isLoading) StatusRowPlaceholder()
+            else StatusRow(
                 label = errorLabel,
                 value = "%.2f".format(telemetry.error),
                 unit = floatUnit,
@@ -170,7 +180,8 @@ fun CruiseScreenContent(
         }
 
         item(key = "correction") {
-            StatusRow(
+            if (isLoading) StatusRowPlaceholder()
+            else StatusRow(
                 label = correctionLabel,
                 value = "%.2f".format(telemetry.correction),
                 unit = floatUnit,
@@ -182,7 +193,8 @@ fun CruiseScreenContent(
         item(key = "divider_3") { HorizontalDivider() }
 
         item(key = "base_position") {
-            StatusRow(
+            if (isLoading) StatusRowPlaceholder()
+            else StatusRow(
                 label = basePositionLabel,
                 value = telemetry.basePosition.toString(),
                 unit = positionUnit,
@@ -192,7 +204,8 @@ fun CruiseScreenContent(
         }
 
         item(key = "current_position") {
-            StatusRow(
+            if (isLoading) StatusRowPlaceholder()
+            else StatusRow(
                 label = currentPositionLabel,
                 value = telemetry.currentPosition.toString(),
                 unit = positionUnit,
@@ -225,6 +238,7 @@ fun CruiseScreenPreview() {
                 basePosition = 285,
                 currentPosition = 310
             ),
+            isLoading = false,
             targetSpeedProvider = { it.targetSpeed.toFloat() },
             currentSpeedProvider = { it.currentSpeed.toFloat() },
             errorProvider = { it.error },

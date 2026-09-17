@@ -8,8 +8,8 @@ import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import by.jadjer.etcu.domain.model.ble.ConnectionState
+import by.jadjer.etcu.util.AppLogger
 import com.welie.blessed.BluetoothCentralManager
 import com.welie.blessed.BluetoothCentralManagerCallback
 import com.welie.blessed.BluetoothPeripheral
@@ -61,7 +61,7 @@ class BLEConnectionManager(
 
             if (!_isManualForget.value && _connectionState.value == ConnectionState.INITIALIZING) {
                 if (peripheral.bondState == BondState.BONDED && isEtcuDevice(peripheral)) {
-                    Log.i(_tag, "Auto-connecting during scan: ${peripheral.address}")
+                    AppLogger.i(_tag, "Auto-connecting during scan: ${peripheral.address}")
                     scanner.stopScan()
                     connect(peripheral.address)
                 }
@@ -69,20 +69,20 @@ class BLEConnectionManager(
         }
 
         override fun onConnected(peripheral: BluetoothPeripheral) {
-            Log.i(_tag, "Connected: ${peripheral.address}")
+            AppLogger.i(_tag, "Connected: ${peripheral.address}")
             activePeripheral = peripheral
             _connectionState.value = ConnectionState.CONNECTED_DISCOVERING
         }
 
         override fun onConnectionFailed(peripheral: BluetoothPeripheral, status: HciStatus) {
-            Log.e(_tag, "Connection failed: ${peripheral.address} ($status)")
+            AppLogger.e(_tag, "Connection failed: ${peripheral.address} ($status)")
             activePeripheral = null
             _connectionState.value = ConnectionState.ERROR_CONNECTION
             startAutoReconnectIfNeeded()
         }
 
         override fun onDisconnected(peripheral: BluetoothPeripheral, status: HciStatus) {
-            Log.i(_tag, "Disconnected: ${peripheral.address} ($status)")
+            AppLogger.i(_tag, "Disconnected: ${peripheral.address} ($status)")
             activePeripheral = null
             _connectionState.value = ConnectionState.DISCONNECTED
             startAutoReconnectIfNeeded()
@@ -113,7 +113,7 @@ class BLEConnectionManager(
             val callback = peripheralCallback ?: throw IllegalStateException("Callback not set")
             central.connect(peripheral, callback)
         } catch (e: Exception) {
-            Log.e(_tag, "Connect failed", e)
+            AppLogger.e(_tag, "Connect failed", e)
             _connectionState.value = ConnectionState.INVALID_MAC
         }
     }
@@ -128,7 +128,7 @@ class BLEConnectionManager(
             .firstOrNull { isEtcuDevice(it) }
 
         if (connected != null) {
-            Log.i(_tag, "Using existing connection: ${connected.address}")
+            AppLogger.i(_tag, "Using existing connection: ${connected.address}")
             connect(connected.address)
             return
         }
@@ -151,13 +151,13 @@ class BLEConnectionManager(
             val address = peripheral.address
             central.cancelConnection(peripheral)
             central.removeBond(address)
-            Log.i(_tag, "Bond removed for $address")
+            AppLogger.i(_tag, "Bond removed for $address")
         } ?: run {
             _adapter?.bondedDevices
                 ?.filter { it.name?.contains("ETCU", ignoreCase = true) == true }
                 ?.forEach { device ->
                     central.removeBond(device.address)
-                    Log.i(_tag, "Bond removed for ${device.address}")
+                    AppLogger.i(_tag, "Bond removed for ${device.address}")
                 }
         }
 
