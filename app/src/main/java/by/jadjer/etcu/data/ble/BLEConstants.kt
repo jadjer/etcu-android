@@ -4,12 +4,13 @@ import java.util.UUID
 
 object BLEConstants {
     // BLE UUIDs
-    val SERVICE_UUID: UUID = UUID.fromString("019fa351-08ac-76bf-b925-fe3ae2f765fb")
-    val TELEMETRY_UUID: UUID = UUID.fromString("019fa351-08ac-7940-a519-6ef5087c0329")
+    val OTA_UUID: UUID = UUID.fromString("019fa351-08ac-7d45-8718-b4aa5af6756a")
     val CONTROL_UUID: UUID = UUID.fromString("019fa351-08ac-7309-804b-ad328e7c1ef1")
+    val SERVICE_UUID: UUID = UUID.fromString("019fa351-08ac-76bf-b925-fe3ae2f765fb")
+    val WARNING_UUID: UUID = UUID.fromString("01a0b03f-0dc8-7ad4-b376-769918cc91c2")
+    val TELEMETRY_UUID: UUID = UUID.fromString("019fa351-08ac-7940-a519-6ef5087c0329")
     val SYSTEM_INFO_UUID: UUID = UUID.fromString("01a044f2-cf05-7494-aef5-a5298c878532")
     val CALIBRATION_UUID: UUID = UUID.fromString("01a07de1-71b0-730f-a4cc-d319b715b7e0")
-    val OTA_UUID: UUID = UUID.fromString("019fa351-08ac-7d45-8718-b4aa5af6756a")
 
     // Connection & OTA parameters
     const val DEFAULT_MTU = 23
@@ -21,6 +22,6 @@ object BLEConstants {
     const val CONTROL_DATA_SIZE = 30
     const val CALIBRATION_DATA_SIZE = 12
     const val SYSTEM_INFO_SIZE = 48
-    const val TELEMETRY_SIZE = 56
+    const val TELEMETRY_SIZE = 58
     const val INFO_STR_LEN = 16
 }

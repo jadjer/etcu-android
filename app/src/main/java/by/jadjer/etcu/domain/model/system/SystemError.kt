@@ -1,33 +1,40 @@
 package by.jadjer.etcu.domain.model.system
 
-enum class SystemError(val bitMask: Int) {
-    ECU_INIT_ERROR(1 shl 0),
-    ECU_READ_ERROR(1 shl 1),
+enum class SystemError(val bitMask: Long) {
+    ECU_INIT_FAILED(1L shl 0),
+    ECU_READ_FAILED(1L shl 1),
+    ECU_WRITE_FAILED(1L shl 2),
+    ECU_VOLTAGE_FAILED(1L shl 3),
+    ECU_ENGINE_OVERHEAT(1L shl 4),
 
-    GUARD_LOCK(1 shl 2),
+    GUARD_LOCKED(1L shl 5),
 
-    SERVO_INIT_ERROR(1 shl 3),
-    SERVO_READ_ERROR(1 shl 4),
-    SERVO_WRITE_ERROR(1 shl 5),
+    SERVO_INIT_FAILED(1L shl 6),
+    SERVO_READ_FAILED(1L shl 7),
+    SERVO_WRITE_FAILED(1L shl 8),
+    SERVO_ENCODER_FAILED(1L shl 9),
+    SERVO_VOLTAGE_FAILED(1L shl 10),
+    SERVO_OVERHEAT(1L shl 11),
+    SERVO_OVERLOAD(1L shl 12),
 
-    BLUETOOTH_INIT_ERROR(1 shl 6),
-    BLUETOOTH_SET_POWER_ERROR(1 shl 7),
-    BLUETOOTH_SET_MTU_ERROR(1 shl 8),
-    BLUETOOTH_CONNECTED_ERROR(1 shl 9),
-    BLUETOOTH_SEND_NOTIFY_ERROR(1 shl 10),
+    BLUETOOTH_INIT_FAILED(1L shl 13),
+    BLUETOOTH_POWER_FAILED(1L shl 14),
+    BLUETOOTH_MTU_FAILED(1L shl 15),
+    BLUETOOTH_CONN_FAILED(1L shl 16),
+    BLUETOOTH_SEND_FAILED(1L shl 17),
 
-    INDICATOR_INIT_ERROR(1 shl 11),
+    INDICATOR_INIT_FAILED(1L shl 18),
 
-    PERIPHERAL_INIT_ERROR(1 shl 12),
+    PERIPHERAL_INIT_FAILED(1L shl 19),
 
-    ACCELERATOR_INIT_ERROR(1 shl 13),
-    ACCELERATOR_READ_ERROR(1 shl 14),
-    ACCELERATOR_MISMATCH(1 shl 15);
+    ACCELERATOR_INIT_FAILED(1L shl 20),
+    ACCELERATOR_READ_FAILED(1L shl 21),
+    ACCELERATOR_MISMATCH(1L shl 22);
 
     companion object {
-        fun parseErrors(errorsMask: Int): List<SystemError> {
-            if (errorsMask == 0) return emptyList()
-            return entries.filter { (errorsMask and it.bitMask) != 0 }
+        fun parseErrors(errorsMask: Long): List<SystemError> {
+            if (errorsMask == 0L) return emptyList()
+            return entries.filter { (errorsMask and it.bitMask) != 0L }
         }
     }
 }

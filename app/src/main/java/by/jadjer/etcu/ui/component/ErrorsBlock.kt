@@ -64,6 +64,6 @@ fun ErrorsBlock(activeErrors: List<SystemError>) {
 @Composable
 private fun ErrorsBlockPreview() {
     ETCUTheme {
-        ErrorsBlock(activeErrors = listOf(SystemError.ECU_INIT_ERROR))
+        ErrorsBlock(activeErrors = listOf(SystemError.ECU_INIT_FAILED))
     }
 }

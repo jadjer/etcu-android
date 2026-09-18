@@ -16,6 +16,7 @@ import by.jadjer.etcu.domain.model.ota.OTAStatus
 import by.jadjer.etcu.domain.model.system.SystemError
 import by.jadjer.etcu.domain.model.system.SystemInfo
 import by.jadjer.etcu.domain.model.system.SystemState
+import by.jadjer.etcu.domain.model.system.SystemWarning
 import by.jadjer.etcu.domain.model.telemetry.AcceleratorTelemetry
 import by.jadjer.etcu.domain.model.telemetry.CruiseTelemetry
 import by.jadjer.etcu.domain.model.telemetry.ECUTelemetry
@@ -91,7 +92,7 @@ class BLEDataParser {
             val cruise = buffer.parseCruiseTelemetry()
             val accelerator = buffer.parseAcceleratorTelemetry()
             val systemState = SystemState.fromByte(buffer.uByte)
-            val activeErrors = SystemError.parseErrors(buffer.uShort)
+            val activeErrors = SystemError.parseErrors(buffer.uInt)
 
             SystemTelemetry(
                 status = SystemStatusTelemetry(
@@ -219,7 +220,13 @@ class BLEDataParser {
     private fun ByteArray.readString(offset: Int, length: Int) =
         String(this, offset, length, Charsets.UTF_8).trim { it <= '\u0000' }
 
+    fun parseWarnings(bytes: ByteArray): List<SystemWarning> {
+        val mask = bytes.getOrNull(0)?.toInt()?.and(0xFF) ?: return emptyList()
+        return SystemWarning.parseWarnings(mask)
+    }
+
     private val ByteBuffer.bool get() = get().toInt() != 0
     private val ByteBuffer.uByte get() = get().toInt() and 0xFF
-    private val ByteBuffer.uShort get() = short.toInt() and 0xFFFF
+    private val ByteBuffer.uShort get() = getShort().toInt() and 0xFFFF
+    private val ByteBuffer.uInt get() = getInt().toLong() and 0xFFFFFFFFL
 }

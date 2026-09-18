@@ -175,6 +175,14 @@
     <string name="error_button_read">Ошибка чтения состояния кнопок</string>
     <string name="error_ecu_init">Ошибка инициализации ЭБУ (ECU)</string>
     <string name="error_ecu_read">Ошибка чтения данных ЭБУ (ECU)</string>
+    <string name="error_ecu_write">Ошибка записи данных ЭБУ (ECU)</string>
+    <string name="error_ecu_voltage">Ошибка напряжения ЭБУ (ECU)</string>
+    <string name="error_ecu_overheat">Перегрев двигателя ЭБУ (ECU)</string>
+    <string name="error_servo_encoder">Ошибка энкодера сервопривода</string>
+    <string name="error_servo_voltage">Ошибка напряжения сервопривода</string>
+    <string name="error_servo_overload">Перегрузка сервопривода</string>
+    <string name="error_bluetooth_conn">Ошибка подключения Bluetooth</string>
+    <string name="error_bluetooth_send">Ошибка отправки Bluetooth</string>
     <string name="error_guard_lock">Блокировка защиты (Guard Lock)</string>
     <string name="error_indicator_init">Ошибка инициализации индикатора</string>
     <string name="error_servo_calibrate">Ошибка калибровки сервопривода</string>
@@ -258,6 +266,8 @@
     <string name="notif_cruise_failed_speed_high">Слишком высокая скорость: %d км/ч</string>
     <string name="notif_cruise_failed_rpm_low">Слишком низкие обороты: %d</string>
     <string name="notif_cruise_failed_rpm_high">Слишком высокие обороты: %d</string>
+    <string name="notif_cruise_failed_not_set">Скорость круиза не задана</string>
+    <string name="notif_cruise_failed_safety">Система безопасности активна</string>
 
     <!-- Permissions -->
     <string name="perm_title">Требуется доступ к Bluetooth</string>

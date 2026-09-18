@@ -188,6 +188,14 @@
     <string name="error_button_read">Button state read error</string>
     <string name="error_ecu_init">ECU initialization error</string>
     <string name="error_ecu_read">ECU read error</string>
+    <string name="error_ecu_write">ECU write error</string>
+    <string name="error_ecu_voltage">ECU voltage error</string>
+    <string name="error_ecu_overheat">ECU engine overheat</string>
+    <string name="error_servo_encoder">Servo encoder error</string>
+    <string name="error_servo_voltage">Servo voltage error</string>
+    <string name="error_servo_overload">Servo overload</string>
+    <string name="error_bluetooth_conn">Bluetooth connection failed</string>
+    <string name="error_bluetooth_send">Bluetooth send failed</string>
     <string name="error_guard_lock">Guard Lock active</string>
     <string name="error_indicator_init">Indicator initialization error</string>
     <string name="error_servo_calibrate">Servo calibration error</string>
@@ -274,6 +282,8 @@
     <string name="notif_cruise_failed_speed_high">Speed too high: %d km/h</string>
     <string name="notif_cruise_failed_rpm_low">RPM too low: %d</string>
     <string name="notif_cruise_failed_rpm_high">RPM too high: %d</string>
+    <string name="notif_cruise_failed_not_set">Target speed not set</string>
+    <string name="notif_cruise_failed_safety">Safety system active</string>
 
     <!-- Permissions -->
     <string name="perm_title">Bluetooth Access Required</string>

@@ -31,7 +31,7 @@ fun ErrorsBottomSheet(activeErrors: List<SystemError>, onDismiss: () -> Unit) {
 private fun ErrorsBottomSheetPreview() {
     ETCUTheme {
         Box(Modifier.padding(16.dp)) {
-            ErrorsBlock(listOf(SystemError.SERVO_WRITE_ERROR))
+            ErrorsBlock(listOf(SystemError.SERVO_WRITE_FAILED))
         }
     }
 }

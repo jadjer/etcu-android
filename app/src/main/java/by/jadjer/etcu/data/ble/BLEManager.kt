@@ -123,6 +123,10 @@ class BLEManager(app: Application) {
 
         when (characteristic.uuid) {
             BLEConstants.TELEMETRY_UUID -> {
+                peripheral.startNotify(BLEConstants.SERVICE_UUID, BLEConstants.WARNING_UUID, false)
+            }
+
+            BLEConstants.WARNING_UUID -> {
                 peripheral.startNotify(BLEConstants.SERVICE_UUID, BLEConstants.OTA_UUID, false)
             }
 
@@ -175,8 +179,20 @@ class BLEManager(app: Application) {
                 _connectionManager.updateState(AppConnectionState.READY)
             }
 
-            BLEConstants.TELEMETRY_UUID -> _telemetry.value =
-                _dataParser.parseSystemTelemetry(value)
+            BLEConstants.TELEMETRY_UUID -> {
+                val currentWarnings = _telemetry.value.status.activeWarnings
+                val parsedTelemetry = _dataParser.parseSystemTelemetry(value)
+                _telemetry.value = parsedTelemetry.copy(
+                    status = parsedTelemetry.status.copy(activeWarnings = currentWarnings)
+                )
+            }
+
+            BLEConstants.WARNING_UUID -> {
+                val warnings = _dataParser.parseWarnings(value)
+                _telemetry.value = _telemetry.value.copy(
+                    status = _telemetry.value.status.copy(activeWarnings = warnings)
+                )
+            }
 
             BLEConstants.OTA_UUID -> _otaFeedback.tryEmit(_dataParser.parseOtaFeedback(value))
         }

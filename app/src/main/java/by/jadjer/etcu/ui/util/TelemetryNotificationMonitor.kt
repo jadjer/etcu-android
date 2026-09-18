@@ -3,6 +3,7 @@ package by.jadjer.etcu.ui.util
 import android.content.Context
 import by.jadjer.etcu.R
 import by.jadjer.etcu.domain.model.control.ControlData
+import by.jadjer.etcu.domain.model.system.SystemWarning
 import by.jadjer.etcu.domain.model.telemetry.SystemTelemetry
 import by.jadjer.etcu.domain.repository.BLERepository
 import kotlinx.coroutines.CoroutineScope
@@ -22,12 +23,12 @@ class TelemetryNotificationMonitor(
     // State tracking to avoid spam
     private var lastEngineOverheat = false
     private var lastServoOverheat = false
-    private var lastVoltageStatus = 0 // 0: normal, 1: low, 2: high
+    private var lastVoltageStatus = 0
     private var lastCruiseActivated = false
     private var lastFailReason: String? = null
 
     // Thresholds
-    private val engineOverheatThreshold = 100
+    private val engineOverheatThreshold = 106
     private val engineRecoveryThreshold = 95
     private val servoOverheatThreshold = 70
     private val servoRecoveryThreshold = 65
@@ -130,24 +131,35 @@ class TelemetryNotificationMonitor(
             }
         }
 
-        // Notify on activation failure (if isEnabled is true but failed to activate)
-        if (telemetry.cruise.isEnabled && !currentActivated && !telemetry.status.isBrakeEnabled) {
-            val cruise = control.cruise
-            val rpm = telemetry.ecu.rpm
-            val speed = telemetry.ecu.speed
+        // Notify on activation failure based strictly on incoming warning channel data
+        val activeWarning = telemetry.status.activeWarnings.firstOrNull()
+        if (activeWarning != null) {
+            val failReason = when (activeWarning) {
+                SystemWarning.SPEED_LOW_FOR_CRUISE -> context.getString(
+                    R.string.notif_cruise_failed_speed_low,
+                    telemetry.ecu.speed
+                )
 
-            var failReason: String? = null
-            if (rpm < cruise.rpmMin) {
-                failReason = context.getString(R.string.notif_cruise_failed_rpm_low, rpm)
-            } else if (rpm > cruise.rpmMax) {
-                failReason = context.getString(R.string.notif_cruise_failed_rpm_high, rpm)
-            } else if (speed < cruise.speedMin) {
-                failReason = context.getString(R.string.notif_cruise_failed_speed_low, speed)
-            } else if (speed > cruise.speedMax) {
-                failReason = context.getString(R.string.notif_cruise_failed_speed_high, speed)
+                SystemWarning.SPEED_FAST_FOR_CRUISE -> context.getString(
+                    R.string.notif_cruise_failed_speed_high,
+                    telemetry.ecu.speed
+                )
+
+                SystemWarning.RPM_LOW_FOR_CRUISE -> context.getString(
+                    R.string.notif_cruise_failed_rpm_low,
+                    telemetry.ecu.rpm
+                )
+
+                SystemWarning.RPM_FAST_FOR_CRUISE -> context.getString(
+                    R.string.notif_cruise_failed_rpm_high,
+                    telemetry.ecu.rpm
+                )
+
+                SystemWarning.CRUISE_NOT_SET -> context.getString(R.string.notif_cruise_failed_not_set)
+                SystemWarning.SAFETY_ENABLE -> context.getString(R.string.notif_cruise_failed_safety)
             }
 
-            if (failReason != null && failReason != lastFailReason) {
+            if (failReason != lastFailReason) {
                 notificationHelper.showNotification(
                     NotificationHelper.NOTIF_ID_CRUISE_FAIL,
                     NotificationHelper.CHANNEL_CRUISE,
@@ -155,13 +167,12 @@ class TelemetryNotificationMonitor(
                     failReason
                 )
                 lastFailReason = failReason
-            } else if (failReason == null && lastFailReason != null) {
+            }
+        } else {
+            if (lastFailReason != null) {
                 notificationHelper.cancelNotification(NotificationHelper.NOTIF_ID_CRUISE_FAIL)
                 lastFailReason = null
             }
-        } else if (!telemetry.cruise.isEnabled || telemetry.status.isBrakeEnabled) {
-            lastFailReason = null
-            notificationHelper.cancelNotification(NotificationHelper.NOTIF_ID_CRUISE_FAIL)
         }
     }
 }

@@ -23,20 +23,27 @@ val SystemState.labelResId: Int
 
 val SystemError.labelResId: Int
     get() = when (this) {
-        SystemError.ECU_INIT_ERROR -> R.string.error_ecu_init
-        SystemError.ECU_READ_ERROR -> R.string.error_ecu_read
-        SystemError.GUARD_LOCK -> R.string.error_guard_lock
-        SystemError.SERVO_INIT_ERROR -> R.string.error_servo_init
-        SystemError.SERVO_READ_ERROR -> R.string.error_servo_read
-        SystemError.SERVO_WRITE_ERROR -> R.string.error_servo_write
-        SystemError.BLUETOOTH_INIT_ERROR -> R.string.error_bluetooth_init
-        SystemError.BLUETOOTH_SET_POWER_ERROR -> R.string.error_bluetooth_power
-        SystemError.BLUETOOTH_SET_MTU_ERROR -> R.string.error_bluetooth_mtu
-        SystemError.BLUETOOTH_SEND_NOTIFY_ERROR -> R.string.error_bluetooth_notify
-        SystemError.BLUETOOTH_CONNECTED_ERROR -> R.string.error_bluetooth_connected
-        SystemError.INDICATOR_INIT_ERROR -> R.string.error_indicator_init
-        SystemError.PERIPHERAL_INIT_ERROR -> R.string.error_button_init
-        SystemError.ACCELERATOR_INIT_ERROR -> R.string.error_accel_init
-        SystemError.ACCELERATOR_READ_ERROR -> R.string.error_accel_read
+        SystemError.ECU_INIT_FAILED -> R.string.error_ecu_init
+        SystemError.ECU_READ_FAILED -> R.string.error_ecu_read
+        SystemError.ECU_WRITE_FAILED -> R.string.error_ecu_write
+        SystemError.ECU_VOLTAGE_FAILED -> R.string.error_ecu_voltage
+        SystemError.ECU_ENGINE_OVERHEAT -> R.string.error_ecu_overheat
+        SystemError.GUARD_LOCKED -> R.string.error_guard_lock
+        SystemError.SERVO_INIT_FAILED -> R.string.error_servo_init
+        SystemError.SERVO_READ_FAILED -> R.string.error_servo_read
+        SystemError.SERVO_WRITE_FAILED -> R.string.error_servo_write
+        SystemError.SERVO_ENCODER_FAILED -> R.string.error_servo_encoder
+        SystemError.SERVO_VOLTAGE_FAILED -> R.string.error_servo_voltage
+        SystemError.SERVO_OVERHEAT -> R.string.error_servo_overtemp
+        SystemError.SERVO_OVERLOAD -> R.string.error_servo_overload
+        SystemError.BLUETOOTH_INIT_FAILED -> R.string.error_bluetooth_init
+        SystemError.BLUETOOTH_POWER_FAILED -> R.string.error_bluetooth_power
+        SystemError.BLUETOOTH_MTU_FAILED -> R.string.error_bluetooth_mtu
+        SystemError.BLUETOOTH_CONN_FAILED -> R.string.error_bluetooth_conn
+        SystemError.BLUETOOTH_SEND_FAILED -> R.string.error_bluetooth_send
+        SystemError.INDICATOR_INIT_FAILED -> R.string.error_indicator_init
+        SystemError.PERIPHERAL_INIT_FAILED -> R.string.error_button_init
+        SystemError.ACCELERATOR_INIT_FAILED -> R.string.error_accel_init
+        SystemError.ACCELERATOR_READ_FAILED -> R.string.error_accel_read
         SystemError.ACCELERATOR_MISMATCH -> R.string.error_accel_mismatch
     }

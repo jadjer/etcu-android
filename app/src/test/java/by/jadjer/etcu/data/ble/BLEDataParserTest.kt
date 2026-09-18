@@ -6,6 +6,7 @@ import by.jadjer.etcu.domain.model.control.ControlData
 import by.jadjer.etcu.domain.model.ota.OTAChunk
 import by.jadjer.etcu.domain.model.ota.OTAStatus
 import by.jadjer.etcu.domain.model.system.SystemState
+import by.jadjer.etcu.domain.model.system.SystemWarning
 import org.junit.Test
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -222,5 +223,13 @@ class BLEDataParserTest {
         val actualData = ByteArray(BLEConstants.OTA_PAYLOAD_SIZE)
         buffer.get(actualData)
         assertEquals(chunkData.toList(), actualData.toList())
+    }
+
+    @Test
+    fun `parseWarnings parses correctly`() {
+        // Test bits 0 (SPEED_LOW_FOR_CRUISE) and 4 (CRUISE_NOT_SET) -> (1 shl 0) | (1 shl 4) = 1 | 16 = 17
+        val bytes = byteArrayOf(17.toByte())
+        val result = _parser.parseWarnings(bytes)
+        assertEquals(listOf(SystemWarning.SPEED_LOW_FOR_CRUISE, SystemWarning.CRUISE_NOT_SET), result)
     }
 }

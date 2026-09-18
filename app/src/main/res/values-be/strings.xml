@@ -175,6 +175,14 @@
     <string name="error_button_read">Памылка чытання стану кнопак</string>
     <string name="error_ecu_init">Памылка ініцыялізацыі ЭБУ (ECU)</string>
     <string name="error_ecu_read">Памылка чытання параметраў ЭБУ (ECU)</string>
+    <string name="error_ecu_write">Памылка запісу параметраў ЭБУ (ECU)</string>
+    <string name="error_ecu_voltage">Памылка напружання ЭБУ (ECU)</string>
+    <string name="error_ecu_overheat">Перагрэў рухавіка ЭБУ (ECU)</string>
+    <string name="error_servo_encoder">Памылка энкадэра сервапрывада</string>
+    <string name="error_servo_voltage">Памылка напружання сервапрывада</string>
+    <string name="error_servo_overload">Перагрузка сервапрывада</string>
+    <string name="error_bluetooth_conn">Памылка падключэння Bluetooth</string>
+    <string name="error_bluetooth_send">Памылка адпраўкі Bluetooth</string>
     <string name="error_guard_lock">Блакіроўка абароны (Guard Lock)</string>
     <string name="error_indicator_init">Памылка ініцыялізацыі індыкатара</string>
     <string name="error_servo_calibrate">Памылка каліброўкі сервапрывада</string>
@@ -258,6 +266,8 @@
     <string name="notif_cruise_failed_speed_high">Занадта высокая хуткасць: %d км/г</string>
     <string name="notif_cruise_failed_rpm_low">Занадта нізкія абароты: %d</string>
     <string name="notif_cruise_failed_rpm_high">Занадта высокія абароты: %d</string>
+    <string name="notif_cruise_failed_not_set">Хуткасць круізу не зададзена</string>
+    <string name="notif_cruise_failed_safety">Сістэма бяспекі актыўная</string>
 
     <!-- Permissions -->
     <string name="perm_title">Патрабуецца доступ да Bluetooth</string>
