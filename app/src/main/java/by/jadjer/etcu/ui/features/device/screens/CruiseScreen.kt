@@ -89,7 +89,9 @@ fun CruiseScreen(viewModel: DeviceViewModel) {
 
     historyState.ShowDialog(
         historyProvider = { history.cruise },
-        currentTelemetryProvider = { telemetry.cruise })
+        currentTelemetryProvider = { telemetry.cruise },
+        lastUpdateProvider = { history.lastUpdate }
+    )
 }
 
 @Composable

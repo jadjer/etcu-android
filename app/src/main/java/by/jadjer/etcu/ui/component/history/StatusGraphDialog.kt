@@ -48,6 +48,7 @@ fun <T> StatusGraphDialog(
             selector = selector,
             valueRange = group.valueRange,
             startTime = group.history.firstOrNull()?.timestamp ?: 0L,
+            lastUpdate = group.lastUpdate,
             onDismiss = onDismiss
         )
     }
@@ -62,11 +63,11 @@ fun <T> StatusGraphDialogContent(
     selector: (HistoryRecord<T>) -> Float,
     valueRange: ClosedFloatingPointRange<Float>? = null,
     startTime: Long = 0,
+    lastUpdate: Long = 0,
     onDismiss: () -> Unit
 ) {
-    val data = remember(history, selector) { history.map(selector) }
-    val minVal = remember(data) { data.minOrNull() ?: 0f }
-    val maxVal = remember(data) { data.maxOrNull() ?: 0f }
+    val minVal = remember(lastUpdate) { history.minOfOrNull(selector) ?: 0f }
+    val maxVal = remember(lastUpdate) { history.maxOfOrNull(selector) ?: 0f }
 
     val timeFormat = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
     val sessionStartStr = remember(startTime) {
@@ -161,6 +162,7 @@ fun <T> StatusGraphDialogContent(
                 history = history,
                 selector = selector,
                 valueRange = valueRange,
+                lastUpdate = lastUpdate,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)

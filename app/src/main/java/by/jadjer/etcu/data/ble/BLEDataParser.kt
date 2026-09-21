@@ -210,7 +210,7 @@ class BLEDataParser {
     }
 
     private fun logError(method: String, e: Exception) {
-        AppLogger.e("BLEDataParser", "Error in $method", e)
+        AppLogger.e("BLEDataParser", message = { "Error in $method" }, throwable = e)
     }
 
     // Helper Extensions

@@ -268,6 +268,10 @@
     <string name="notif_cruise_failed_rpm_high">Занадта высокія абароты: %d</string>
     <string name="notif_cruise_failed_not_set">Хуткасць круізу не зададзена</string>
     <string name="notif_cruise_failed_safety">Сістэма бяспекі актыўная</string>
+    <string name="notif_ecu_disconnected">ECU адключаны!</string>
+    <string name="notif_ecu_disconnected_desc">Сувязь з блокам кіравання рухавіком страчана.</string>
+    <string name="notif_servo_disconnected">Серва адключаны!</string>
+    <string name="notif_servo_disconnected_desc">Сувязь з сервапрывадам дроселя страчана.</string>
 
     <!-- Permissions -->
     <string name="perm_title">Патрабуецца доступ да Bluetooth</string>

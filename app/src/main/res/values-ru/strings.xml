@@ -268,6 +268,10 @@
     <string name="notif_cruise_failed_rpm_high">Слишком высокие обороты: %d</string>
     <string name="notif_cruise_failed_not_set">Скорость круиза не задана</string>
     <string name="notif_cruise_failed_safety">Система безопасности активна</string>
+    <string name="notif_ecu_disconnected">ECU отключен!</string>
+    <string name="notif_ecu_disconnected_desc">Связь с блоком управления двигателем потеряна.</string>
+    <string name="notif_servo_disconnected">Серво отключен!</string>
+    <string name="notif_servo_disconnected_desc">Связь с сервоприводом дросселя потеряна.</string>
 
     <!-- Permissions -->
     <string name="perm_title">Требуется доступ к Bluetooth</string>

@@ -79,7 +79,9 @@ fun ServoScreen(viewModel: DeviceViewModel) {
 
     historyState.ShowDialog(
         historyProvider = { history.servo },
-        currentTelemetryProvider = { telemetry.servo })
+        currentTelemetryProvider = { telemetry.servo },
+        lastUpdateProvider = { history.lastUpdate }
+    )
 }
 
 @Composable

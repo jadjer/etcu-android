@@ -48,7 +48,10 @@ class BLERepositoryImpl(private val _bleManager: BLEManager, scope: CoroutineSco
         telemetry
             .sample(100.milliseconds)
             .onEach { t ->
-                _history.update { h -> _historyManager.updateHistory(h, t) }
+                _history.update { h ->
+                    _historyManager.updateHistory(h, t)
+                    h.copy(lastUpdate = System.currentTimeMillis())
+                }
             }.launchIn(scope)
     }
 

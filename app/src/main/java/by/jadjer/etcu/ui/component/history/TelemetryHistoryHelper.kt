@@ -14,7 +14,8 @@ data class HistoryGroup<T>(
     val history: List<HistoryRecord<T>>,
     val selector: (T) -> Float,
     val currentValue: Float,
-    val valueRange: ClosedFloatingPointRange<Float>? = null
+    val valueRange: ClosedFloatingPointRange<Float>? = null,
+    val lastUpdate: Long = 0L
 )
 
 @Stable
@@ -35,18 +36,20 @@ class TelemetryHistoryState<T>(
     @Composable
     fun ShowDialog(
         historyProvider: () -> List<HistoryRecord<T>>,
-        currentTelemetryProvider: () -> T
+        currentTelemetryProvider: () -> T,
+        lastUpdateProvider: () -> Long
     ) {
         val info = dialogInfo ?: return
 
-        val historyGroup by remember(info) {
+        val historyGroup by remember(info, lastUpdateProvider()) {
             derivedStateOf {
                 val currentTelemetry = currentTelemetryProvider()
                 HistoryGroup(
                     history = historyProvider(),
                     selector = info.selector,
                     currentValue = info.selector(currentTelemetry),
-                    valueRange = rangeProvider(info.label)
+                    valueRange = rangeProvider(info.label),
+                    lastUpdate = lastUpdateProvider()
                 )
             }
         }

@@ -75,10 +75,14 @@ fun SystemScreen(viewModel: DeviceViewModel) {
 
     acceleratorHistoryState.ShowDialog(
         historyProvider = { history.accelerator },
-        currentTelemetryProvider = { telemetry.accelerator })
+        currentTelemetryProvider = { telemetry.accelerator },
+        lastUpdateProvider = { history.lastUpdate }
+    )
     throttleHistoryState.ShowDialog(
         historyProvider = { history.status },
-        currentTelemetryProvider = { telemetry.status })
+        currentTelemetryProvider = { telemetry.status },
+        lastUpdateProvider = { history.lastUpdate }
+    )
 }
 
 @Composable

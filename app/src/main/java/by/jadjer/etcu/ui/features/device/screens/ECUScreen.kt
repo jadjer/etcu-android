@@ -100,7 +100,9 @@ fun EcuScreen(viewModel: DeviceViewModel) {
 
     historyState.ShowDialog(
         historyProvider = { history.ecu },
-        currentTelemetryProvider = { telemetry.ecu })
+        currentTelemetryProvider = { telemetry.ecu },
+        lastUpdateProvider = { history.lastUpdate }
+    )
 }
 
 @Composable

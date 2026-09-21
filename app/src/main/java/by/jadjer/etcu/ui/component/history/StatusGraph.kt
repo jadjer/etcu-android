@@ -5,10 +5,12 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -59,26 +61,32 @@ fun <T> StatusGraph(
     modifier: Modifier = Modifier,
     lineColor: Color = MaterialTheme.colorScheme.primary,
     selectColor: Color = MaterialTheme.colorScheme.error,
-    valueRange: ClosedFloatingPointRange<Float>? = null
+    valueRange: ClosedFloatingPointRange<Float>? = null,
+    lastUpdate: Long = 0L
 ) {
     if (history.size < 2) {
         EmptyGraphMessage(modifier)
         return
     }
 
-    val data = remember(history, selector) { history.map(selector) }
-    val minVal = remember(data, valueRange) { valueRange?.start ?: (data.minOrNull() ?: 0f) }
-    val maxVal = remember(data, valueRange) { valueRange?.endInclusive ?: (data.maxOrNull() ?: 1f) }
+    val lastTimestamp = remember(lastUpdate) { history.lastOrNull()?.timestamp ?: 0L }
+
+    val minVal = remember(lastUpdate, valueRange) {
+        valueRange?.start ?: history.minOfOrNull(selector) ?: 0f
+    }
+    val maxVal = remember(lastUpdate, valueRange) {
+        valueRange?.endInclusive ?: history.maxOfOrNull(selector) ?: 1f
+    }
     val valRange = remember(maxVal, minVal) { if (maxVal == minVal) 1f else maxVal - minVal }
 
-    val startTime = history.first().timestamp
-    val endTime = history.last().timestamp
-    val totalDurationMs = endTime - startTime
-    val graphWidth = (totalDurationMs * (10.dp.value / 1000f)).dp
+    val startTime = remember(lastUpdate) { history.firstOrNull()?.timestamp ?: 0L }
+    val endTime = lastTimestamp
+    val totalDurationMs = remember(startTime, endTime) { endTime - startTime }
+    val graphWidth = remember(totalDurationMs) { (totalDurationMs * (10.dp.value / 1000f)).dp }
 
     val scrollState = rememberScrollState()
 
-    AutoScrollToEnd(history.size, scrollState)
+    AutoScrollToEnd(lastUpdate, scrollState)
 
     val textMeasurer = rememberTextMeasurer()
     val labelStyle = MaterialTheme.typography.labelSmall.copy(
@@ -90,6 +98,8 @@ fun <T> StatusGraph(
 
     var selectedPoint by remember { mutableStateOf<Pair<Long, Float>?>(null) }
     val timeFormat = remember { SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault()) }
+
+    val path = remember { Path() }
 
     Column(modifier = modifier) {
         Box(
@@ -119,48 +129,54 @@ fun <T> StatusGraph(
 
             Spacer(Modifier.width(4.dp))
 
-            Box(
+            BoxWithConstraints(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .horizontalScroll(scrollState)
             ) {
-                Canvas(
+                val visibleWidth = constraints.maxWidth.toFloat()
+                Box(
                     modifier = Modifier
-                        .width(graphWidth)
-                        .fillMaxHeight()
-                        .pointerInput(history, totalDurationMs, startTime) {
-                            val touchSlop = viewConfiguration.touchSlop
+                        .fillMaxSize()
+                        .horizontalScroll(scrollState)
+                ) {
+                    Canvas(
+                        modifier = Modifier
+                            .width(graphWidth)
+                            .fillMaxHeight()
+                            .pointerInput(lastUpdate, totalDurationMs, startTime) {
+                                val touchSlop = viewConfiguration.touchSlop
 
-                            awaitPointerEventScope {
-                                var startX = 0f
-                                var isMoving = false
+                                awaitPointerEventScope {
+                                    var startX = 0f
+                                    var isMoving = false
 
-                                while (true) {
-                                    val event = awaitPointerEvent(pass = PointerEventPass.Initial)
-                                    val change = event.changes.firstOrNull()
+                                    while (true) {
+                                        val event = awaitPointerEvent(pass = PointerEventPass.Initial)
+                                        val change = event.changes.firstOrNull()
 
-                                    if (change != null) {
-                                        when (event.type) {
-                                            PointerEventType.Press -> {
-                                                startX = change.position.x
-                                                isMoving = false
-                                            }
-
-                                            PointerEventType.Move -> {
-                                                if (abs(change.position.x - startX) > touchSlop) {
-                                                    isMoving = true
+                                        if (change != null) {
+                                            when (event.type) {
+                                                PointerEventType.Press -> {
+                                                    startX = change.position.x
+                                                    isMoving = false
                                                 }
-                                            }
 
-                                            PointerEventType.Release -> {
-                                                if (!isMoving) {
-                                                    val clickedTime =
-                                                        startTime + (change.position.x / size.width * totalDurationMs).toLong()
-                                                    val closest =
-                                                        history.minByOrNull { abs(it.timestamp - clickedTime) }
-                                                    closest?.let {
-                                                        selectedPoint = it.timestamp to selector(it)
+                                                PointerEventType.Move -> {
+                                                    if (abs(change.position.x - startX) > touchSlop) {
+                                                        isMoving = true
+                                                    }
+                                                }
+
+                                                PointerEventType.Release -> {
+                                                    if (!isMoving) {
+                                                        val clickedTime =
+                                                            startTime + (change.position.x / size.width * totalDurationMs).toLong()
+                                                        val closest =
+                                                            history.minByOrNull { abs(it.timestamp - clickedTime) }
+                                                        closest?.let {
+                                                            selectedPoint = it.timestamp to selector(it)
+                                                        }
                                                     }
                                                 }
                                             }
@@ -168,53 +184,55 @@ fun <T> StatusGraph(
                                     }
                                 }
                             }
-                        }
-                ) {
-                    val width = size.width
-                    val height = size.height - 20.dp.toPx()
+                    ) {
+                        val width = size.width
+                        val height = size.height - 20.dp.toPx()
 
-                    val viewportStart = scrollState.value.toFloat()
-                    val viewportEnd = viewportStart + width
+                        val viewportStart = scrollState.value.toFloat()
+                        val viewportEnd = viewportStart + visibleWidth
 
-                    drawGraphGrid(
-                        startTime,
-                        endTime,
-                        totalDurationMs,
-                        width,
-                        height,
-                        textMeasurer,
-                        labelStyle,
-                        viewportStart,
-                        viewportEnd,
-                        gridColor
-                    )
+                        drawGraphGrid(
+                            startTime,
+                            endTime,
+                            totalDurationMs,
+                            width,
+                            height,
+                            textMeasurer,
+                            labelStyle,
+                            viewportStart,
+                            viewportEnd,
+                            gridColor
+                        )
 
-                    drawGraphPath(
-                        data,
-                        history,
-                        startTime,
-                        totalDurationMs,
-                        minVal,
-                        valRange,
-                        width,
-                        height,
-                        lineColor,
-                        viewportStart,
-                        viewportEnd
-                    )
-
-                    selectedPoint?.let { (time, value) ->
-                        drawSelectionHighlight(
-                            time,
-                            value,
+                        path.reset()
+                        drawGraphPath(
+                            path,
+                            history,
+                            selector,
                             startTime,
                             totalDurationMs,
                             minVal,
                             valRange,
                             width,
                             height,
-                            selectColor
+                            lineColor,
+                            viewportStart,
+                            viewportEnd
                         )
+
+                        selectedPoint?.let { (time, value) ->
+                            drawSelectionHighlight(
+                                time,
+                                value,
+                                startTime,
+                                totalDurationMs,
+                                minVal,
+                                valRange,
+                                width,
+                                height,
+                                selectColor
+                            )
+                        }
                     }
                 }
             }
@@ -239,10 +257,10 @@ private fun EmptyGraphMessage(modifier: Modifier) {
 }
 
 @Composable
-private fun AutoScrollToEnd(historySize: Int, scrollState: ScrollState) {
+private fun AutoScrollToEnd(lastUpdate: Long, scrollState: ScrollState) {
     var isInitial by remember { mutableStateOf(true) }
 
-    LaunchedEffect(historySize) {
+    LaunchedEffect(lastUpdate) {
         if (isInitial) {
             snapshotFlow { scrollState.maxValue }.first { it > 0 }
             scrollState.scrollTo(scrollState.maxValue)
@@ -294,7 +312,7 @@ private fun DrawScope.drawGraphGrid(
 
     while (currentGridTime < endTime) {
         val gridX =
-            ((currentGridTime - startTime).toFloat() / totalDurationMs) * width// Оптимизация: Выходим из цикла, если сетка ушла правее экрана
+            ((currentGridTime - startTime).toFloat() / totalDurationMs) * width
 
         if (gridX > viewportEnd) break
         if (gridX >= viewportStart) {
@@ -319,9 +337,10 @@ private fun DrawScope.drawGraphGrid(
     }
 }
 
-private fun DrawScope.drawGraphPath(
-    data: List<Float>,
-    history: List<HistoryRecord<*>>,
+private fun <T> DrawScope.drawGraphPath(
+    path: Path,
+    history: List<HistoryRecord<T>>,
+    selector: (HistoryRecord<T>) -> Float,
     startTime: Long,
     totalDurationMs: Long,
     minVal: Float,
@@ -332,30 +351,55 @@ private fun DrawScope.drawGraphPath(
     viewportStart: Float,
     viewportEnd: Float
 ) {
-    val path = Path()
-    var isPathEmpty = true
-    val padding = 50f
-    val activeRange = (viewportStart - padding)..(viewportEnd + padding)
+    if (history.isEmpty()) return
 
-    history.forEachIndexed { index, record ->
+    val padding = 50f
+    val visibleRange = history.findVisibleIndices(
+        startTime, totalDurationMs, width, viewportStart, viewportEnd, padding
+    )
+
+    if (visibleRange.isEmpty()) return
+
+    var firstPoint = true
+
+    for (i in visibleRange) {
+        val record = history[i]
         val x = ((record.timestamp - startTime).toFloat() / totalDurationMs) * width
-        if (x in activeRange) {
-            val value = data[index]
-            val y = height - ((value - minVal) / valRange * height)
-            if (isPathEmpty) {
-                path.moveTo(x, y)
-                isPathEmpty = false
-            } else {
-                path.lineTo(x, y)
-            }
-        } else if (!isPathEmpty && x > viewportEnd + padding) {
-            return@forEachIndexed
+        val value = selector(record)
+        val y = height - ((value - minVal) / valRange * height)
+        
+        if (firstPoint) {
+            path.moveTo(x, y)
+            firstPoint = false
+        } else {
+            path.lineTo(x, y)
         }
     }
 
-    if (!isPathEmpty) {
-        drawPath(path = path, color = lineColor, style = Stroke(width = 2.dp.toPx()))
-    }
+    drawPath(path = path, color = lineColor, style = Stroke(width = 2.dp.toPx()))
+}
+
+private fun <T> List<HistoryRecord<T>>.findVisibleIndices(
+    startTime: Long,
+    totalDurationMs: Long,
+    width: Float,
+    viewportStart: Float,
+    viewportEnd: Float,
+    padding: Float
+): IntRange {
+    if (isEmpty()) return IntRange.EMPTY
+    
+    val msPerPixel = totalDurationMs.toFloat() / width
+    val minTime = startTime + ((viewportStart - padding) * msPerPixel).toLong()
+    val maxTime = startTime + ((viewportEnd + padding) * msPerPixel).toLong()
+
+    var startIndex = binarySearch { it.timestamp.compareTo(minTime) }
+    if (startIndex < 0) startIndex = (-(startIndex + 1)).coerceIn(indices)
+    
+    var endIndex = binarySearch { it.timestamp.compareTo(maxTime) }
+    if (endIndex < 0) endIndex = (-(endIndex + 1)).coerceIn(indices)
+    
+    return startIndex..endIndex
 }
 
 private fun DrawScope.drawSelectionHighlight(

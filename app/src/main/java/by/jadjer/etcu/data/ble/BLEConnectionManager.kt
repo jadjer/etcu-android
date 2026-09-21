@@ -7,7 +7,7 @@ import android.bluetooth.BluetoothManager
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.os.Handler
-import android.os.Looper
+import android.os.HandlerThread
 import by.jadjer.etcu.domain.model.ble.ConnectionState
 import by.jadjer.etcu.util.AppLogger
 import com.welie.blessed.BluetoothCentralManager
@@ -45,8 +45,15 @@ class BLEConnectionManager(
     private val _isManualForget = MutableStateFlow(false)
     val isManualForget = _isManualForget.asStateFlow()
 
-    private val _scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private val _scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var _reconnectJob: Job? = null
+
+    private var _currentReconnectDelayMs = 3000L
+    private val _minReconnectDelayMs = 3000L
+    private val _maxReconnectDelayMs = 30000L
+
+    private val _bleHandlerThread = HandlerThread("BLEConnectionManagerThread").apply { start() }
+    private val _bleHandler = Handler(_bleHandlerThread.looper)
 
     val central: BluetoothCentralManager
     val scanner: BLEScanner
@@ -61,7 +68,7 @@ class BLEConnectionManager(
 
             if (!_isManualForget.value && _connectionState.value == ConnectionState.INITIALIZING) {
                 if (peripheral.bondState == BondState.BONDED && isEtcuDevice(peripheral)) {
-                    AppLogger.i(_tag, "Auto-connecting during scan: ${peripheral.address}")
+                    AppLogger.i(_tag) { "Auto-connecting during scan: ${peripheral.address}" }
                     scanner.stopScan()
                     connect(peripheral.address)
                 }
@@ -69,20 +76,21 @@ class BLEConnectionManager(
         }
 
         override fun onConnected(peripheral: BluetoothPeripheral) {
-            AppLogger.i(_tag, "Connected: ${peripheral.address}")
+            AppLogger.i(_tag) { "Connected: ${peripheral.address}" }
             activePeripheral = peripheral
             _connectionState.value = ConnectionState.CONNECTED_DISCOVERING
+            _currentReconnectDelayMs = _minReconnectDelayMs
         }
 
         override fun onConnectionFailed(peripheral: BluetoothPeripheral, status: HciStatus) {
-            AppLogger.e(_tag, "Connection failed: ${peripheral.address} ($status)")
+            AppLogger.e(_tag, message = { "Connection failed: ${peripheral.address} ($status)" })
             activePeripheral = null
             _connectionState.value = ConnectionState.ERROR_CONNECTION
             startAutoReconnectIfNeeded()
         }
 
         override fun onDisconnected(peripheral: BluetoothPeripheral, status: HciStatus) {
-            AppLogger.i(_tag, "Disconnected: ${peripheral.address} ($status)")
+            AppLogger.i(_tag) { "Disconnected: ${peripheral.address} ($status)" }
             activePeripheral = null
             _connectionState.value = ConnectionState.DISCONNECTED
             startAutoReconnectIfNeeded()
@@ -97,7 +105,7 @@ class BLEConnectionManager(
     }
 
     init {
-        central = BluetoothCentralManager(app, _centralCallback, Handler(Looper.getMainLooper()))
+        central = BluetoothCentralManager(app, _centralCallback, _bleHandler)
         scanner = BLEScanner(central)
     }
 
@@ -105,6 +113,7 @@ class BLEConnectionManager(
         if (!central.isBluetoothEnabled) return
 
         _reconnectJob?.cancel()
+        _currentReconnectDelayMs = _minReconnectDelayMs
         _isManualForget.value = false
         _connectionState.value = ConnectionState.CONNECTING
 
@@ -113,7 +122,7 @@ class BLEConnectionManager(
             val callback = peripheralCallback ?: throw IllegalStateException("Callback not set")
             central.connect(peripheral, callback)
         } catch (e: Exception) {
-            AppLogger.e(_tag, "Connect failed", e)
+            AppLogger.e(_tag, message = { "Connect failed" }, throwable = e)
             _connectionState.value = ConnectionState.INVALID_MAC
         }
     }
@@ -128,7 +137,7 @@ class BLEConnectionManager(
             .firstOrNull { isEtcuDevice(it) }
 
         if (connected != null) {
-            AppLogger.i(_tag, "Using existing connection: ${connected.address}")
+            AppLogger.i(_tag) { "Using existing connection: ${connected.address}" }
             connect(connected.address)
             return
         }
@@ -139,6 +148,7 @@ class BLEConnectionManager(
             delay(5500.milliseconds)
             if (_connectionState.value == ConnectionState.INITIALIZING) {
                 _connectionState.value = ConnectionState.DISCONNECTED
+                startAutoReconnectIfNeeded()
             }
         }
     }
@@ -151,13 +161,13 @@ class BLEConnectionManager(
             val address = peripheral.address
             central.cancelConnection(peripheral)
             central.removeBond(address)
-            AppLogger.i(_tag, "Bond removed for $address")
+            AppLogger.i(_tag) { "Bond removed for $address" }
         } ?: run {
             _adapter?.bondedDevices
                 ?.filter { it.name?.contains("ETCU", ignoreCase = true) == true }
                 ?.forEach { device ->
                     central.removeBond(device.address)
-                    AppLogger.i(_tag, "Bond removed for ${device.address}")
+                    AppLogger.i(_tag) { "Bond removed for ${device.address}" }
                 }
         }
 
@@ -177,8 +187,11 @@ class BLEConnectionManager(
         if (!_isManualForget.value) {
             _reconnectJob?.cancel()
             _reconnectJob = _scope.launch {
-                delay(3000.milliseconds)
-                if (!_connectionState.value.isActive) autoConnect()
+                delay(_currentReconnectDelayMs.milliseconds)
+                if (!_connectionState.value.isActive) {
+                    _currentReconnectDelayMs = (_currentReconnectDelayMs * 2).coerceAtMost(_maxReconnectDelayMs)
+                    autoConnect()
+                }
             }
         }
     }
