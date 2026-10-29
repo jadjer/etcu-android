@@ -65,6 +65,6 @@ class AppContainer(private val _application: Application) {
     }
     
     fun startMonitoring() {
-        _notificationMonitor.toString() // Force lazy initialization
+        _notificationMonitor
     }
 }

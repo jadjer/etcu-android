@@ -12,8 +12,8 @@ android {
         applicationId = "by.jadjer.etcu"
         minSdk = 36
         targetSdk = 37
-        versionCode = 40
-        versionName = "1.2.8"
+        versionCode = 41
+        versionName = "1.2.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -36,7 +36,7 @@ class TelemetryNotificationMonitor(
     private val engineRecoveryThreshold = 95
     private val servoOverheatThreshold = 70
     private val servoRecoveryThreshold = 65
-    private val voltageLowThreshold = 11.5f
+    private val voltageLowThreshold = 11.0f
     private val voltageHighThreshold = 14.8f
     private val voltageRecoveryLow = 12.0f
     private val voltageRecoveryHigh = 14.5f
